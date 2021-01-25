@@ -18,20 +18,20 @@ app.get("/", function(req, res) {
 });
 
 app.post("/", function(req, res) {
-  res.sendFile(__dirname + "/failure.html");
-})
+  if (req.body.button === "login") {
+    res.sendFile(__dirname + "/failure.html");
+  } else  {
+    res.sendFile(__dirname + "/create.html");
+  }
+});
 
 app.post("/failure", function(req, res) {
   res.redirect("/");
-})
+});
 
 app.post("/create", function(req, res) {
-  res.sendFile(__dirname + "/create.html");
-})
-
-app.post("/createsubmit", function(req, res) {
   res.sendFile(__dirname + "/failure.html");
-})
+});
 
 app.listen(process.env.PORT || 3000, function() {
   console.log("Server is running on port 3000.");
