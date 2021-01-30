@@ -38,7 +38,7 @@ mongoose.set("useCreateIndex", true);
 const userSchema = new mongoose.Schema ({
   username: String,
   password: String,
-  verified: Boolean(false)
+  verified: Boolean
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -48,6 +48,9 @@ const User = new mongoose.model("User", userSchema);
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+//deletes unverified users once a day 24 is hours
+setInterval(deleteNotVerified, 1000 * 60 * 60 * 24);
 
 
 app.get("/", function(req, res) {
@@ -77,9 +80,25 @@ app.post("/", function(req, res) {
   }
 });
 
+app.get("/deleteAccount", function(req, res) {
+
+  User.deleteOne({username: req.user.username}, function(err) {
+    if (err) {
+      console.log(err);
+    } else {
+      req.logout();
+      res.redirect("/");
+    }
+  });
+});
+
 app.post("/logout", function(req, res) {
+  if (req.body.button === "deleteAccount") {
+    res.redirect("/deleteAccount");
+  } else {
   req.logout();
   res.redirect("/");
+}
 });
 
 app.post("/failure", function(req, res) {
@@ -108,7 +127,12 @@ app.post("/create", function(req, res) {
     } else {
       passport.authenticate('local')(req, res, function(){
         emailAuth(req.body.username);
-
+        User.updateOne({username: req.body.username}, {verified: false}, function(err, user) {
+          if (err) {
+            console.log(err);
+          } else {
+          }
+        });
         res.render("verify");
       });
     }
@@ -132,10 +156,8 @@ app.get("/verify", function(req, res) {
             } else {
             }
           });
-          //console.log("get for verify");
+
           res.redirect("/budget");
-          //res.send("User verified!");
-          //update database with verification flag
         }
       });
     } catch (err) {
@@ -190,6 +212,16 @@ function emailAuth(email) {
     } else {
       console.log("Message sent: " + res.message);
       res.end("sent");
+    }
+  });
+}
+
+function deleteNotVerified() {
+  User.deleteMany({verified: false}, function(err) {
+    if (err) {
+      console.log(err);
+    } else {
+
     }
   });
 }
