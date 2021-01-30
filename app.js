@@ -28,8 +28,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-//mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
+if (process.env.NODE_ENV === "dev") {
+mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
+} else {
 mongoose.connect("mongodb+srv://admin-brent:" + process.env.MONGODB + "@cluster0.1mr2f.mongodb.net/iBudget", {useNewUrlParser: true, useUnifiedTopology: true});
+}
 mongoose.set("useCreateIndex", true);
 
 const userSchema = new mongoose.Schema ({
@@ -156,7 +159,14 @@ function emailAuth(email) {
   };
 
   const token_mail_verification = jwt.sign(mail, process.env.SECRET, {expiresIn: '1d'});
-  const url = "http://localhost:3000/" + "verify?id=" + token_mail_verification;
+  let host = "";
+
+  if (process.env.NODE_ENV === "dev") {
+    host = "http://localhost:3000/";
+  } else {
+    host = process.env.DATABASE_URL;
+  }
+  const url = host + "verify?id=" + token_mail_verification;
 
   var transporter = nodemailer.createTransport({
     service: "Gmail",
