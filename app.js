@@ -8,9 +8,9 @@ const nodemailer = require("nodemailer");
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
+const date = require(__dirname + "/date.js");
 
 const app = express();
-
 
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
@@ -41,9 +41,199 @@ const userSchema = new mongoose.Schema ({
   verified: Boolean
 });
 
+const budgetSchema = new mongoose.Schema ({
+  user: String,
+  month: String,
+  category: [
+    {
+      name: String,
+      items: [
+        {
+          name: String,
+          planned: Number
+        }
+      ]
+    }
+  ],
+  transaction: [
+    {
+      type: String,
+      amt: Number,
+      date: Date,
+      merchant: String,
+      notes: String,
+      budgetItem: String
+    }
+  ]
+});
+
 userSchema.plugin(passportLocalMongoose);
 
 const User = new mongoose.model("User", userSchema);
+const Budget = new mongoose.model("Budget", budgetSchema);
+
+const defaultBudget = new Budget({
+  category: [
+    {
+      name: "Income",
+      items: [
+        {
+          name: "Paycheck 1",
+          planned: 0
+        },
+        {
+          name: "Paycheck 2",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Giving",
+      items: [
+        {
+          name: "Church",
+          planned: 0
+        },
+        {
+          name: "Charity",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Savings",
+      items: [
+        {
+          name: "Emergency Fund",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Housing",
+      items: [
+        {
+          name: "Mortgage/Rent",
+          planned: 0
+        },
+        {
+          name: "Electricity",
+          planned: 0
+        },
+        {
+          name: "Cable and Internet",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Transportation",
+      items: [
+        {
+          name: "Gas",
+          planned: 0
+        },
+        {
+          name: "Uber/Bus",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Food",
+      items: [
+        {
+          name: "Groceries",
+          planned: 0
+        },
+        {
+          name: "Restaurants",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Personal",
+      items: [
+        {
+          name: "Cellphone",
+          planned: 0
+        },
+        {
+          name: "Subscriptions",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Lifestyle",
+      items: [
+        {
+          name: "Entertainment",
+          planned: 0
+        },
+        {
+          name: "Misc",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Health",
+      items: [
+        {
+          name: "Gym",
+          planned: 0
+        },
+        {
+          name: "Medicine",
+          planned: 0
+        },
+        {
+          name: "Doctor",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Insurance",
+      items: [
+        {
+          name: "Auto",
+          planned: 0
+        },
+        {
+          name: "Homeowner/Renter",
+          planned: 0
+        }
+      ]
+    },
+    {
+      name: "Debt",
+      items: [
+        {
+          name: "Car",
+          planned: 0
+        },
+        {
+          name: "Student Loans",
+          planned: 0
+        },
+        {
+          name: "Medical Bill",
+          planned: 0
+        },
+        {
+          name: "Personal Loan",
+          planned: 0
+        }
+      ]
+    },
+  ],
+
+});
+
+let activeBudget = new Budget({});
 
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
@@ -114,6 +304,38 @@ app.get("/budget", function(req, res) {
   }
 });
 
+app.get("/budget2", function(req, res) {
+  if (req.isAuthenticated()) {
+
+    Budget.findOne({user: req.user.username, month: date.getMonth()}, function (err, budget) {
+      if (err) {
+
+      } else if(!budget) {
+        defaultBudget.user = req.user.username;
+        defaultBudget.month = date.getMonth();
+        defaultBudget.save();
+        //console.log(defaultBudget);
+        activeBudget = defaultBudget;
+        res.render("budget2", {budget: defaultBudget, url: req.url});
+      } else {
+        //console.log(budget);
+        activeBudget = budget;
+        res.render("budget2", {budget: budget, url: req.url});
+      }
+    });
+
+
+
+
+
+
+    //console.log(defaultBudget);
+
+  } else {
+    res.redirect("/");
+  }
+});
+
 app.get("/create", function(req, res) {
   res.render("create");
 });
@@ -167,6 +389,43 @@ app.get("/verify", function(req, res) {
   } else {
     return res.sendStatus(403);
   }
+});
+
+app.post("/addItem", function(req, res) {
+
+  const index = req.body.index;
+  activeBudget.category[index].items.push({});
+  activeBudget.save();
+  res.redirect("/budget2");
+});
+
+app.post("/editItem" , function(req, res) {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const name = req.body.itemName;
+  const itemAmt = req.body.planned;
+
+  activeBudget.category[index].items[itemIndex].name = name;
+  activeBudget.category[index].items[itemIndex].planned = itemAmt;
+  activeBudget.save();
+  res.redirect("/budget2" + "#" + activeBudget.category[index].items[itemIndex]._id);
+});
+
+app.post("/addCat", function(req, res) {
+
+  activeBudget.category.push({});
+  activeBudget.save();
+  res.redirect("/budget2");
+});
+
+app.post("/editCat" , function(req, res) {
+  const index = req.body.index;
+  const name = req.body.catName;
+console.log(name);
+console.log(index);
+  activeBudget.category[index].name = name;
+  activeBudget.save();
+  res.redirect("/budget2");
 });
 
 app.listen(process.env.PORT || 3000, function() {
