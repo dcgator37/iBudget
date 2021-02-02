@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(session({
-  secret: process.env.SECRET,
+  secret: process.env.SESSION,
   resave: false,
   saveUninitialized: false
 }));
