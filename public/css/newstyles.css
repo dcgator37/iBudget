@@ -6,14 +6,18 @@ body {
 .container {
   background: white;
   margin: 20px;
-  max-width: 480px;
+  max-width: 768px;
+  /* max-width: 480px; */
   border-radius: 5px;
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  padding: 0;
 }
 
 .item {
   border-bottom: 1px solid #F1F1F1;
   display: flex;
+  font-size: 2em;
+  width: 100%;
 
 }
 
@@ -30,20 +34,28 @@ button {
 }
 
 .btndel {
-  position: absolute;
-  left: 710px;
-  display: none;
+  /* position: absolute; */
+  /* left: 710px; */
+  visibility: hidden;
 
 }
+
+
 
 input {
   border: transparent;
-  width: 100px;
+  /* width: 100px; */
 }
 
 .input-label {
-  width: 200px;
-  margin-left: 5px;
+  width: 300px;
+  /* margin-left: 5px; */
+}
+
+.planned-label {
+  width: 150px;
+  text-align: right;
+  /* margin-left: 5px; */
 }
 input:hover:not(:focus) {
     border: 1px solid #f5f7f8;
@@ -63,23 +75,23 @@ input:last-child {
   text-align: right;
 }
 
-.header-label {
-  width: 200px;
-  margin-left: 5px;
+.header-column {
+  width: 300px;
+  margin-left: 44px;
 }
 
-.header-label:nth-child(2) {
-  width: 100px;
-  margin-left: 5px;
+.header-column:nth-child(2) {
+  /* width: 100px; */
+  /* margin-left: 5px; */
 }
 
-.header-label:last-child {
-  text-align: center;
-  width: 100px;
-  margin-left: 5px;
+.header-column:last-child {
+  /* text-align: center;
+  width: 100px; */
+  /* margin-left: 5px; */
 }
 
 .span-rem {
-  width: 100px;
-  text-align: center;
+  width: 200px;
+  text-align: right;
 }
