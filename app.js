@@ -421,8 +421,8 @@ app.post("/addCat", function(req, res) {
 app.post("/editCat" , function(req, res) {
   const index = req.body.index;
   const name = req.body.catName;
-console.log(name);
-console.log(index);
+  console.log(name);
+  console.log(index);
   activeBudget.category[index].name = name;
   activeBudget.save();
   res.redirect("/budget2");
