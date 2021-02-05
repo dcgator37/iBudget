@@ -28,11 +28,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-if (process.env.NODE_ENV === "dev") {
-mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
-} else {
+ // if (process.env.NODE_ENV === "dev") {
+ // mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
+ // } else {
 mongoose.connect("mongodb+srv://admin-brent:" + process.env.MONGODB + "@cluster0.1mr2f.mongodb.net/iBudget", {useNewUrlParser: true, useUnifiedTopology: true});
-}
+ // }
 mongoose.set("useCreateIndex", true);
 
 const userSchema = new mongoose.Schema ({
@@ -44,6 +44,8 @@ const userSchema = new mongoose.Schema ({
 const budgetSchema = new mongoose.Schema ({
   user: String,
   month: String,
+  monthNum: Number,
+  year: Number,
   category: [
     {
       name: String,
@@ -233,7 +235,9 @@ const defaultBudget = new Budget({
 
 });
 
-let activeBudget = new Budget({});
+//let activeBudget = new Budget({});
+let activeBudget;
+let monthArr;
 
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
@@ -261,7 +265,7 @@ app.post("/", function(req, res) {
       } else {
 
         passport.authenticate('local')(req, res, function() {
-          res.redirect("/budget");
+          res.redirect("/budget2");
         });
       }
     });
@@ -307,30 +311,55 @@ app.get("/budget", function(req, res) {
 app.get("/budget2", function(req, res) {
   if (req.isAuthenticated()) {
 
-    Budget.findOne({user: req.user.username, month: date.getMonth()}, function (err, budget) {
-      if (err) {
+    if (!activeBudget){
+      console.log("no active budget");
 
-      } else if(!budget) {
-        defaultBudget.user = req.user.username;
-        defaultBudget.month = date.getMonth();
-        defaultBudget.save();
-        //console.log(defaultBudget);
-        activeBudget = defaultBudget;
-        res.render("budget2", {budget: defaultBudget, url: req.url});
-      } else {
-        //console.log(budget);
-        activeBudget = budget;
-        res.render("budget2", {budget: budget, url: req.url});
-      }
-    });
+      Budget.findOne({user: req.user.username, month: date.getMonth()}, function (err, budget) {
+        if (err) {
+
+        } else if(!budget) {
+          console.log("no budget in db for this month. generating default budget");
+          // next idea is to display website that asks user if they want to load from the past month
+          defaultBudget.user = req.user.username;
+          defaultBudget.month = date.getMonth();
+          defaultBudget.year = date.getYear();
+          defaultBudget.monthNum = date.getMonthNum();
 
 
+          console.log(date.getMonthNum());
+          console.log(date.getYear());
+          //date.getMonth();
+          defaultBudget.save();
+
+          activeBudget = defaultBudget;
+
+          Budget.find({user: activeBudget.user}, "month _id monthNum year", function (err, months) {
+            monthArr = months;
+            console.log(monthArr);
+            res.render("budget2", {budget: activeBudget, months: monthArr});
+          });
+
+          //res.render("budget2", {budget: defaultBudget});
+
+        } else {
+          console.log("Budget found in db for this month. loading budget");
+          activeBudget = budget;
+
+          Budget.find({user: activeBudget.user}, "month _id monthNum year", function (err, months) {
+            monthArr = months;
+
+            res.render("budget2", {budget: activeBudget, months: monthArr});
+          });
 
 
 
-
-    //console.log(defaultBudget);
-
+          //res.render("budget2", {budget: budget, months: monthArr});
+        }
+      });
+    } else {
+      console.log(monthArr);
+      res.render("budget2", {budget: activeBudget, months: monthArr});
+    }
   } else {
     res.redirect("/");
   }
@@ -393,7 +422,7 @@ app.get("/verify", function(req, res) {
 
 app.post("/addItem", function(req, res) {
 
-  const index = req.body.index;
+  const index = req.body.button;
   activeBudget.category[index].items.push({});
   activeBudget.save();
   res.redirect("/budget2");
@@ -408,7 +437,23 @@ app.post("/editItem" , function(req, res) {
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.category[index].items[itemIndex].planned = itemAmt;
   activeBudget.save();
-  res.redirect("/budget2" + "#" + activeBudget.category[index].items[itemIndex]._id);
+
+  res.redirect("/budget2");
+  // + "#" + activeBudget.category[index].items[itemIndex-1]._id
+});
+
+app.post("/deleteItem", function(req, res) {
+  const index = req.body.button;
+  const itemIndex = req.body.itemIndex;
+
+   // console.log(index);
+   // console.log(itemIndex);
+  // console.log(req.body);
+
+  activeBudget.category[index].items[itemIndex].remove();
+  activeBudget.save();
+
+  res.redirect("/budget2");
 });
 
 app.post("/addCat", function(req, res) {
@@ -442,11 +487,11 @@ function emailAuth(email) {
   const token_mail_verification = jwt.sign(mail, process.env.SECRET, {expiresIn: '1d'});
   let host = "";
 
-  if (process.env.NODE_ENV === "dev") {
-    host = "http://localhost:3000/";
-  } else {
+  // if (process.env.NODE_ENV === "dev") {
+  //   host = "http://localhost:3000/";
+  // } else {
     host = process.env.DATABASE_URL;
-  }
+  //}
   const url = host + "verify?id=" + token_mail_verification;
 
   var transporter = nodemailer.createTransport({
@@ -483,4 +528,18 @@ function deleteNotVerified() {
 
     }
   });
+}
+
+function budgetMonthsArray() {
+  const user = activeBudget.user;
+  let exportmonths = [];
+  Budget.find({user: user}, "month _id", function (err, months) {
+
+
+  });
+
+  console.log(exportmonths);
+
+  return exportmonths;
+
 }

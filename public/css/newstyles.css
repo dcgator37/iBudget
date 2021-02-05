@@ -20,6 +20,9 @@ body {
   width: 100%;
 
 }
+.item-column {
+
+}
 
 .item:active {
 
@@ -77,21 +80,35 @@ input:last-child {
 
 .header-column {
   width: 300px;
-  margin-left: 44px;
+  display: flex;
+  /* margin-left: 44px; */
 }
 
 .header-column:nth-child(2) {
-  /* width: 100px; */
+  width: 200px;
   /* margin-left: 5px; */
 }
 
 .header-column:last-child {
-  /* text-align: center;
-  width: 100px; */
-  /* margin-left: 5px; */
+  /* text-align: center; */
+  width: 200px;
+   /* margin-left: 5px; */
 }
 
 .span-rem {
   width: 200px;
   text-align: right;
+}
+
+.card {
+  flex-direction: row;
+  padding: 20px;
+}
+
+.card-body {
+
+}
+
+p {
+  padding: 0 5px;
 }

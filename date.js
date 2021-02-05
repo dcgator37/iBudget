@@ -27,6 +27,30 @@ exports.getMonth = function() {
 
 };
 
+exports.getMonthNum = function() {
+
+  const today = new Date();
+
+  const options = {
+    month: "numeric",
+  };
+
+  return today.toLocaleDateString("en-US", options);
+
+};
+
+exports.getYear = function() {
+
+  const today = new Date();
+
+  const options = {
+    Year: "numeric",
+  };
+
+  return today.getFullYear();
+
+};
+
 exports.getMonthFromBudget = function(budgetDate) {
 
 
