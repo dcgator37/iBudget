@@ -408,7 +408,7 @@ app.get("/verify", function(req, res) {
             }
           });
 
-          res.redirect("/budget");
+          res.redirect("/budget2");
         }
       });
     } catch (err) {
@@ -433,6 +433,7 @@ app.post("/editItem" , function(req, res) {
   const itemIndex = req.body.itemIndex;
   const name = req.body.itemName;
   const itemAmt = req.body.planned;
+
 
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.category[index].items[itemIndex].planned = itemAmt;
