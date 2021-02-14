@@ -37,6 +37,18 @@ button {
   font-weight: bold;
 }
 
+.monthpicker-month {
+
+}
+
+.monthpicker-month--current {
+
+}
+
+.monthpicker-month--exists {
+
+}
+
 .btndel {
   /* position: absolute; */
   /* left: 710px; */
@@ -49,6 +61,11 @@ input {
 }
 
 .input-label {
+  width: 300px;
+  /* margin-left: 5px; */
+}
+
+.cat-label {
   width: 300px;
   /* margin-left: 5px; */
 }
