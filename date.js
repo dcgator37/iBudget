@@ -27,6 +27,15 @@ exports.getMonth = function() {
 
 };
 
+exports.getMonth = function (date) {
+  const options = {
+    month: "long",
+    year: "numeric"
+  };
+
+  return date.toLocaleDateString("en-US", options);
+};
+
 exports.getMonthNum = function() {
 
   const today = new Date();
@@ -39,6 +48,16 @@ exports.getMonthNum = function() {
 
 };
 
+exports.getMonthNum = function(date) {
+
+  const options = {
+    month: "numeric",
+  };
+
+  return date.toLocaleDateString("en-US", options);
+
+};
+
 exports.getYear = function() {
 
   const today = new Date();
@@ -48,6 +67,16 @@ exports.getYear = function() {
   };
 
   return today.getFullYear();
+
+};
+
+exports.getYear = function(date) {
+
+  const options = {
+    Year: "numeric",
+  };
+
+  return date.getFullYear();
 
 };
 

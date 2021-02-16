@@ -1,9 +1,13 @@
-
 body {
   background-color: #f5f7f8;
+<<<<<<< HEAD
     color: #69757a;
     
+=======
+  color: #69757a;
+>>>>>>> bc9cda0806fccfb1de41218e50f69c08fac25a27
 }
+
 .container {
   background: white;
   margin: 20px;
@@ -19,14 +23,15 @@ body {
   display: flex;
   font-size: 2em;
   width: 100%;
-
-}
-.item-column {
-
 }
 
-.item:active {
+.item-column {}
 
+.item--selected {
+  border: 2px solid green;
+  /* top: -.8rem;
+  bottom: -.8rem; */
+  border-radius: .4rem;
 }
 
 button {
@@ -39,14 +44,23 @@ button {
 
 }
 
+.monthpicker-month {
+
+}
+
+.monthpicker-month--current {
+
+}
+
+.monthpicker-month--exists {
+
+}
+
 .btndel {
   /* position: absolute; */
   /* left: 710px; */
   visibility: hidden;
-
 }
-
-
 
 input {
   border: transparent;
@@ -58,14 +72,20 @@ input {
   /* margin-left: 5px; */
 }
 
+.cat-label {
+  width: 300px;
+  /* margin-left: 5px; */
+}
+
 .planned-label {
   width: 150px;
   text-align: right;
   /* margin-left: 5px; */
 }
+
 input:hover:not(:focus) {
-    border: 1px solid #f5f7f8;
-    background-color: #f5f7f8;
+  border: 1px solid #f5f7f8;
+  background-color: #f5f7f8;
 }
 
 input:focus {
@@ -74,7 +94,7 @@ input:focus {
 }
 
 input:active {
-    border: 1px solid #0091d9;
+  border: 1px solid #0091d9;
 }
 
 input:last-child {
@@ -98,7 +118,7 @@ input:last-child {
 .header-column:last-child {
   /* text-align: center; */
   width: 200px;
-   /* margin-left: 5px; */
+  /* margin-left: 5px; */
 }
 
 .span-rem {
@@ -113,10 +133,14 @@ input:last-child {
 
 }
 
+<<<<<<< HEAD
 .card-body {
 
 
 }
+=======
+.card-body {}
+>>>>>>> bc9cda0806fccfb1de41218e50f69c08fac25a27
 
 p {
   padding: 0 5px;

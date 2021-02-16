@@ -8,16 +8,34 @@ const nodemailer = require("nodemailer");
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-const date = require(__dirname + "/date.js");
+const path = require('path');
+const utils = require(__dirname + "/date.js");
+const $ = require('jquery');
+const datejs = require('datejs');
 
 const app = express();
 
-app.use(express.static("public"));
+//set template engine
 app.set('view engine', 'ejs');
+//app.use(express.static("public"));
+
+//set bodyparser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
+//set the path of the jquery file
+app.use('/jquery', express.static(path.join(__dirname + '/node_modules/jquery/dist/')));
+
+//set static public folder
+app.use(express.static(path.join(__dirname + '/public')));
+
+
+
+
+
+
 
 app.use(session({
   secret: process.env.SESSION,
@@ -38,7 +56,13 @@ mongoose.set("useCreateIndex", true);
 const userSchema = new mongoose.Schema ({
   username: String,
   password: String,
-  verified: Boolean
+  verified: Boolean,
+  monthsArray: [{
+    active: Boolean,
+    month: Number,
+    year: Number,
+    monthString: String
+  }]
 });
 
 const budgetSchema = new mongoose.Schema ({
@@ -311,33 +335,48 @@ app.get("/budget", function(req, res) {
 app.get("/budget2", function(req, res) {
   if (req.isAuthenticated()) {
 
-    if (!activeBudget){
+    if (req.user.monthsArray.length === 0) {
+      console.log('no month array');
+      createBudgetArray(req);
+    }
+
+    if (!activeBudget) {
       console.log("no active budget");
 
-      Budget.findOne({user: req.user.username, month: date.getMonth()}, function (err, budget) {
+      let today = new Date();
+
+      Budget.findOne({user: req.user.username, month: utils.getMonth(today)}, function (err, budget) {
         if (err) {
 
         } else if(!budget) {
           console.log("no budget in db for this month. generating default budget");
-          // next idea is to display website that asks user if they want to load from the past month
+          // next idea is to display website or popup that asks user if they want to load from the past month
           defaultBudget.user = req.user.username;
-          defaultBudget.month = date.getMonth();
-          defaultBudget.year = date.getYear();
-          defaultBudget.monthNum = date.getMonthNum();
+          defaultBudget.month = utils.getMonth(today);
+          defaultBudget.year = utils.getYear(today);
+          defaultBudget.monthNum = utils.getMonthNum(today);
 
-
-          console.log(date.getMonthNum());
-          console.log(date.getYear());
-          //date.getMonth();
           defaultBudget.save();
 
           activeBudget = defaultBudget;
 
-          Budget.find({user: activeBudget.user}, "month _id monthNum year", function (err, months) {
-            monthArr = months;
-            console.log(monthArr);
-            res.render("budget2", {budget: activeBudget, months: monthArr});
+          //save the monthsArray for new month
+          let arraySearch = req.user.monthsArray.find((month, index) => {
+            if (month.monthString === defaultBudget.month) {
+              req.user.monthsArray[index].active = true;
+            }
           });
+
+          req.user.save();
+
+          res.render("budget2", {budget: activeBudget, months: req.user.monthsArray});
+
+          // Budget.find({user: activeBudget.user}, "month _id monthNum year", function (err, months) {
+          //   monthArr = months;
+          //
+          //   console.log(monthArr);
+          //
+          // });
 
           //res.render("budget2", {budget: defaultBudget});
 
@@ -345,24 +384,133 @@ app.get("/budget2", function(req, res) {
           console.log("Budget found in db for this month. loading budget");
           activeBudget = budget;
 
-          Budget.find({user: activeBudget.user}, "month _id monthNum year", function (err, months) {
-            monthArr = months;
+          // Budget.find({user: activeBudget.user, month: { $ne: activeBudget.month}}, "month _id monthNum year", function (err, months) {
+          //   monthArr = months;
+          //
+          //   monthArr = [{
+          //     month: 'February 2021',
+          //     _id: null,
+          //     monthNum: 2,
+          //     year: 2021
+          //   },
+          //   {
+          //     month: 'March 2021',
+          //     _id: null,
+          //     monthNum: 3,
+          //     year: 2021
+          //   },
+          //   {
+          //     month: 'April 2021',
+          //     _id: null,
+          //     monthNum: 4,
+          //     year: 2021
+          //   },
+          //   {
+          //     month: 'May 2021',
+          //     _id: null,
+          //     monthNum: 5,
+          //     year: 2021
+          //   },
+          //   {
+          //     month: 'June 2021',
+          //     _id: null,
+          //     monthNum: 6,
+          //     year: 2021
+          //   },
+          //   {
+          //     month: 'July 2021',
+          //     _id: null,
+          //     monthNum: 7,
+          //     year: 2021
+          //   },
+          //   {
+          //     month: 'August 2021',
+          //     _id: null,
+          //     monthNum: 8,
+          //     year: 2021
+          //   },
+          // ];
+          //
+          //   res.render("budget2", {budget: activeBudget, months: monthArr});
+          // });
 
-            res.render("budget2", {budget: activeBudget, months: monthArr});
-          });
 
 
-
-          //res.render("budget2", {budget: budget, months: monthArr});
+          res.render("budget2", {budget: activeBudget, months: req.user.monthsArray});
         }
       });
+
     } else {
-      console.log(monthArr);
-      res.render("budget2", {budget: activeBudget, months: monthArr});
+      console.log('refreshing screen. there is an activebudget');
+      res.render("budget2", {budget: activeBudget, months: req.user.monthsArray});
     }
   } else {
+
+    //not authenticated. haven't logged in yet
     res.redirect("/");
   }
+});
+
+app.post('/switchmonth', (req, res) => {
+  //load month
+  const month = req.body.button;
+
+
+  //render budget2
+
+  //res.json({msg: 'success'});
+
+  Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
+
+    if (err) {
+      alert('Error loading month');
+    } else if (!budget) {
+      //load default budget
+
+      defaultBudget.user = req.user.username;
+      defaultBudget.month = req.body.monthString.toString();
+      defaultBudget.year = parseInt(req.body.year);
+      defaultBudget.monthNum = month;
+
+      defaultBudget.save();
+
+      activeBudget = defaultBudget;
+
+      //save the monthsArray for new month
+      let arraySearch = req.user.monthsArray.find((month, index) => {
+        if (month.monthString === defaultBudget.month) {
+          req.user.monthsArray[index].active = true;
+        }
+      });
+
+      req.user.save();
+
+      res.redirect('/budget2');
+
+      // Budget.find({user: activeBudget.user, month: { $ne: activeBudget.month}}, "month _id monthNum year", function (err, months) {
+      //   monthArr = months;
+      //   console.log(monthArr);
+      //
+      //   // res.render("budget2", {budget: activeBudget, months: monthArr});
+      // });
+
+    } else {
+        //laod the actual budget
+        console.log('loading actual budget');
+        activeBudget = budget;
+
+        res.redirect('/budget2');
+        // Budget.find({user: activeBudget.user, month: { $ne: activeBudget.month}}, "month _id monthNum year", function (err, months) {
+        //   monthArr = months;
+        //
+        //   // res.render("budget2", {budget: activeBudget, months: monthArr});
+        // });
+    }
+
+
+
+  });
+
 });
 
 app.get("/create", function(req, res) {
@@ -408,7 +556,7 @@ app.get("/verify", function(req, res) {
             }
           });
 
-          res.redirect("/budget");
+          res.redirect("/budget2");
         }
       });
     } catch (err) {
@@ -422,10 +570,17 @@ app.get("/verify", function(req, res) {
 
 app.post("/addItem", function(req, res) {
 
-  const index = req.body.button;
+  const index = req.body.index;
   activeBudget.category[index].items.push({});
   activeBudget.save();
-  res.redirect("/budget2");
+  const itemIndex = activeBudget.category[index].items.length - 1;
+
+  // if(err) {
+  //   res.json({msg: 'error'});
+  // } else {
+    res.json({msg: 'success', data: {itemIndex: itemIndex} });
+  // }
+  //res.redirect("/budget2");
 });
 
 app.post("/editItem" , function(req, res) {
@@ -433,6 +588,7 @@ app.post("/editItem" , function(req, res) {
   const itemIndex = req.body.itemIndex;
   const name = req.body.itemName;
   const itemAmt = req.body.planned;
+
 
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.category[index].items[itemIndex].planned = itemAmt;
@@ -442,8 +598,29 @@ app.post("/editItem" , function(req, res) {
   // + "#" + activeBudget.category[index].items[itemIndex-1]._id
 });
 
-app.post("/deleteItem", function(req, res) {
-  const index = req.body.button;
+app.put("/editItemAmt", (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const amt = req.body.amt;
+
+  activeBudget.category[index].items[itemIndex].planned = amt;
+  activeBudget.save();
+
+  res.json({msg: 'success' });
+});
+
+app.put("/editItemName", (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const name = req.body.name;
+
+  activeBudget.category[index].items[itemIndex].name = name;
+  activeBudget.save();
+
+});
+
+app.delete("/deleteItem", function(req, res) {
+  const index = req.body.index;
   const itemIndex = req.body.itemIndex;
 
    // console.log(index);
@@ -453,24 +630,30 @@ app.post("/deleteItem", function(req, res) {
   activeBudget.category[index].items[itemIndex].remove();
   activeBudget.save();
 
-  res.redirect("/budget2");
+  res.json({msg: 'success' });
+  //res.redirect("/budget2");
 });
 
 app.post("/addCat", function(req, res) {
 
   activeBudget.category.push({});
   activeBudget.save();
-  res.redirect("/budget2");
+  //res.redirect("/budget2");
+
+  const index = activeBudget.category.length - 1;
+
+  res.json({msg: 'success', data: {index: index}});
 });
 
-app.post("/editCat" , function(req, res) {
+app.put("/editCat" , function(req, res) {
   const index = req.body.index;
-  const name = req.body.catName;
-  console.log(name);
-  console.log(index);
+  const name = req.body.name;
+
   activeBudget.category[index].name = name;
   activeBudget.save();
-  res.redirect("/budget2");
+
+  res.json({msg: 'success' });
+  //res.redirect("/budget2");
 });
 
 app.listen(process.env.PORT || 3000, function() {
@@ -481,7 +664,7 @@ function emailAuth(email) {
   const date = new Date();
   const mail = {
     "id": email,
-    "created": date.toString()
+    "created": utils.toString()
   };
 
   const token_mail_verification = jwt.sign(mail, process.env.SECRET, {expiresIn: '1d'});
@@ -530,16 +713,41 @@ function deleteNotVerified() {
   });
 }
 
-function budgetMonthsArray() {
-  const user = activeBudget.user;
-  let exportmonths = [];
-  Budget.find({user: user}, "month _id", function (err, months) {
+function createBudgetArray(req) {
 
+  let monthArray = [];
+  var i;
+  let myDate = new Date();
+
+  console.log(myDate);
+
+  for (i = 0; i < 24; i++) {
+    monthArray.push({active: false, month: utils.getMonthNum(myDate), year: utils.getYear(myDate), monthString: utils.getMonth(myDate)});
+    myDate = myDate.add(1).month();
+  }
+
+
+
+  Budget.find({user: req.user.username}, "month", (err, budgets) => {
+    console.log(budgets);
+    monthArray.forEach((month, index, theArray) => {
+      budgets.forEach((budget) => {
+        if (month.monthString === budget.month) {
+          console.log('there is an active month');
+          theArray[index].active = true;
+        }
+      });
+    });
+
+    console.log('month array');
+    console.log(monthArray);
+
+    req.user.monthsArray = monthArray;
+    req.user.save();
 
   });
 
-  console.log(exportmonths);
 
-  return exportmonths;
+
 
 }
