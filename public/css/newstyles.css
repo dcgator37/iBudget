@@ -121,7 +121,9 @@ input:last-child {
   padding: 20px;
 }
 
-.card-body {}
+.card-body {
+  overflow: hidden;
+}
 
 p {
   padding: 0 5px;
