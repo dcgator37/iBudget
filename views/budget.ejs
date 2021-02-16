@@ -3,29 +3,138 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>iBudget</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 
-  <!-- Bootstrap core CSS -->
-  <!-- Latest compiled and minified CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous"> -->
+  <script src="https://kit.fontawesome.com/0edefc6157.js" crossorigin="anonymous"></script>
+  <script src="/jquery/jquery.js"></script>
+  <!-- <script type="text/javascript" src="/js/jquery.formatCurrency-1.4.0.js"></script> -->
 
+  <script type="text/javascript">
+    function dothat(el) {
+      el.children[0].children[0].style.visibility = "hidden";
+    };
+
+    function dosomething(el) {
+      el.children[0].children[0].style.visibility = "visible";
+    };
+
+    function clickItem(el) {
+      //Remove the my-list--selected class from any elements that already have it
+      $('.item--selected').removeClass('item--selected');
+      //Add the my-list--selected class to the clicked element
+      $(el).addClass('item--selected');
+    };
+
+    //     function setTwoNumberDecimal(el) {
+    //     el.value = parseFloat(el.value).toFixed(2);
+    // }
+  </script>
+  <link rel="stylesheet" href="css/budgetstyles.css">
 </head>
 
 <body>
-  <div class="jumbotron jumbotron-fluid">
-    <div class="container">
-      <h1 class="display-4">Congrats!</h1>
-      <p class="lead"><%=username%> is logged in!</p>
 
-      <form action="/logout" method="post">
-        <button class="btn btn-lg btn-warning" type="submit" name="button">Log Out</button>
-        <button class="btn btn-lg btn-warning" type="submit" name="button" value="deleteAccount">Delete Account</button>
+  <div class="row">
 
-      </form>
+    <div class="col-lg-3" style="background-color: white">
 
     </div>
+
+    <div class="col-lg-6">
+      <div class="container mx-auto">
+        <p>
+          <!-- button for current month's budget -->
+          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            <%=budget.month%>
+          </button>
+        </p>
+        <div class="collapse" id="collapseExample">
+          <div class="card card-body">
+            <div class="card card-body-prev"></div>
+            <!-- loop through and create buttons for each month for two years -->
+            <% months.forEach(function(month) { %>
+            <form action="/switchmonth" method="post">
+              <p>
+                <button class="btn btn-primary" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                <input type="hidden" name="year" value="<%= month.year %>">
+                <input type="hidden" name="monthString" value="<%= month.monthString %>">
+              </p>
+            </form>
+            <% }); %>
+
+            <div class="card card-body-next"></div>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- loop through the budget building category boxes -->
+      <% budget.category.forEach(function(category, index) { %>
+
+      <div class="container mx-auto" data-cat="<%= index %>">
+        <% if (!category.name) { %>
+        <!-- if this is a new category and the name is blank, make the name an input so it can be edited -->
+        <div class="item">
+          <input class="cat-label" type="text" name="catName" value="" placeholder="Untitled"></input>
+          <span class="header-column">Planned</span>
+          <span class="header-column">Received</span>
+        </div>
+        <% } else if (category.name === "Income") { %>
+        <!-- if the category is Income, make it say Received -->
+        <div class="item">
+          <span class="header-column"><%= category.name %></span>
+          <span class="header-column">Planned</span>
+          <span class="header-column">Received</span>
+        </div>
+        <% } else { %>
+        <!-- otherwise make it say Remaining -->
+        <div class="item">
+          <span class="header-column"><%= category.name %></span>
+          <span class="header-column">Planned</span>
+          <span class="header-column">Received</span>
+        </div>
+        <% } %>
+
+        <!-- Loop through each budget item in the category -->
+        <% category.items.forEach(function(item, itemIndex) { %>
+
+        <div class="item" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>">
+          <button type="button" class="btndel" name="button"><i class="far fa-trash-alt"></i></button>
+          <input class="input-label" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
+          <input class="planned-label" type="text" name="planned" value="$<%= item.planned %>" onInput="setTwoNumberDecimal(this)" onclick="this.select()"></input>
+          <span class="span-rem">$0.00</span>
+        </div>
+
+        <% }) %>
+        <!-- add item button -->
+        <div class="item" data-cat="<%= index %>">
+          <button class="addItem" type="button" name="button">Add Item</button>
+        </div>
+
+      </div>
+      <!-- end of loop to make each budget category container -->
+      <% }); %>
+
+      <!-- add category button -->
+      <div class="container mx-auto">
+        <button class="item addCat" type="button" name="button" value="">Add Category</button>
+      </div>
+
+    </div> <!-- end of middle column -->
+
+    <!-- right column -->
+    <div class="col-lg-3" style="background-color: white">
+
+    </div>
+
   </div>
+  <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src="/data.js"></script>
 </body>
 
 </html>

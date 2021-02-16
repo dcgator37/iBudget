@@ -1,0 +1,108 @@
+.box {
+  max-width: 400px;
+  margin: 50px 10px;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  box-orient: vertical;
+  display: box;
+}
+
+.item {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #F1F1F1;
+  width: 400px;
+  height: 50px;
+}
+
+#heading {
+  background-color: #A683E3;
+  text-align: left;
+}
+
+p {
+  margin: 0;
+  padding: 20px;
+  font-size: 20px;
+  font-weight: 200;
+  color: #00204a;
+}
+
+button {
+  text-align: center;
+  border-color: transparent;
+  background-color: transparent;
+  color: #0091d9;
+  font-weight: bold;
+}
+
+.BudgetGroupHeader-column:first-child {
+  text-align: left;
+  display: flex;
+}
+
+.BudgetGroupHeader-column:nth-child(2) {
+  text-align: right
+}
+
+.BudgetGroupHeader-column:nth-child(3) {
+  text-align: right
+}
+
+.BudgetGroupHeader-label {
+  -ms-align-items: center;
+  align-items: center;
+}
+input {
+  border: transparent;
+  width: 100px;
+}
+
+.input-label {
+  width: 200px;
+  margin-left: 5px;
+}
+
+.planned-label {
+  width: 100px;
+  margin-left: 5px;
+}
+
+input:hover:not(:focus) {
+    border: 1px solid #f5f7f8;
+    background-color: #f5f7f8;
+}
+
+input:focus {
+  outline: none;
+  border: 1px solid #0091d9;
+}
+
+input:active {
+    border: 1px solid #0091d9;
+}
+
+input:last-child {
+  text-align: right;
+}
+
+.header-label {
+  width: 200px;
+  margin-left: 5px;
+}
+
+.header-label:nth-child(2) {
+  width: 100px;
+}
+
+.header-label:last-child {
+  text-align: center;
+  width: 100px;
+}
+
+.span-rem {
+  width: 100px;
+  text-align: center;
+}

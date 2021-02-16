@@ -17,9 +17,8 @@ const app = express();
 
 //set template engine
 app.set('view engine', 'ejs');
-//app.use(express.static("public"));
 
-//set bodyparser
+//set bodyparser to be able to parse data from body post from client
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -30,12 +29,6 @@ app.use('/jquery', express.static(path.join(__dirname + '/node_modules/jquery/di
 
 //set static public folder
 app.use(express.static(path.join(__dirname + '/public')));
-
-
-
-
-
-
 
 app.use(session({
   secret: process.env.SESSION,
@@ -259,7 +252,6 @@ const defaultBudget = new Budget({
 
 });
 
-//let activeBudget = new Budget({});
 let activeBudget;
 let monthArr;
 
@@ -267,7 +259,7 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-//deletes unverified users once a day 24 is hours
+//doesn't work yet. deletes unverified users once a day 24 is hours
 setInterval(deleteNotVerified, 1000 * 60 * 60 * 24);
 
 
@@ -289,7 +281,7 @@ app.post("/", function(req, res) {
       } else {
 
         passport.authenticate('local')(req, res, function() {
-          res.redirect("/budget2");
+          res.redirect("/budget");
         });
       }
     });
@@ -326,15 +318,6 @@ app.post("/failure", function(req, res) {
 app.get("/budget", function(req, res) {
   if (req.isAuthenticated()) {
 
-    res.render("budget", {username: req.user.username});
-  } else {
-    res.redirect("/");
-  }
-});
-
-app.get("/budget2", function(req, res) {
-  if (req.isAuthenticated()) {
-
     if (req.user.monthsArray.length === 0) {
       console.log('no month array');
       createBudgetArray(req);
@@ -369,80 +352,19 @@ app.get("/budget2", function(req, res) {
 
           req.user.save();
 
-          res.render("budget2", {budget: activeBudget, months: req.user.monthsArray});
-
-          // Budget.find({user: activeBudget.user}, "month _id monthNum year", function (err, months) {
-          //   monthArr = months;
-          //
-          //   console.log(monthArr);
-          //
-          // });
-
-          //res.render("budget2", {budget: defaultBudget});
+          res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
 
         } else {
           console.log("Budget found in db for this month. loading budget");
           activeBudget = budget;
 
-          // Budget.find({user: activeBudget.user, month: { $ne: activeBudget.month}}, "month _id monthNum year", function (err, months) {
-          //   monthArr = months;
-          //
-          //   monthArr = [{
-          //     month: 'February 2021',
-          //     _id: null,
-          //     monthNum: 2,
-          //     year: 2021
-          //   },
-          //   {
-          //     month: 'March 2021',
-          //     _id: null,
-          //     monthNum: 3,
-          //     year: 2021
-          //   },
-          //   {
-          //     month: 'April 2021',
-          //     _id: null,
-          //     monthNum: 4,
-          //     year: 2021
-          //   },
-          //   {
-          //     month: 'May 2021',
-          //     _id: null,
-          //     monthNum: 5,
-          //     year: 2021
-          //   },
-          //   {
-          //     month: 'June 2021',
-          //     _id: null,
-          //     monthNum: 6,
-          //     year: 2021
-          //   },
-          //   {
-          //     month: 'July 2021',
-          //     _id: null,
-          //     monthNum: 7,
-          //     year: 2021
-          //   },
-          //   {
-          //     month: 'August 2021',
-          //     _id: null,
-          //     monthNum: 8,
-          //     year: 2021
-          //   },
-          // ];
-          //
-          //   res.render("budget2", {budget: activeBudget, months: monthArr});
-          // });
-
-
-
-          res.render("budget2", {budget: activeBudget, months: req.user.monthsArray});
+          res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
         }
       });
 
     } else {
       console.log('refreshing screen. there is an activebudget');
-      res.render("budget2", {budget: activeBudget, months: req.user.monthsArray});
+      res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
     }
   } else {
 
@@ -454,11 +376,6 @@ app.get("/budget2", function(req, res) {
 app.post('/switchmonth', (req, res) => {
   //load month
   const month = req.body.button;
-
-
-  //render budget2
-
-  //res.json({msg: 'success'});
 
   Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
 
@@ -484,30 +401,15 @@ app.post('/switchmonth', (req, res) => {
       });
 
       req.user.save();
-
-      res.redirect('/budget2');
-
-      // Budget.find({user: activeBudget.user, month: { $ne: activeBudget.month}}, "month _id monthNum year", function (err, months) {
-      //   monthArr = months;
-      //   console.log(monthArr);
-      //
-      //   // res.render("budget2", {budget: activeBudget, months: monthArr});
-      // });
+      res.redirect('/budget');
 
     } else {
-        //laod the actual budget
+        //laod the actual budget because it exists
         console.log('loading actual budget');
         activeBudget = budget;
 
-        res.redirect('/budget2');
-        // Budget.find({user: activeBudget.user, month: { $ne: activeBudget.month}}, "month _id monthNum year", function (err, months) {
-        //   monthArr = months;
-        //
-        //   // res.render("budget2", {budget: activeBudget, months: monthArr});
-        // });
+        res.redirect('/budget');
     }
-
-
 
   });
 
@@ -556,7 +458,7 @@ app.get("/verify", function(req, res) {
             }
           });
 
-          res.redirect("/budget2");
+          res.redirect("/budget");
         }
       });
     } catch (err) {
@@ -575,12 +477,7 @@ app.post("/addItem", function(req, res) {
   activeBudget.save();
   const itemIndex = activeBudget.category[index].items.length - 1;
 
-  // if(err) {
-  //   res.json({msg: 'error'});
-  // } else {
-    res.json({msg: 'success', data: {itemIndex: itemIndex} });
-  // }
-  //res.redirect("/budget2");
+  res.json({msg: 'success', data: {itemIndex: itemIndex} });
 });
 
 app.post("/editItem" , function(req, res) {
@@ -589,13 +486,11 @@ app.post("/editItem" , function(req, res) {
   const name = req.body.itemName;
   const itemAmt = req.body.planned;
 
-
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.category[index].items[itemIndex].planned = itemAmt;
   activeBudget.save();
 
-  res.redirect("/budget2");
-  // + "#" + activeBudget.category[index].items[itemIndex-1]._id
+  res.redirect("/budget");
 });
 
 app.put("/editItemAmt", (req, res) => {
@@ -616,29 +511,22 @@ app.put("/editItemName", (req, res) => {
 
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.save();
-
 });
 
 app.delete("/deleteItem", function(req, res) {
   const index = req.body.index;
   const itemIndex = req.body.itemIndex;
 
-   // console.log(index);
-   // console.log(itemIndex);
-  // console.log(req.body);
-
   activeBudget.category[index].items[itemIndex].remove();
   activeBudget.save();
 
   res.json({msg: 'success' });
-  //res.redirect("/budget2");
 });
 
 app.post("/addCat", function(req, res) {
 
   activeBudget.category.push({});
   activeBudget.save();
-  //res.redirect("/budget2");
 
   const index = activeBudget.category.length - 1;
 
@@ -653,7 +541,6 @@ app.put("/editCat" , function(req, res) {
   activeBudget.save();
 
   res.json({msg: 'success' });
-  //res.redirect("/budget2");
 });
 
 app.listen(process.env.PORT || 3000, function() {
@@ -726,8 +613,6 @@ function createBudgetArray(req) {
     myDate = myDate.add(1).month();
   }
 
-
-
   Budget.find({user: req.user.username}, "month", (err, budgets) => {
     console.log(budgets);
     monthArray.forEach((month, index, theArray) => {
@@ -739,15 +624,11 @@ function createBudgetArray(req) {
       });
     });
 
-    console.log('month array');
-    console.log(monthArray);
+    // console.log('month array');
+    // console.log(monthArray);
 
     req.user.monthsArray = monthArray;
     req.user.save();
-
   });
-
-
-
 
 }
