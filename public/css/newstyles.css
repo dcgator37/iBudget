@@ -35,6 +35,8 @@ button {
   background-color: transparent;
   color: #0091d9;
   font-weight: bold;
+
+
 }
 
 .monthpicker-month {
@@ -97,12 +99,15 @@ input:last-child {
 .header-column {
   width: 300px;
   display: flex;
+
   /* margin-left: 44px; */
 }
+
 
 .header-column:nth-child(2) {
   width: 200px;
   /* margin-left: 5px; */
+
 }
 
 .header-column:last-child {
@@ -119,11 +124,14 @@ input:last-child {
 .card {
   flex-direction: row;
   padding: 20px;
+
+
 }
 
 .card-body {
   overflow: hidden;
 }
+>>>>>>> 0619035573b5977c924a3946a1022ccffcd8b9d7
 
 p {
   padding: 0 5px;

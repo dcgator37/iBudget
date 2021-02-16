@@ -71,6 +71,11 @@
         </button>
       </p>
       <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+          <div class="card card-body-prev"></div>
+          <% months.forEach(function(month) { %>
+
+
           <div class="card card-body">
             <div class="card card-body-prev"></div>
           <% months.forEach(function(month) { %>
@@ -80,6 +85,11 @@
             <input type="hidden" name="year" value="<%= month.year %>">
             <input type="hidden" name="monthString" value="<%= month.monthString %>">
           </p>
+
+          <% }); %>
+          <div class="card card-body-next"></div>
+        </div>
+
           </form>
           <% }); %>
           <div class="card card-body-next"></div>
@@ -87,8 +97,8 @@
       </div>
 
       <hr>
-  </div>
 
+  </div>
 
       <!-- loop through the budget building category boxes -->
       <% budget.category.forEach(function(category, index) { %>
