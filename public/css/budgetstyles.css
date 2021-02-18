@@ -11,14 +11,13 @@ body {
   border-radius: 5px;
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
   padding: 0;
-
-
 }
+
   /* the header column */
 .monthHeader{
   background: white;
   margin: 20px;
-  max-width: 768px;
+  max-width: 700px;
   /* max-width: 480px; */
   border-radius: 5px;
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
@@ -35,7 +34,9 @@ body {
 
 }
 
-.item-column {}
+.item-column {
+
+}
 
 .item--selected {
   border: 2px solid green;
@@ -114,6 +115,7 @@ input:last-child {
 .header-column {
   width: 300px;
   display: flex;
+
   /* margin-left: 44px; */
 }
 
@@ -142,7 +144,7 @@ input:last-child {
 
 .card-body {
     /* scroll through the 24 months */
-  overflow: scroll;
+  overflow: auto;
 
 }
 
