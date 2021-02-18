@@ -16,14 +16,14 @@ body {
 }
   /* the header column */
 .monthHeader{
-  background: green;
+  background: white;
   margin: 20px;
   max-width: 768px;
   /* max-width: 480px; */
   border-radius: 5px;
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
   padding: 0;
-
+  position: fixed;
 
 }
 
