@@ -69,21 +69,21 @@ const budgetSchema = new mongoose.Schema ({
       items: [
         {
           name: String,
-          planned: Number
+          planned: Number,
+          transactions: [
+            {
+              type: String,
+              amt: Number,
+              date: Date,
+              merchant: String,
+              notes: String,
+            }
+          ]
         }
       ]
     }
   ],
-  transaction: [
-    {
-      type: String,
-      amt: Number,
-      date: Date,
-      merchant: String,
-      notes: String,
-      budgetItem: String
-    }
-  ]
+
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -375,7 +375,8 @@ app.get("/budget", function(req, res) {
 
 app.post('/switchmonth', (req, res) => {
   //load month
-  const month = req.body.button;
+  const month = req.body.monthString;
+  console.log(month);
 
   Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
 
@@ -385,9 +386,9 @@ app.post('/switchmonth', (req, res) => {
       //load default budget
 
       defaultBudget.user = req.user.username;
-      defaultBudget.month = req.body.monthString.toString();
+      defaultBudget.month = month;
       defaultBudget.year = parseInt(req.body.year);
-      defaultBudget.monthNum = month;
+      defaultBudget.monthNum = req.body.monthNum;
 
       defaultBudget.save();
 
@@ -541,6 +542,28 @@ app.put("/editCat" , function(req, res) {
   activeBudget.save();
 
   res.json({msg: 'success' });
+});
+
+app.post('/addTransaction', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const type = req.body.type;
+  const amt = parseFloat(req.body.amt);
+  const date = req.body.date;
+  const merchant = req.body.merchant;
+  const notes = req.body.notes;
+
+  activeBudget.category[index].items[itemIndex].transactions.push({
+    'type': type,
+    'amt': amt,
+    'date': date,
+    'merchant': merchant,
+    'notes': notes
+  });
+
+  activeBudget.save();
+
+  res.json({msg: 'success'});
 });
 
 app.listen(process.env.PORT || 3000, function() {

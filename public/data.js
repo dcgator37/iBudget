@@ -20,7 +20,7 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           addItem(el, res.data);
         } else {
-          alert('data did not get edited');
+          alert('data did not get added');
         }
       },
       error: function(res) {
@@ -28,6 +28,49 @@ $(document).ready(function() {
       }
     });
   });
+
+  // type: String,
+  // amt: Number,
+  // date: Date,
+  // merchant: String,
+  // notes: String,
+
+
+  // Add transaction button click event. Sends post request to server, sending the transaction data.
+  //
+  $(document).on('click', 'button.addTransaction', function() {
+    var index = $(this).parent().attr('data-cat');
+    var itemIndex = $(this).attr('data-item');
+
+    index = 5;
+    itemIndex = 0;
+
+    $.ajax({
+      url: '/addTransaction',
+      method: 'post',
+      dataType: 'json',
+      data: {
+        type: 'Expense',
+        amt: 100,
+        date: new Date(),
+        merchant: 'Publix',
+        notes: 'I was hungry so I went to Publix',
+        index: index,
+        itemIndex: itemIndex
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          console.log('Success');
+        } else {
+          alert('data did not get added');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+  });
+
 
   // Add category button click event. Sends post request to server.
   // The server adds the new blank category to the database and responds with the index of the new category. When the server responds, run
