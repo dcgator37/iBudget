@@ -145,7 +145,24 @@ input:last-child {
 .card-body {
     /* scroll through the 24 months */
   overflow: auto;
+  position: relative;
 
+}
+/* previous button style */
+.card-body-prev{
+  left: 0;
+  position: sticky;
+  border-color: transparent;
+  background-color: rgb(13, 110, 254);
+  font-weight: bold;
+}
+/* /* next button style */
+.card-body-next{
+  right: 0;
+  position: sticky;
+  border-color: transparent;
+  background-color: rgb(13, 110, 254);
+  font-weight: bold;
 }
 
 p {
