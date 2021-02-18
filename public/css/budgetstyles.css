@@ -13,14 +13,30 @@ body {
   padding: 0;
 }
 
+  /* the header column */
+.monthHeader{
+  background: white;
+  margin: 20px;
+  max-width: 700px;
+  /* max-width: 480px; */
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  padding: 0;
+  position: fixed;
+
+}
+
 .item {
   border-bottom: 1px solid #F1F1F1;
   display: flex;
   font-size: 2em;
   width: 100%;
+
 }
 
-.item-column {}
+.item-column {
+
+}
 
 .item--selected {
   border: 2px solid green;
@@ -35,6 +51,7 @@ button {
   background-color: transparent;
   color: #0091d9;
   font-weight: bold;
+
 }
 
 .monthpicker-month {
@@ -53,6 +70,7 @@ button {
   /* position: absolute; */
   /* left: 710px; */
   visibility: hidden;
+
 }
 
 input {
@@ -97,6 +115,7 @@ input:last-child {
 .header-column {
   width: 300px;
   display: flex;
+
   /* margin-left: 44px; */
 }
 
@@ -120,13 +139,33 @@ input:last-child {
   flex-direction: row;
   padding: 20px;
 
-
 }
 
+
 .card-body {
-  overflow: hidden;
+    /* scroll through the 24 months */
+  overflow: auto;
+  position: relative;
+
+}
+/* previous button style */
+.card-body-prev{
+  left: 0;
+  position: sticky;
+  border-color: transparent;
+  background-color: rgb(13, 110, 254);
+  font-weight: bold;
+}
+/* /* next button style */
+.card-body-next{
+  right: 0;
+  position: sticky;
+  border-color: transparent;
+  background-color: rgb(13, 110, 254);
+  font-weight: bold;
 }
 
 p {
   padding: 0 5px;
+
 }
