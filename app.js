@@ -70,6 +70,7 @@ const budgetSchema = new mongoose.Schema ({
         {
           name: String,
           planned: Number,
+          sumOfTransactions: Number,
           transactions: [
             {
               type: String,
@@ -84,7 +85,8 @@ const budgetSchema = new mongoose.Schema ({
     }
   ],
 
-});
+},
+{ typeKey: '$type' });
 
 userSchema.plugin(passportLocalMongoose);
 
@@ -98,11 +100,13 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Paycheck 1",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Paycheck 2",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -111,11 +115,13 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Church",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Charity",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -124,7 +130,8 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Emergency Fund",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -133,15 +140,18 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Mortgage/Rent",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Electricity",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Cable and Internet",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -150,11 +160,13 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Gas",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Uber/Bus",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -163,11 +175,13 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Groceries",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Restaurants",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -176,11 +190,13 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Cellphone",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Subscriptions",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -189,11 +205,13 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Entertainment",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Misc",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -202,15 +220,18 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Gym",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Medicine",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Doctor",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -219,11 +240,13 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Auto",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Homeowner/Renter",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -232,19 +255,23 @@ const defaultBudget = new Budget({
       items: [
         {
           name: "Car",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Student Loans",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Medical Bill",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         },
         {
           name: "Personal Loan",
-          planned: 0
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -334,18 +361,30 @@ app.get("/budget", function(req, res) {
         } else if(!budget) {
           console.log("no budget in db for this month. generating default budget");
           // next idea is to display website or popup that asks user if they want to load from the past month
-          defaultBudget.user = req.user.username;
-          defaultBudget.month = utils.getMonth(today);
-          defaultBudget.year = utils.getYear(today);
-          defaultBudget.monthNum = utils.getMonthNum(today);
 
-          defaultBudget.save();
+          var newBudget = new Budget();
 
-          activeBudget = defaultBudget;
+          newBudget.user = req.user.username;
+          newBudget.month = utils.getMonth(today);
+          newBudget.year = utils.getYear(today);
+          newBudget.monthNum = utils.getMonthNum(today);
+
+          newBudget.category = defaultBudget.category;
+
+          // defaultBudget.user = req.user.username;
+          // defaultBudget.month = utils.getMonth(today);
+          // defaultBudget.year = utils.getYear(today);
+          // defaultBudget.monthNum = utils.getMonthNum(today);
+
+          // defaultBudget.save();
+
+          newBudget.save();
+
+          activeBudget = newBudget;
 
           //save the monthsArray for new month
           let arraySearch = req.user.monthsArray.find((month, index) => {
-            if (month.monthString === defaultBudget.month) {
+            if (month.monthString === newBudget.month) {
               req.user.monthsArray[index].active = true;
             }
           });
@@ -385,18 +424,28 @@ app.post('/switchmonth', (req, res) => {
     } else if (!budget) {
       //load default budget
 
-      defaultBudget.user = req.user.username;
-      defaultBudget.month = month;
-      defaultBudget.year = parseInt(req.body.year);
-      defaultBudget.monthNum = req.body.monthNum;
+      var newBudget = new Budget();
+      newBudget.user = req.user.username;
+      newBudget.month = month;
+      newBudget.year = parseInt(req.body.year);
+      newBudget.monthNum = req.body.monthNum;
 
-      defaultBudget.save();
+      newBudget.category = defaultBudget.category;
 
-      activeBudget = defaultBudget;
+      // defaultBudget.user = req.user.username;
+      // defaultBudget.month = month;
+      // defaultBudget.year = parseInt(req.body.year);
+      // defaultBudget.monthNum = req.body.monthNum;
+      //
+      // defaultBudget.save();
+
+      newBudget.save();
+
+      activeBudget = newBudget;
 
       //save the monthsArray for new month
       let arraySearch = req.user.monthsArray.find((month, index) => {
-        if (month.monthString === defaultBudget.month) {
+        if (month.monthString === newBudget.month) {
           req.user.monthsArray[index].active = true;
         }
       });
@@ -553,17 +602,46 @@ app.post('/addTransaction', (req, res) => {
   const merchant = req.body.merchant;
   const notes = req.body.notes;
 
-  activeBudget.category[index].items[itemIndex].transactions.push({
-    'type': type,
-    'amt': amt,
-    'date': date,
-    'merchant': merchant,
-    'notes': notes
-  });
+  //create transaction object
+  let obj = {
+    type: type,
+    amt: amt,
+    date: date,
+    merchant: merchant,
+    notes: notes
+  };
 
+  //initialize sum to 0
+  var sum = 0;
+
+  //add the transaction to the array of transactions for the item
+  activeBudget.category[index].items[itemIndex].transactions.push(obj);
+
+  //if the sumOfTransactions variable does not exist for the budget, set to zero
+  //only needed for old budgets created before this. I've changed the default budget to set this to zero
+  //i will delete everyone's budgets to so this will be unecessary in the future
+  if (!activeBudget.category[index].items[itemIndex].sumOfTransactions) {
+    activeBudget.category[index].items[itemIndex].sumOfTransactions = 0;
+  }
+
+  //increment the sum with the new transaction
+  activeBudget.category[index].items[itemIndex].sumOfTransactions += amt;
+
+  //save the budget to the database
   activeBudget.save();
 
-  res.json({msg: 'success'});
+  //set sum to the sum from the db
+  sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
+
+  // activeBudget.category[index].items[itemIndex].transactions.forEach((transaction) => {
+  //   sum =  sum + transaction.amt;
+  // });
+
+  console.log('transaction: ' + amt);
+  console.log('sum of transactions: ' + sum);
+
+  //send the sum back to the client so it can do the math and update the remaining span and data-value attribute
+  res.json({msg: 'success', sum: sum});
 });
 
 app.listen(process.env.PORT || 3000, function() {

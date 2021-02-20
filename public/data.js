@@ -1,6 +1,11 @@
 //jshint esversion: 8
 
+
+
 $(document).ready(function() {
+
+  $.getScript("jquery.formatCurrency-1.4.0.js", function() {
+});
 
   // Add item button click event. Sends post request to server, sending the index of the category array you're adding an item to.
   // The server adds the new blank item to the database and responds with the index of the new item. When the server responds, run
@@ -39,28 +44,33 @@ $(document).ready(function() {
   // Add transaction button click event. Sends post request to server, sending the transaction data.
   //
   $(document).on('click', 'button.addTransaction', function() {
-    var index = $(this).parent().attr('data-cat');
-    var itemIndex = $(this).attr('data-item');
+    // var index = $(this).parent().attr('data-cat');
+    // var itemIndex = $(this).attr('data-item');
 
-    index = 5;
-    itemIndex = 0;
+    const itemIndex = $('.item--selected').attr('data-item');
+    const index = $('.item--selected').parent().attr('data-cat');
+    const el = $('.item--selected');
+
+    // index = 5;
+    // itemIndex = 0;
 
     $.ajax({
       url: '/addTransaction',
       method: 'post',
       dataType: 'json',
       data: {
-        type: 'Expense',
-        amt: 100,
-        date: new Date(),
-        merchant: 'Publix',
-        notes: 'I was hungry so I went to Publix',
-        index: index,
-        itemIndex: itemIndex
+        'type': 'Expense',
+        'amt': 25,
+        'date': new Date(),
+        'merchant': 'test merchant',
+        'notes': 'test',
+        'index': index,
+        'itemIndex': itemIndex
       },
       success: function(res) {
         if (res.msg == 'success') {
           console.log('Success');
+          updateRemaining(el, res.sum);
         } else {
           alert('data did not get added');
         }
@@ -124,35 +134,7 @@ $(document).ready(function() {
     });
   });
 
-  // Edit planned amount event. Sends put request to server with category index, itemIndex, and amount.
-  // The server edits the item in the database and responds with success. When the server responds, do nothing since the input is already edited
-  $(document).on('change', '.planned-label', function() {
-    var index = $(this).parent().parent().attr('data-cat');
-    var itemIndex = $(this).parent().attr('data-item');
-    var amt = $(this).val();
-    $(this).val('$' + amt);
 
-    $.ajax({
-      url: '/editItemAmt',
-      method: 'put',
-      dataType: 'json',
-      data: {
-        'index': index,
-        'itemIndex': itemIndex,
-        'amt': amt
-      },
-      success: function(res) {
-        if (res.msg == 'success') {
-
-        } else {
-          alert('data did not get edited');
-        }
-      },
-      error: function(res) {
-        alert('server error occurred');
-      }
-    });
-  });
 
   // Edit item name event. Sends put request to server with category index, itemIndex, and name.
   // The server edits the item in the database and responds with success. When the server responds, do nothing since the input is already edited
@@ -169,6 +151,47 @@ $(document).ready(function() {
         'index': index,
         'itemIndex': itemIndex,
         'name': name
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+
+        } else {
+          alert('data did not get edited');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+  });
+
+  // Edit planned amount event. Sends put request to server with category index, itemIndex, and amount.
+  // The server edits the item in the database and responds with success. When the server responds, do nothing since the input is already edited
+  $(document).on('blur', '.planned-label', function() {
+    var index = $(this).parent().parent().attr('data-cat');
+    var itemIndex = $(this).parent().attr('data-item');
+    var amtDB = parseFloat($(this).val()).toFixed(2);
+    //console.log(amtDB);
+    $(this).toNumber().formatCurrency();
+    var amt = $(this).val();
+    //console.log(amt);
+
+    if (amt == '') {
+      //console.log('not a number');
+      return false;
+    }
+
+    $(this).attr('data-value', amtDB);
+    console.log($(this).attr('data-value'));
+
+    $.ajax({
+      url: '/editItemAmt',
+      method: 'put',
+      dataType: 'json',
+      data: {
+        'index': index,
+        'itemIndex': itemIndex,
+        'amt': amtDB
       },
       success: function(res) {
         if (res.msg == 'success') {
@@ -235,8 +258,8 @@ $(document).ready(function() {
     const item = "<div class='item' onmouseover='dosomething(this)' onmouseout='dothat(this)' onclick='clickItem(this)' data-item='" + data.itemIndex + "'>" +
       "<button type='button' class='btndel' name='button' value=''><i class='far fa-trash-alt'></i></button>" +
       "<input class='input-label' type='text' name='itemName' value='' placeholder='Enter a name'></input>" +
-      "<input class='planned-label' name='planned' value='' placeholder='$0.00' oninput='setTwoNumberDecimal(this)' onclick='this.select()'></input>" +
-      "<span class='span-rem'>$0.00</span>" +
+      "<input class='planned-label' name='planned' data-value='' value='' placeholder='$0.00' onclick='this.select()'></input>" +
+      "<span class='span-rem' data-value=''>$0.00</span>" +
       "</div>";
     $(el).before(item);
   }
@@ -259,6 +282,24 @@ $(document).ready(function() {
   function convertCat(el, name) {
     $(el).before("<span class='header-column'>" + name + "</div>");
     $(el).remove();
+  }
+
+  function updateRemaining(el, sum) {
+    console.log('data-value from label: ' + $(el).children('.planned-label').attr('data-value'));
+    console.log('value from label before edit: ' + $(el).children('.planned-label').val());
+
+    // get the planned amt from the html data element
+    plannedAmt = $(el).children('.planned-label').attr('data-value');
+    console.log('value from label: ' + plannedAmt);
+
+    //set the text of the remaining span; planned amount - all the transactions for the item
+    $(el).children('span').text(plannedAmt - sum);
+
+    //set the data-value for remaining
+    $(el).children('span').attr('data-value', plannedAmt - sum );
+
+    //format the span remaining as currency
+    $(el).children('span').formatCurrency();
   }
 
 });

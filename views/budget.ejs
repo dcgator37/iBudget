@@ -12,24 +12,37 @@
   <!-- <script type="text/javascript" src="/js/jquery.formatCurrency-1.4.0.js"></script> -->
 
   <script type="text/javascript">
-    function dothat(el) {
-      el.children[0].children[0].style.visibility = "hidden";
-    };
 
-    function dosomething(el) {
-      el.children[0].children[0].style.visibility = "visible";
-    };
+    $(document).ready(function() {
 
-    function clickItem(el) {
-      //Remove the my-list--selected class from any elements that already have it
-      $('.item--selected').removeClass('item--selected');
-      //Add the my-list--selected class to the clicked element
-      $(el).addClass('item--selected');
-    };
+      $('.planned-label').toNumber().formatCurrency();
+      $('.span-rem').toNumber().formatCurrency();
+
+    // $('.planned-label').blur(function() {
+    //   $('.planned-label').toNumber().formatCurrency();
+    //   console.log($(this).val());
+    // });
 
     //     function setTwoNumberDecimal(el) {
     //     el.value = parseFloat(el.value).toFixed(2);
     // }
+  });
+
+  function dothat(el) {
+    el.children[0].children[0].style.visibility = "hidden";
+  };
+
+  function dosomething(el) {
+    el.children[0].children[0].style.visibility = "visible";
+  };
+
+  function clickItem(el) {
+    //Remove the my-list--selected class from any elements that already have it
+    $('.item--selected').removeClass('item--selected');
+    //Add the my-list--selected class to the clicked element
+    $(el).addClass('item--selected');
+  };
+
   </script>
   <link rel="stylesheet" href="css/budgetstyles.css">
 </head>
@@ -105,8 +118,8 @@
         <div class="item" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>">
           <button type="button" class="btndel" name="button"><i class="far fa-trash-alt"></i></button>
           <input class="input-label" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
-          <input class="planned-label" type="text" name="planned" value="$<%= item.planned %>" onInput="setTwoNumberDecimal(this)" onclick="this.select()"></input>
-          <span class="span-rem">$0.00</span>
+          <input class="planned-label" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
+          <span class="span-rem" data-value="<%= item.planned - item.sumOfTransactions %>"><%= item.planned - item.sumOfTransactions %></span>
         </div>
 
         <% }) %>
@@ -137,6 +150,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   <script src="/data.js"></script>
+  <script src="/jquery.formatCurrency-1.4.0.js"></script>
+
 </body>
 
 </html>
