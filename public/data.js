@@ -167,7 +167,8 @@ $(document).ready(function() {
 
   // Edit planned amount event. Sends put request to server with category index, itemIndex, and amount.
   // The server edits the item in the database and responds with success. When the server responds, do nothing since the input is already edited
-  $(document).on('blur', '.planned-label', function() {
+  $(document).on('change', '.planned-label', function() {
+    
     var index = $(this).parent().parent().attr('data-cat');
     var itemIndex = $(this).parent().attr('data-item');
     var amtDB = parseFloat($(this).val()).toFixed(2);

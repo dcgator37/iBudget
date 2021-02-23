@@ -26,6 +26,7 @@ app.use(bodyParser.urlencoded({
 
 //set the path of the jquery file
 app.use('/jquery', express.static(path.join(__dirname + '/node_modules/jquery/dist/')));
+app.use('/charts', express.static(path.join(__dirname + '/node_modules/@mongodb-js/charts-embed-dom/dist/')));
 
 //set static public folder
 app.use(express.static(path.join(__dirname + '/public')));
