@@ -1,6 +1,9 @@
 //jshint esversion: 8
-// const EmbedSDK =  require('./charts');
-import EmbedSDK from "/@mongodb-js/charts-embed-dom/dist";
+//const EmbedSDK =  require('@mongodb-js');
+// import {EmbedSDK} from "/@mongodb-js/charts-embed-dom/dist";
+
+
+import ChartsEmbedSDK from "@mongodb-js/charts-embed-dom";
 
 
 const sdk = new EmbedSDK({

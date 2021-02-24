@@ -7,6 +7,13 @@ $(document).ready(function() {
   $.getScript("jquery.formatCurrency-1.4.0.js", function() {
 });
 
+  function updateChart() {
+
+  }
+
+  $('.planned-label').toNumber().formatCurrency();
+  $('.span-rem').toNumber().formatCurrency();
+
   // Add item button click event. Sends post request to server, sending the index of the category array you're adding an item to.
   // The server adds the new blank item to the database and responds with the index of the new item. When the server responds, run
   // addItem function which appends new item html with the itemIndex
@@ -165,23 +172,26 @@ $(document).ready(function() {
     });
   });
 
-  // Edit planned amount event. Sends put request to server with category index, itemIndex, and amount.
-  // The server edits the item in the database and responds with success. When the server responds, do nothing since the input is already edited
+  // Edit planned amount event. Sends put request to server with the index of the category array, item array itemIndex, and amount planned that is inputted.
+  // The server edits the item in the database and responds with success. When the server responds, run a function to edit the remaining value which should be zero at this time since no transactions
   $(document).on('change', '.planned-label', function() {
-    
+
     var index = $(this).parent().parent().attr('data-cat');
     var itemIndex = $(this).parent().attr('data-item');
-    var amtDB = parseFloat($(this).val()).toFixed(2);
+    var amtDB = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
     //console.log(amtDB);
-    $(this).toNumber().formatCurrency();
+    $(this).toNumber().formatCurrency();    //format it as currency with dollar sign and commas, and not accept non-numbers
     var amt = $(this).val();
     //console.log(amt);
 
+
+    //if it's blank, end the function
     if (amt == '') {
-      //console.log('not a number');
+      console.log('not a number');
       return false;
     }
 
+    //save the amt to the embedded data attribute in html
     $(this).attr('data-value', amtDB);
     console.log($(this).attr('data-value'));
 
@@ -196,7 +206,7 @@ $(document).ready(function() {
       },
       success: function(res) {
         if (res.msg == 'success') {
-
+          //function to update remaining value
         } else {
           alert('data did not get edited');
         }

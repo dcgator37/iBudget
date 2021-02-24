@@ -524,7 +524,7 @@ app.get("/verify", function(req, res) {
 app.post("/addItem", function(req, res) {
 
   const index = req.body.index;
-  activeBudget.category[index].items.push({});
+  activeBudget.category[index].items.push({sumOfTransactions: 0});
   activeBudget.save();
   const itemIndex = activeBudget.category[index].items.length - 1;
 
