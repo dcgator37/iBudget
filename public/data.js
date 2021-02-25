@@ -172,6 +172,7 @@ $(document).ready(function() {
     });
   });
 
+
   // Edit planned amount event. Sends put request to server with the index of the category array, item array itemIndex, and amount planned that is inputted.
   // The server edits the item in the database and responds with success. When the server responds, run a function to edit the remaining value which should be zero at this time since no transactions
   $(document).on('change', '.planned-label', function() {
@@ -183,6 +184,8 @@ $(document).ready(function() {
     $(this).toNumber().formatCurrency();    //format it as currency with dollar sign and commas, and not accept non-numbers
     var amt = $(this).val();
     //console.log(amt);
+
+    var el = $(this).parent();
 
 
     //if it's blank, end the function
@@ -207,6 +210,7 @@ $(document).ready(function() {
       success: function(res) {
         if (res.msg == 'success') {
           //function to update remaining value
+          updateRemaining(el, res.sum);
         } else {
           alert('data did not get edited');
         }

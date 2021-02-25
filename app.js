@@ -358,7 +358,7 @@ app.get("/budget", function(req, res) {
 
       Budget.findOne({user: req.user.username, month: utils.getMonth(today)}, function (err, budget) {
         if (err) {
-
+          alert('Mongo is down!');
         } else if(!budget) {
           console.log("no budget in db for this month. generating default budget");
           // next idea is to display website or popup that asks user if they want to load from the past month
@@ -552,7 +552,9 @@ app.put("/editItemAmt", (req, res) => {
   activeBudget.category[index].items[itemIndex].planned = amt;
   activeBudget.save();
 
-  res.json({msg: 'success' });
+  const sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
+
+  res.json({msg: 'success', sum: sum });
 });
 
 app.put("/editItemName", (req, res) => {
