@@ -9,7 +9,7 @@
 
   <script src="https://kit.fontawesome.com/0edefc6157.js" crossorigin="anonymous"></script>
   <script src="/jquery/jquery.js"></script>
-  <!-- <script src="https://unpkg.com/@mongodb-js/charts-embed-dom"></script> -->
+  <script src="https://unpkg.com/@mongodb-js/charts-embed-dom"></script>
   <!-- <script type="text/javascript" src="/js/jquery.formatCurrency-1.4.0.js"></script> -->
 
   <script type="text/javascript">
@@ -30,9 +30,14 @@
 
   function clickItem(el) {
     //Remove the my-list--selected class from any elements that already have it
-    $('.item--selected').removeClass('item--selected');
-    //Add the my-list--selected class to the clicked element
-    $(el).addClass('item--selected');
+    // $('.item--selected').removeClass('item--selected');
+    // //Add the my-list--selected class to the clicked element
+    // $(el).addClass('item--selected');
+    // $('.Transactions-List').css("display", "flex");
+    // $('.Budget-List-Item').css("display", "flex");
+    //
+    // $('#myChart').css("display", "none");
+    // document.getElementById("myChart").style.display = "none";
   };
 
   </script>
@@ -51,7 +56,7 @@
       <div class="monthHeader mx-auto">
         <p>
           <!-- button for current month's budget -->
-          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+          <button id="monthPicker" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
             <%=budget.month%>
           </button>
         </p>
@@ -80,7 +85,7 @@
       <!-- loop through the budget building category boxes -->
       <% budget.category.forEach(function(category, index) { %>
 
-      <div class="container mx-auto" data-cat="<%= index %>">
+      <div class="container mx-auto" data-cat-name="<%= category.name %>" data-cat="<%= index %>">
         <% if (!category.name) { %>
         <!-- if this is a new category and the name is blank, make the name an input so it can be edited -->
         <div class="item">
@@ -133,10 +138,73 @@
 
     <!-- right column -->
     <div class="col-lg-3" style="background-color: white">
-      <button type="button" name="button" class="addTransaction"><i class="fas fa-plus" style="color: green; font-size: 3em"></i></button>
-      <iframe style="background: #FFFFFF;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);" width="480" height="360" src="https://charts.mongodb.com/charts-ibudget-zqzdh/embed/charts?id=df5582b5-8d8d-45a9-9817-80e7ed5de323&theme=light&autoRefresh=true&maxDataAge=30"></iframe>
+      <!-- <button type="button" name="button" class="addTransaction"><i class="fas fa-plus" style="color: green; font-size: 3em"></i></button> -->
+
+      <!-- <iframe style="background: #FFFFFF;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);" width="480" height="360" src=""></iframe> -->
+      <!-- src="https://charts.mongodb.com/charts-ibudget-zqzdh/embed/charts?id=df5582b5-8d8d-45a9-9817-80e7ed5de323&theme=light&autoRefresh=true&maxDataAge=30" -->
+      <!-- <div id="chart"></div>
+      <script>
+      async function renderChart() {
+      const sdk = new ChartsEmbedSDK({
+        baseUrl: 'https://charts.mongodb.com/charts-ibudget-zqzdh'
+      });
+
+      const chart = sdk.createChart({
+        chartId: "df5582b5-8d8d-45a9-9817-80e7ed5de323",
+        height: 360,
+        width: 480,
+        // filter: {"_id" : "603147da03500263ac2d5046" }
+      });
 
 
+      await chart.render(document.getElementById('chart'));
+      // await chart.setFilter({"_id":"603147da03500263ac2d5046"});
+
+
+      $(document).on('click', '.addItem', async function() {
+        const myObject = {"_id": stringify('603146b3cfa6ac5bf8ccfa28')};
+        await chart.setFilter(myObject);
+
+      })
+
+    }
+    renderChart();
+
+      </script> -->
+
+      <canvas id="myChart" width="480" height="360"></canvas>
+      <div class='Budget-List-Container'>
+      <div class="Budget-List-Item container mx-auto">
+        <button id='closeBudgetListItem' style='padding: 0'><i class="far fa-times-circle"></i></button>
+        <div class="Budget-List-Item-Row">
+          <span id="catName" class="">Housing</span><span class="">Remaining</span>
+        </div>
+        <div class="Budget-List-Item-Row">
+          <span id="itemName">Mortgage</span><span id="remaining">$1,300.00</span>
+        </div>
+
+          <div class="progress Budget-List-Item-Progress">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+
+        <div class="Budget-List-Item-Row">
+          <div><span id="spent">$0.00</span><span> spent</span></div>
+        </div>
+      </div>
+
+      <div id="Transaction-Container" class="Transactions-List container mx-auto">
+        <div class="Transactions-List-Row">
+          <div><span id="numTransactions">1</span><span> Transactions</span></div>
+          <button id="addTransaction" style="padding: 0"><i class="fas fa-plus"></i> Add New</button>
+        </div>
+
+        <!-- <div class="Transactions-List-Row">
+          <span>Date</span>
+          <span>Mortgage</span>
+          <span>-$1,300.00</span>
+        </div> -->
+      </div>
+      </div>
     </div>
 
 
