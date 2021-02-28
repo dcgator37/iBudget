@@ -7,9 +7,9 @@ $(document).ready(function() {
   $.getScript("jquery.formatCurrency-1.4.0.js", function() {
 });
 
-$.getScript("Chart.js", function() {
-  console.log('chart loaded');
-});
+// $.getScript("Chart.js", function() {
+//   console.log('chart loaded');
+// });
 
   //initialize global chart variable
   var myChart;
@@ -282,7 +282,7 @@ $.getScript("Chart.js", function() {
       },
       success: function(res) {
         if (res.msg == 'success') {
-
+            $('#itemName').text(name);
         } else {
           alert('data did not get edited');
         }
@@ -408,10 +408,10 @@ $.getScript("Chart.js", function() {
   //function to add category html
   function addCat(el, index) {
     const category = "<div class='container mx-auto' data-cat='" + index + "'>" +
-      "<div class='item'><input class='cat-label' type='text' name='catName' value='' placeholder='Untitled'></input>" +
+      "<div class='itemHeader'><input class='cat-label' type='text' name='catName' value='' placeholder='Untitled'></input>" +
       "<span class='header-column'>Planned</span><span class='header-column'>Remaining</span>" +
       "</div>" +
-      "<div class='item' data-cat='" + index + "'>" +
+      "<div class='itemButton' data-cat='" + index + "'>" +
       "<button class='addItem' type='button' name='button'>Add Item</button>" +
       "</div>" +
       "</div>";
@@ -447,7 +447,11 @@ $.getScript("Chart.js", function() {
     const remaining = $(el).children('.span-rem').text();
     const spent = $(el).children('.planned-label').attr('data-value') - $(el).children('.span-rem').attr('data-value');
     const progressAmt = (spent / $(el).children('.planned-label').attr('data-value') * 100).toFixed(1);
+    const name = $(el).children('.input-label').val();
 
+    console.log(name);
+
+    $('#itemName').text(name);
     $('#remaining').text(remaining);
     $('#spent').text(spent);
     $('#spent').toNumber().formatCurrency();

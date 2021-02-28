@@ -31,7 +31,27 @@ body {
   display: flex;
   font-size: 2em;
   width: 100%;
+}
 
+.itemHeader {
+  border-bottom: 1px solid #F1F1F1;
+  display: flex;
+  font-size: 2em;
+  width: 100%;
+}
+
+.itemButton {
+  border-bottom: 1px solid #F1F1F1;
+  display: flex;
+  font-size: 2em;
+  width: 100%;
+}
+
+.itemCategory {
+  border-bottom: 1px solid #F1F1F1;
+  display: flex;
+  font-size: 2em;
+  width: 100%;
 }
 
 .item-column {

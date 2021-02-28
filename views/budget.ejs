@@ -88,21 +88,21 @@
       <div class="container mx-auto" data-cat-name="<%= category.name %>" data-cat="<%= index %>">
         <% if (!category.name) { %>
         <!-- if this is a new category and the name is blank, make the name an input so it can be edited -->
-        <div class="item">
+        <div class="itemHeader">
           <input class="cat-label" type="text" name="catName" value="" placeholder="Untitled"></input>
           <span class="header-column">Planned</span>
           <span class="header-column">Received</span>
         </div>
         <% } else if (category.name === "Income") { %>
         <!-- if the category is Income, make it say Received -->
-        <div class="item">
+        <div class="itemHeader">
           <span class="header-column"><%= category.name %></span>
           <span class="header-column">Planned</span>
           <span class="header-column">Received</span>
         </div>
         <% } else { %>
         <!-- otherwise make it say Remaining -->
-        <div class="item">
+        <div class="itemHeader">
           <span class="header-column"><%= category.name %></span>
           <span class="header-column">Planned</span>
           <span class="header-column">Remaining</span>
@@ -121,7 +121,7 @@
 
         <% }) %>
         <!-- add item button -->
-        <div class="item" data-cat="<%= index %>">
+        <div class="itemButton" data-cat="<%= index %>">
           <button class="addItem" type="button" name="button">Add Item</button>
         </div>
 
@@ -131,7 +131,7 @@
 
       <!-- add category button -->
       <div class="container mx-auto">
-        <button class="item addCat" type="button" name="button" value="">Add Category</button>
+        <button class="itemCategory addCat" type="button" name="button" value="">Add Category</button>
       </div>
 
     </div> <!-- end of middle column -->
@@ -212,8 +212,10 @@
   <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-  <script src="/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
   <script src="/jquery.formatCurrency-1.4.0.js"></script>
+  <script src="/data.js"></script>
+
 
   <!-- <script type="module" src="/chart.js"></script> -->
 

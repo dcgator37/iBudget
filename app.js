@@ -581,6 +581,8 @@ app.put("/editItemName", (req, res) => {
 
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.save();
+
+  res.json({msg: 'success'});
 });
 
 app.delete("/deleteItem", function(req, res) {
