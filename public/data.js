@@ -28,6 +28,7 @@ $(document).ready(function() {
     if(!$target.closest('.item').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length) {
       $('.item--selected').removeClass('item--selected');
       $('#myChart').css("display", "block");
+      $('.Budget-List-Container').css("display", "none");
       $('.Transactions-List').css("display", "none");
       $('.Budget-List-Item').css("display", "none");
     }
@@ -82,6 +83,7 @@ $(document).ready(function() {
       }
     });
 
+    $('.Budget-List-Container').css("display", "block");
     $('.Transactions-List').css("display", "flex");
     $('.Budget-List-Item').css("display", "flex");
 

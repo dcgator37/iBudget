@@ -1,3 +1,8 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
 body {
   background-color: #f5f7f8;
   color: #69757a;
@@ -200,9 +205,17 @@ p {
 
 }
 
+.chart-container {
+  width: 40rem;
+}
+
 .Budget-List-Container {
-  width: 30rem;
+  display: none;
+  width: 40rem;
   position: fixed;
+  overflow-y: auto;
+  top: 0;
+  bottom: 0;
 }
 
 .Budget-List-Item {
@@ -219,6 +232,7 @@ p {
   display: flex;
   width: 100%;
   justify-content: space-between;
+  align-items: center;
   padding: 5px;
 
 }
@@ -235,6 +249,14 @@ p {
   margin: 5px 0;
 }
 
+.fa-times-circle {
+  color: #0091d9;
+  font-size: 1.5rem;
+}
+.fa-angle-down {
+  color: #0091d9;
+  font-size: 2rem;
+}
 
 .Budget-List-Item-Row-Item-Left {
   /* justify-content: flex-start; */
