@@ -57,20 +57,27 @@
         </p>
         <div class="collapse" id="collapseExample">
           <div class="card card-body">
-            <div class="card card-body-prev"></div>
+            <!-- <div class="card card-body-prev"></div> -->
 
             <!-- loop through and create buttons for each month for two years -->
             <% months.forEach(function(month) { %>
             <form action="/switchmonth" method="post">
               <p>
-                <button class="btn btn-primary" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                <% if(month.monthString == budget.month ){ %>
+                  <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                <% } else if(month.active == true){ %>
+                  <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                <% } else { %>
+                  <button class="btn btn--month" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                <% } %>
+                <!-- <button class="btn btn-primary" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button> -->
                 <input type="hidden" name="year" value="<%= month.year %>">
                 <input type="hidden" name="monthString" value="<%= month.monthString %>">
               </p>
             </form>
             <% }); %>
 
-            <div class="card card-body-next"></div>
+            <!-- <div class="card card-body-next"></div> -->
           </div>
         </div>
       </div>
