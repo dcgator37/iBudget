@@ -12,6 +12,7 @@
   "dependencies": {
     "@mongodb-js/charts-embed-dom": "^2.0.1",
     "body-parser": "^1.19.0",
+    "chart.js": "^2.9.4",
     "connect-flash": "^0.1.1",
     "datejs": "^1.0.0-rc3",
     "dotenv": "^8.2.0",

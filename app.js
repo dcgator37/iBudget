@@ -392,11 +392,15 @@ app.get("/budget", function(req, res) {
 
           req.user.save();
 
+          // const url = createChart(activeBudget._id);
+
           res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
 
         } else {
           console.log("Budget found in db for this month. loading budget");
           activeBudget = budget;
+
+          // const url = createChart(activeBudget._id);
 
           res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
         }
@@ -404,6 +408,9 @@ app.get("/budget", function(req, res) {
 
     } else {
       console.log('refreshing screen. there is an activebudget');
+
+      // const url = createChart(activeBudget._id);
+
       res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
     }
   } else {
@@ -554,7 +561,17 @@ app.put("/editItemAmt", (req, res) => {
 
   const sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
 
-  res.json({msg: 'success', sum: sum });
+  var newCatSum = 0;
+
+  activeBudget.category[index].items.forEach((item, index) => {
+    if (item.planned) {
+    newCatSum += item.planned;
+  } else {
+    newCatSum += 0;
+  }
+  });
+
+  res.json({msg: 'success', sum: sum, newCatSum: newCatSum });
 });
 
 app.put("/editItemName", (req, res) => {
@@ -564,6 +581,8 @@ app.put("/editItemName", (req, res) => {
 
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.save();
+
+  res.json({msg: 'success'});
 });
 
 app.delete("/deleteItem", function(req, res) {
@@ -573,7 +592,17 @@ app.delete("/deleteItem", function(req, res) {
   activeBudget.category[index].items[itemIndex].remove();
   activeBudget.save();
 
-  res.json({msg: 'success' });
+  var newCatSum = 0;
+
+  activeBudget.category[index].items.forEach((item, index) => {
+    if (item.planned) {
+    newCatSum += item.planned;
+  } else {
+    newCatSum += 0;
+  }
+  });
+
+  res.json({msg: 'success', newCatSum: newCatSum });
 });
 
 app.post("/addCat", function(req, res) {
@@ -645,6 +674,41 @@ app.post('/addTransaction', (req, res) => {
 
   //send the sum back to the client so it can do the math and update the remaining span and data-value attribute
   res.json({msg: 'success', sum: sum});
+});
+
+app.post('/getTransactions', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+
+  const transactions = activeBudget.category[index].items[itemIndex].transactions;
+
+  res.json({msg: 'success', transactions: transactions});
+
+});
+
+app.get('/testData', (req, res) => {
+  const labels = [];
+  const data = [];
+  var plannedSum;
+
+
+  activeBudget.category.forEach((category, index) => {
+    labels.push(category.name);
+
+    plannedSum = 0;
+
+    category.items.forEach((item, index) => {
+      if (item.planned) {
+      plannedSum += item.planned;
+    } else {
+      plannedSum += 0;
+    }
+    });
+
+    data.push(plannedSum);
+  });
+
+  res.json({msg: 'success', labels: labels, data: data});
 });
 
 app.listen(process.env.PORT || 3000, function() {
@@ -735,4 +799,14 @@ function createBudgetArray(req) {
     req.user.save();
   });
 
+}
+
+function createChart(id) {
+  const src= 'https://charts.mongodb.com/charts-ibudget-zqzdh/embed/charts?id=df5582b5-8d8d-45a9-9817-80e7ed5de323&theme=light&autoRefresh=true&maxDataAge=30';
+
+  const filterDoc = {"_id": id};
+  const encodedFilter = encodeURIComponent(JSON.stringify(filterDoc));
+
+  const url = src + '&filter={"_id":' + id + '}';
+  return url;
 }

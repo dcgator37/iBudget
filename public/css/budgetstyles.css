@@ -31,7 +31,27 @@ body {
   display: flex;
   font-size: 2em;
   width: 100%;
+}
 
+.itemHeader {
+  border-bottom: 1px solid #F1F1F1;
+  display: flex;
+  font-size: 2em;
+  width: 100%;
+}
+
+.itemButton {
+  border-bottom: 1px solid #F1F1F1;
+  display: flex;
+  font-size: 2em;
+  width: 100%;
+}
+
+.itemCategory {
+  border-bottom: 1px solid #F1F1F1;
+  display: flex;
+  font-size: 2em;
+  width: 100%;
 }
 
 .item-column {
@@ -178,4 +198,73 @@ input:last-child {
 p {
   padding: 0 5px;
 
+}
+
+.Budget-List-Container {
+  width: 30rem;
+  position: fixed;
+}
+
+.Budget-List-Item {
+  display: none;
+  width: 70%;
+  padding: 10px;
+
+  flex-direction: column;
+  align-items: flex-end;
+
+}
+
+.Budget-List-Item-Row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 5px;
+
+}
+
+.Budget-List-Item-Row span {
+    color: #69757a;
+    font-size: 1.4rem;
+    /* font-weight: 600; */
+}
+
+.Budget-List-Item-Progress {
+  height: 10px;
+  width: 100%;
+  margin: 5px 0;
+}
+
+
+.Budget-List-Item-Row-Item-Left {
+  /* justify-content: flex-start; */
+}
+
+.Budget-List-Item-Row-Item-Right {
+  /* justify-content: flex-end; */
+}
+
+.Transactions-List {
+  display: none;
+  width: 70%;
+  padding: 10px;
+
+  flex-direction: column;
+
+}
+
+.Transactions-List-Row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.Transactions-List-Row span {
+  color: #69757a;
+  font-size: 1.4rem;
+}
+
+#myChart {
+  position: fixed;
 }
