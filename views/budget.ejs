@@ -58,7 +58,9 @@
           <!-- button for current month's budget -->
           <button id="monthPicker" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
             <%=budget.month%>
+
           </button>
+
         </p>
         <div class="collapse" id="collapseExample">
           <div class="card card-body">
@@ -105,7 +107,10 @@
         <div class="itemHeader">
           <span class="header-column"><%= category.name %></span>
           <span class="header-column">Planned</span>
+
+
           <span class="header-column">Received</span>
+
         </div>
         <% } else { %>
         <!-- otherwise make it say Remaining -->
