@@ -21,7 +21,6 @@ $(document).ready(function() {
   $('.planned-label').toNumber().formatCurrency();
   $('.span-rem').toNumber().formatCurrency();
 
-
   //listener when clicking off an item to hide item sidebar and re-display the chart
   $(document).click(function(event) {
     var $target = $(event.target);
@@ -51,6 +50,7 @@ $(document).ready(function() {
 
     console.log(progressAmt);
 
+    //set the values from the clicked item for the sidebar spans and progress bar
     $('#catName').text(categoryName);
     $('#itemName').text(itemName);
     $('#remaining').text(remaining);
@@ -59,6 +59,7 @@ $(document).ready(function() {
     $('.progress-bar').css('width', progressAmt + '%');
     $('.progress-bar').attr('aria-valuenow', progressAmt);
 
+    //remove all elements of the transaction container except the first one
     $('#Transaction-Container').children('.Transactions-List-Row').slice(1).remove();
 
     //ajax query to retrieve transactions from database
@@ -72,8 +73,10 @@ $(document).ready(function() {
       },
       success: function(res) {
         if (res.msg == 'success') {
-          console.log(res.transactions);
+          //console.log(res.transactions);
+
           updateTransactions(res.transactions);
+          $('#last-Month-Val').text(res.sum);
         } else {
           alert('data did not get retrieved');
         }
@@ -83,6 +86,7 @@ $(document).ready(function() {
       }
     });
 
+    //display the budget item sidebar. hide the chart
     $('.Budget-List-Container').css("display", "block");
     $('.Transactions-List').css("display", "flex");
     $('.Budget-List-Item').css("display", "flex");
@@ -375,7 +379,6 @@ $(document).ready(function() {
     });
   });
 
-  //not used. will delete soon
   function getChartData() {
     $.ajax({
       url: '/testData',
@@ -545,5 +548,7 @@ $(document).ready(function() {
     });
     chart.update();
 }
+
+console.log(myChart);
 
 });

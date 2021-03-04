@@ -679,10 +679,55 @@ app.post('/addTransaction', (req, res) => {
 app.post('/getTransactions', (req, res) => {
   const index = req.body.index;
   const itemIndex = req.body.itemIndex;
+  const categoryName = activeBudget.category[index].name;
+  const itemName = activeBudget.category[index].items[itemIndex].name;
+  const currentMonth = activeBudget.monthNum;
+  const currentYear = activeBudget.year;
+  var priorMonth = currentMonth - 1;
+  var priorMonthYear = currentYear;
+  var sum = 0;
+
+  if (currentMonth == 1) {
+    priorMonth = 12;
+    --priorMonthYear;
+  }
 
   const transactions = activeBudget.category[index].items[itemIndex].transactions;
 
-  res.json({msg: 'success', transactions: transactions});
+  // Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
+
+
+  Budget.find({user: req.user.username, monthNum: priorMonth, year: priorMonthYear, 'category.name': categoryName, 'category.items.name': itemName}, (err, budget) => {
+    if (err) {
+      alert(err);
+    } else if (budget) {
+      budget[0].category.find( function (el, index, array) {
+        if (el.name == categoryName) {
+          el.items.find( function (item, index, array) {
+            if (item.name == itemName) {
+              sum = item.sumOfTransactions;
+              console.log(sum);
+            }
+          });
+        }
+      });
+      // budget.category.toArray().find( function(el, index, array) {
+      //   if (el.name == categoryName) {
+      //     el.items.find( function(item) {
+      //       if(item.name == itemName) {
+      //         console.log(item.sumOfTransactions);
+      //       }
+      //     });
+      //   }
+      // });
+
+      res.json({msg: 'success', transactions: transactions, budget: budget, sum: sum});
+    } else {
+      console.log('no budget found');
+    }
+  });
+
+  // res.json({msg: 'success', transactions: transactions, budget: budget});
 
 });
 
