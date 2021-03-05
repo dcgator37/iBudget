@@ -77,6 +77,7 @@ $(document).ready(function() {
 
           updateTransactions(res.transactions);
           $('#last-Month-Val').text(res.sum);
+          $('#last-Month-Val').toNumber().formatCurrency();
         } else {
           alert('data did not get retrieved');
         }
@@ -379,25 +380,7 @@ $(document).ready(function() {
     });
   });
 
-  function getChartData() {
-    $.ajax({
-      url: '/testData',
-      method: 'get',
-      dataType: 'json',
-      success: function(res) {
-        if (res.msg == 'success') {
-          console.log(res.labels);
-          console.log(res.data);
-          createChart(res.labels, res.data);
-        } else {
-          alert('data did not get added');
-        }
-      },
-      error: function(res) {
-        alert('server error occurred');
-      }
-    });
-  }
+
 
   //function to add item html
   function addItem(el, data) {
@@ -497,6 +480,26 @@ $(document).ready(function() {
 
     $(el).append(htmlRow);
     $('.transactionAmt').toNumber().formatCurrency();
+  }
+
+  function getChartData() {
+    $.ajax({
+      url: '/testData',
+      method: 'get',
+      dataType: 'json',
+      success: function(res) {
+        if (res.msg == 'success') {
+          console.log(res.labels);
+          console.log(res.data);
+          createChart(res.labels, res.data);
+        } else {
+          alert('data did not get added');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
   }
 
   function createChart(labels, data) {

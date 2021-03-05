@@ -559,10 +559,11 @@ app.put("/editItemAmt", (req, res) => {
   activeBudget.category[index].items[itemIndex].planned = amt;
   activeBudget.save();
 
+  //when you edit the planned amount, the remaining will change. so get the total transaction amt
   const sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
 
+  //loop through the items in the category, summing the total planned amt. this is used to update the chart
   var newCatSum = 0;
-
   activeBudget.category[index].items.forEach((item, index) => {
     if (item.planned) {
     newCatSum += item.planned;
@@ -700,30 +701,22 @@ app.post('/getTransactions', (req, res) => {
   Budget.find({user: req.user.username, monthNum: priorMonth, year: priorMonthYear, 'category.name': categoryName, 'category.items.name': itemName}, (err, budget) => {
     if (err) {
       alert(err);
-    } else if (budget) {
+    } else if (budget.length) {
+      console.log(budget);
       budget[0].category.find( function (el, index, array) {
         if (el.name == categoryName) {
           el.items.find( function (item, index, array) {
             if (item.name == itemName) {
               sum = item.sumOfTransactions;
-              console.log(sum);
             }
           });
         }
       });
-      // budget.category.toArray().find( function(el, index, array) {
-      //   if (el.name == categoryName) {
-      //     el.items.find( function(item) {
-      //       if(item.name == itemName) {
-      //         console.log(item.sumOfTransactions);
-      //       }
-      //     });
-      //   }
-      // });
 
-      res.json({msg: 'success', transactions: transactions, budget: budget, sum: sum});
+      res.json({msg: 'success', transactions: transactions, sum: sum});
     } else {
       console.log('no budget found');
+      res.json({msg: 'success', transactions: transactions, sum: sum});
     }
   });
 
