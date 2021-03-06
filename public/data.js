@@ -18,37 +18,56 @@ $(document).ready(function() {
   getChartData();
 
   //format all the values on the site as currency
-  $('.planned-label').toNumber().formatCurrency();
-  $('.span-rem').toNumber().formatCurrency();
+  $('.Input-Planned').toNumber().formatCurrency();
+  $('.Budget-Row-Remaining').toNumber().formatCurrency();
 
   //listener when clicking off an item to hide item sidebar and re-display the chart
   $(document).click(function(event) {
     var $target = $(event.target);
-    if(!$target.closest('.item').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length  && !$target.closest('.modal').length) {
+    if(!$target.closest('.Budget-Row').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length  && !$target.closest('.modal').length) {
       $('.item--selected').removeClass('item--selected');
       $('#myChart').css("display", "block");
       $('.Budget-List-Container').css("display", "none");
       $('.Transactions-List').css("display", "none");
       $('.Budget-List-Item').css("display", "none");
     }
+
+    if(!$target.closest('.Header-Left').length && !$target.closest('.btndelHidden').length && !$target.closest('.cat-label').length) {
+      const name = $('.--selected--').val();
+
+      $('.btndelHidden').css("visibility", "hidden");
+
+      $('input.cat-label').before("<span class='Header-Left'>" + name + "</div>");
+      $('input.cat-label').remove();
+      // $('.--selected--').removeClass('.--selected--');
+
+      //convert back to span
+    }
   });
 
-  $(document).on('click', '.item', function() {
+  $(document).on('click', '.Budget-Row', function(e) {
+
+    console.log('click event for budget row');
 
     const index = $(this).parent().attr('data-cat');
     const itemIndex = $(this).attr('data-item');
+
     const categoryName = $(this).parent().attr('data-cat-name');
-    const itemName = $(this).children('.input-label').val();
-    const remaining = $(this).children('.span-rem').text();
-    const spent = $(this).children('.planned-label').attr('data-value') - $(this).children('.span-rem').attr('data-value');
-    const progressAmt = (spent / $(this).children('.planned-label').attr('data-value') * 100).toFixed(1);
+    const itemName = $(this).children('.Input-Name').val();
+    const remaining = $(this).children('.Budget-Row-Remaining').text();
+    const spent = $(this).children('.Input-Planned').attr('data-value') - $(this).children('.Budget-Row-Remaining').attr('data-value');
+    var progressAmt = (spent / $(this).children('.Input-Planned').attr('data-value') * 100).toFixed(1);
+
+    if (isNaN(progressAmt)) {
+      progressAmt = 0;
+    }
 
     //Remove the my-list--selected class from any elements that already have it
     $('.item--selected').removeClass('item--selected');
     //Add the my-list--selected class to the clicked element
     $(this).addClass('item--selected');
 
-    console.log(progressAmt);
+
 
     //set the values from the clicked item for the sidebar spans and progress bar
     $('#catName').text(categoryName);
@@ -76,8 +95,13 @@ $(document).ready(function() {
           //console.log(res.transactions);
 
           updateTransactions(res.transactions);
-          $('#last-Month-Val').text(res.sum);
-          $('#last-Month-Val').toNumber().formatCurrency();
+          if (res.sum == undefined) {
+            $('#last-Month-Val').text('Not Found');
+          } else {
+            $('#last-Month-Val').text(res.sum);
+            $('#last-Month-Val').toNumber().formatCurrency();
+          }
+
         } else {
           alert('data did not get retrieved');
         }
@@ -93,7 +117,22 @@ $(document).ready(function() {
     $('.Budget-List-Item').css("display", "flex");
 
     $('#myChart').css("display", "none");
+  }).on('click', 'button.btndel', function(e) {
+    e.stopPropagation();
   });
+
+  $(document).on('click', '.Header-Left', function() {
+    const el = $(this);
+    const name = $(this).text();
+
+
+    $(this).parent().children('.btndelHidden').css("visibility", "visible");
+
+
+    convertCatToInput(el, name);
+  });
+
+
 
   $(document).on('click', '#closeBudgetListItem', function() {
     $('.Transactions-List').css("display", "none");
@@ -247,6 +286,8 @@ $(document).ready(function() {
     const itemIndex = $(this).parent().attr('data-item');
     const el = $(this).parent();
 
+    console.log('delete button click');
+
     $.ajax({
       url: '/deleteItem',
       method: 'delete',
@@ -267,16 +308,43 @@ $(document).ready(function() {
         alert('server error occurred');
       }
     });
+
+  });
+
+  $(document).on('click', 'button.btndelHidden', function() {
+    const index = $(this).parent().parent().attr('data-cat');
+    const el = $(this).parent().parent();
+
+    $.ajax({
+      url: '/deleteCategory',
+      method: 'delete',
+      dataType: 'json',
+      data: {
+        'index': index,
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          el.remove();
+          deleteCatFromChart(index);
+        } else {
+          alert('data did not get deleted');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
   });
 
 
 
   // Edit item name event. Sends put request to server with category index, itemIndex, and name.
   // The server edits the item in the database and responds with success. When the server responds, do nothing since the input is already edited
-  $(document).on('change', '.input-label', function() {
+  $(document).on('change', '.Input-Name', function() {
     var index = $(this).parent().parent().attr('data-cat');
     var itemIndex = $(this).parent().attr('data-item');
-    var name = $(this).val();
+    var name = capitalizeFirstLetter($(this).val());
+    $(this).val(name);
 
     $.ajax({
       url: '/editItemName',
@@ -303,7 +371,7 @@ $(document).ready(function() {
 
   // Edit planned amount event. Sends put request to server with the index of the category array, item array itemIndex, and amount planned that is inputted.
   // The server edits the item in the database and responds with success. When the server responds, run a function to edit the remaining value which should be zero at this time since no transactions
-  $(document).on('change', '.planned-label', function() {
+  $(document).on('change', '.Input-Planned', function() {
 
     var index = $(this).parent().parent().attr('data-cat');
     var itemIndex = $(this).parent().attr('data-item');
@@ -356,7 +424,9 @@ $(document).ready(function() {
   // which changes it from an input to a span. Further development will be a click event on the span, which will change it to an input so it can be edited
   $(document).on('change', '.cat-label', function() {
     var index = $(this).parent().parent().attr('data-cat');
-    var name = $(this).val();
+    var name = capitalizeFirstLetter($(this).val());
+    $(this).val(name);
+    $(this).parent().parent().attr('data-cat-name', name);
     const el = $(this);
 
     $.ajax({
@@ -369,7 +439,10 @@ $(document).ready(function() {
       },
       success: function(res) {
         if (res.msg == 'success') {
+          updateChartLabels(index, name);
           convertCat(el, name);
+          //need to update chart since a category was added or the name changed. use the index.
+
         } else {
           alert('data did not get edited');
         }
@@ -384,21 +457,23 @@ $(document).ready(function() {
 
   //function to add item html
   function addItem(el, data) {
-    const item = "<div class='item' onmouseover='dosomething(this)' onmouseout='dothat(this)' onclick='clickItem(this)' data-item='" + data.itemIndex + "'>" +
+    const item = "<div class='Budget-Row' onmouseover='dosomething(this)' onmouseout='dothat(this)' onclick='clickItem(this)' data-item='" + data.itemIndex + "'>" +
       "<button type='button' class='btndel' name='button' value=''><i class='far fa-trash-alt'></i></button>" +
-      "<input class='input-label' type='text' name='itemName' value='' placeholder='Enter a name'></input>" +
-      "<input class='planned-label' name='planned' data-value='' value='' placeholder='$0.00' onclick='this.select()'></input>" +
-      "<span class='span-rem' data-value=''>$0.00</span>" +
+      "<input class='Input-Name' type='text' name='itemName' value='' placeholder='Enter a name'></input>" +
+      "<input class='Input-Planned' name='planned' data-value='' value='' placeholder='$0.00' onclick='this.select()'></input>" +
+      "<span class='Budget-Row-Remaining' data-value=''>$0.00</span>" +
       "</div>";
     $(el).before(item);
   }
 
   //function to add category html
   function addCat(el, index) {
-    const category = "<div class='container mx-auto' data-cat='" + index + "'>" +
-      "<div class='itemHeader'><input class='cat-label' type='text' name='catName' value='' placeholder='Untitled'></input>" +
-      "<span class='header-column'>Planned</span><span class='header-column'>Remaining</span>" +
-      "</div>" +
+    const category = "<div class='container Budget-Container mx-auto' data-cat-name='' data-cat='" + index + "'>" +
+      "<header class='Category-Header'>" +
+      "<button type='button' class='btndelHidden' name='button'><i class='far fa-trash-alt'></i></button>" +
+      "<input class='cat-label' type='text' name='catName' value='' placeholder='Untitled'></input>" +
+      "<span class='Header-Right'>Planned</span><span class='Header-Right'>Remaining <i class='fas fa-angle-down'></i></span>" +
+      "</header>" +
       "<div class='itemButton' data-cat='" + index + "'>" +
       "<button class='addItem' type='button' name='button'>Add Item</button>" +
       "</div>" +
@@ -409,16 +484,21 @@ $(document).ready(function() {
 
   //converts category name input to a span
   function convertCat(el, name) {
-    $(el).before("<span class='header-column'>" + name + "</div>");
+    $(el).before("<span class='Header-Left'>" + name + "</div>");
+    $(el).remove();
+  }
+
+  function convertCatToInput(el, name) {
+    $(el).before("<input class='cat-label --selected--' type='text' name='catName' value='"+ name + "' placeholder=''></input>");
     $(el).remove();
   }
 
   function updateRemaining(el, sum) {
-    console.log('data-value from label: ' + $(el).children('.planned-label').attr('data-value'));
-    console.log('value from label before edit: ' + $(el).children('.planned-label').val());
+    console.log('data-value from label: ' + $(el).children('.Input-Planned').attr('data-value'));
+    console.log('value from label before edit: ' + $(el).children('.Input-Planned').val());
 
     // get the planned amt from the html data element
-    plannedAmt = $(el).children('.planned-label').attr('data-value');
+    plannedAmt = $(el).children('.Input-Planned').attr('data-value');
     console.log('value from label: ' + plannedAmt);
 
     //set the text of the remaining span; planned amount - all the transactions for the item
@@ -432,10 +512,10 @@ $(document).ready(function() {
   }
 
   function updateBudgetListItem(el) {
-    const remaining = $(el).children('.span-rem').text();
-    const spent = $(el).children('.planned-label').attr('data-value') - $(el).children('.span-rem').attr('data-value');
-    const progressAmt = (spent / $(el).children('.planned-label').attr('data-value') * 100).toFixed(1);
-    const name = $(el).children('.input-label').val();
+    const remaining = $(el).children('.Budget-Row-Remaining').text();
+    const spent = $(el).children('.Input-Planned').attr('data-value') - $(el).children('.Budget-Row-Remaining').attr('data-value');
+    const progressAmt = (spent / $(el).children('.Input-Planned').attr('data-value') * 100).toFixed(1);
+    const name = $(el).children('.Input-Name').val();
 
     console.log(name);
 
@@ -449,14 +529,23 @@ $(document).ready(function() {
 
   function updateTransactions(transactions) {
     const numTransactions = transactions.length;
+
+
+
     const el = $('#Transaction-Container');
     var htmlRow = '';
 
     $('#numTransactions').text(numTransactions);
 
     transactions.forEach((transaction) => {
+      var theDate = new Date(transaction.date);
+      var month = theDate.toLocaleDateString("en-US", {month: "short"});
+      var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
+
       htmlRow = "<div class='Transactions-List-Row'>" +
-                  "<span>Date</span>" +
+                  "<div class='monthDay-container'>" +
+                  "<span class='transaction-month'>" + month + "</span><span class='transaction-day'>" + day + "</span>" +
+                  "</div>" +
                   "<span>" + transaction.merchant + "</span>" +
                   "<span class='transactionAmt'>" + transaction.amt + "</span>" +
                 "</div>";
@@ -471,15 +560,22 @@ $(document).ready(function() {
   function addTransactionList(merchant, amt) {
     const el = $('#Transaction-Container');
     var htmlRow = '';
+    var numOfTransactions = $('#numTransactions').text();
+    var theDate = new Date();
+    var month = theDate.toLocaleDateString("en-US", {month: "short"});
+    var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
 
     htmlRow = "<div class='Transactions-List-Row'>" +
-                "<span>Date</span>" +
+                "<div class='monthDay-container'>" +
+                "<span class='transaction-month'>" + month + "</span><span class='transaction-day'>" + day + "</span>" +
+                "</div>" +
                 "<span>" + merchant + "</span>" +
                 "<span class='transactionAmt'>" + amt + "</span>" +
               "</div>";
 
     $(el).append(htmlRow);
     $('.transactionAmt').toNumber().formatCurrency();
+    $('#numTransactions').text(++numOfTransactions);
   }
 
   function getChartData() {
@@ -540,8 +636,23 @@ $(document).ready(function() {
 
   function updateChart(index, newCatSum) {
     //var ctx = document.getElementById('myChart');
-    console.log(myChart);
+
     myChart.config.data.datasets[0].data[index] = newCatSum;
+    myChart.update();
+  }
+
+  function updateChartLabels(index, name) {
+    if (myChart.data.labels[index]) {
+      myChart.data.labels[index] = name;
+      myChart.update();
+    }
+
+  }
+
+  function deleteCatFromChart(index) {
+
+    myChart.config.data.datasets[0].data.splice(index,1);
+    myChart.data.labels.splice(index,1);
     myChart.update();
   }
 
@@ -553,6 +664,10 @@ $(document).ready(function() {
     chart.update();
 }
 
-console.log(myChart);
+function capitalizeFirstLetter(string) {
+  return string[0].toUpperCase() + string.slice(1);
+}
+
+
 
 });

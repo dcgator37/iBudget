@@ -606,6 +606,23 @@ app.delete("/deleteItem", function(req, res) {
   res.json({msg: 'success', newCatSum: newCatSum });
 });
 
+app.delete("/deleteCategory", function(req, res) {
+  const index = req.body.index;
+
+  activeBudget.category[index].remove();
+  activeBudget.save();
+
+  // activeBudget.category[index].items.forEach((item, index) => {
+  //   if (item.planned) {
+  //   newCatSum += item.planned;
+  // } else {
+  //   newCatSum += 0;
+  // }
+  // });
+
+  res.json({msg: 'success'});
+});
+
 app.post("/addCat", function(req, res) {
 
   activeBudget.category.push({});
@@ -686,7 +703,7 @@ app.post('/getTransactions', (req, res) => {
   const currentYear = activeBudget.year;
   var priorMonth = currentMonth - 1;
   var priorMonthYear = currentYear;
-  var sum = 0;
+  var sum;
 
   if (currentMonth == 1) {
     priorMonth = 12;
@@ -708,14 +725,18 @@ app.post('/getTransactions', (req, res) => {
           el.items.find( function (item, index, array) {
             if (item.name == itemName) {
               sum = item.sumOfTransactions;
+            } else {
+
             }
           });
+        } else {
+
         }
       });
 
       res.json({msg: 'success', transactions: transactions, sum: sum});
     } else {
-      console.log('no budget found');
+
       res.json({msg: 'success', transactions: transactions, sum: sum});
     }
   });

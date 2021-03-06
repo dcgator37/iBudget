@@ -3,19 +3,128 @@
   margin: 0;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+}
+
 body {
   background-color: #f5f7f8;
   color: #69757a;
 }
 
-.container {
+button {
+  text-align: center;
+  border-color: transparent;
+  background-color: transparent;
+  color: #0091d9;
+  font-weight: bold;
+}
+
+p {
+  padding: 0 5px;
+}
+
+input {
+  border: transparent;
+  border-radius: 5px;
+  /* width: 100px; */
+}
+
+input:hover:not(:focus) {
+  border: 1px solid #f5f7f8;
+  background-color: #f5f7f8;
+}
+
+input:focus {
+  outline: none;
+  border: 1px solid #0091d9;
+}
+
+input:active {
+  border: 1px solid #0091d9;
+}
+
+input:last-child {
+  text-align: right;
+}
+
+/* ******************* Main Budget Styling *************************** */
+
+.Budget-Container {
   background: white;
-  margin: 20px;
-  max-width: 768px;
-  /* max-width: 480px; */
+  width: 50rem;
   border-radius: 5px;
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
-  padding: 0;
+  padding: 0 10px;
+  margin: 20px 0;
+  margin-left: 5rem;
+}
+
+.Category-Header {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  flex-wrap: nowrap;
+  font-size: 2rem;
+  padding: 0.6rem 0;
+}
+
+.Header-Left {
+  margin-left: 5px;
+  /*   margin-left: 2.6rem; */
+  width: 50%;
+}
+
+.Header-Right {
+  margin-left: 5px;
+  width: 25%;
+  text-align: right;
+}
+
+.Budget-Row {
+  display: flex;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 2rem;
+}
+
+.btndelHidden {
+  visibility: hidden;
+}
+
+.Input-Name {
+  width: 50%;
+  margin-left: 5px;
+}
+
+.Input-Planned {
+  width: 25%;
+  margin-left: 5px;
+  text-align: right;
+}
+
+.Budget-Row-Remaining {
+  width: 25%;
+  margin-left: 5px;
+  text-align: right;
+}
+
+.container {
+  /* commented for 3/6/21 flex box changes */
+
+  /* background: white;
+  margin: 20px;
+  max-width: 768px; */
+    /* max-width: 480px; */
+  /* border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  padding: 0; */
 }
 
   /* the header column */
@@ -70,14 +179,7 @@ body.monthHeader{
   border-radius: .4rem;
 }
 
-button {
-  text-align: center;
-  border-color: transparent;
-  background-color: transparent;
-  color: #0091d9;
-  font-weight: bold;
 
-}
 
 .btn--current {
  color: #fff;
@@ -106,10 +208,7 @@ button {
 
 }
 
-input {
-  border: transparent;
-  /* width: 100px; */
-}
+
 
 .input-label {
   width: 300px;
@@ -117,7 +216,8 @@ input {
 }
 
 .cat-label {
-  width: 300px;
+  width: 50%;
+  margin-left: 5px;
   /* margin-left: 5px; */
 }
 
@@ -127,23 +227,7 @@ input {
   /* margin-left: 5px; */
 }
 
-input:hover:not(:focus) {
-  border: 1px solid #f5f7f8;
-  background-color: #f5f7f8;
-}
 
-input:focus {
-  outline: none;
-  border: 1px solid #0091d9;
-}
-
-input:active {
-  border: 1px solid #0091d9;
-}
-
-input:last-child {
-  text-align: right;
-}
 
 .header-column {
   width: 300px;
@@ -200,10 +284,7 @@ input:last-child {
   font-weight: bold;
 }
 
-p {
-  padding: 0 5px;
 
-}
 
 .chart-container {
   width: 30rem;
@@ -219,9 +300,22 @@ p {
 }
 
 .Budget-List-Item {
+  background: white;
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+
   display: none;
   width: 70%;
   padding: 10px;
+  margin-left: 20px;
+
+  /* background: white;
+  margin: 20px;
+  max-width: 768px; */
+    /* max-width: 480px; */
+  /* border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  padding: 0; */
 
   flex-direction: column;
   align-items: flex-end;
@@ -251,11 +345,11 @@ p {
 
 .fa-times-circle {
   color: #0091d9;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
 }
 .fa-angle-down {
   color: #0091d9;
-  font-size: 2rem;
+  font-size: 1.4rem;
 }
 
 .Budget-List-Item-Row-Item-Left {
@@ -270,8 +364,16 @@ p {
   display: none;
   width: 70%;
   padding: 10px;
+  font-size: 1.4rem;
+
+  margin-top: 20px;
+  margin-left: 20px;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
 
   flex-direction: column;
+
 
 }
 
@@ -279,12 +381,28 @@ p {
   display: flex;
   width: 100%;
   justify-content: space-between;
+  align-items: center;
   padding: 5px;
+}
+
+.monthDay-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.transaction-month {
+  font-size: .9rem;
+}
+
+.transaction-day {
+  font-size: .9rem;
 }
 
 .Transactions-List-Row span {
   color: #69757a;
-  font-size: 1.4rem;
+  /* font-size: 1.4rem; */
 }
 
 #myChart {

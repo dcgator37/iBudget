@@ -96,41 +96,51 @@
       <!-- loop through the budget building category boxes -->
       <% budget.category.forEach(function(category, index) { %>
 
-      <div class="container mx-auto" data-cat-name="<%= category.name %>" data-cat="<%= index %>">
+      <div class="container Budget-Container mx-auto" data-cat-name="<%= category.name %>" data-cat="<%= index %>">
         <% if (!category.name) { %>
         <!-- if this is a new category and the name is blank, make the name an input so it can be edited -->
-        <div class="itemHeader">
+        <header class="Category-Header">
+        <!-- <div class="itemHeader"> -->
+          <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
           <input class="cat-label" type="text" name="catName" value="" placeholder="Untitled"></input>
-          <span class="header-column">Planned</span>
-          <span class="header-column">Received</span>
-        </div>
+          <span class="Header-Right">Planned</span>
+          <span class="Header-Right">Received <i class="fas fa-angle-down"></i></span>
+
+        <!-- </div> -->
+        </header>
         <% } else if (category.name === "Income") { %>
         <!-- if the category is Income, make it say Received -->
-        <div class="itemHeader">
-          <span class="header-column"><%= category.name %></span>
-          <span class="header-column">Planned</span>
-
-
-          <span class="header-column">Received</span>
-
-        </div>
+        <!-- <div class="itemHeader"> -->
+        <header class="Category-Header">
+          <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
+          <span class="Header-Left"><%= category.name %></span>
+          <span class="Header-Right">Planned</span>
+          <span class="Header-Right">Received <i class="fas fa-angle-down"></i></span>
+        </header>
+        <!-- </div> -->
         <% } else { %>
         <!-- otherwise make it say Remaining -->
-        <div class="itemHeader">
-          <span class="header-column"><%= category.name %></span>
-          <span class="header-column">Planned</span>
-          <span class="header-column">Remaining</span>
-        </div>
+        <!-- <div class="itemHeader"> -->
+        <header class="Category-Header">
+          <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
+          <span class="Header-Left"><%= category.name %></span>
+          <span class="Header-Right">Planned</span>
+          <span class="Header-Right">Remaining <i class="fas fa-angle-down"></i></span>
+        </header>
+        <!-- </div> -->
         <% } %>
 
         <!-- Loop through each budget item in the category -->
         <% category.items.forEach(function(item, itemIndex) { %>
 
-        <div class="item" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>">
+        <div class="Budget-Row" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>">
           <button type="button" class="btndel" name="button"><i class="far fa-trash-alt"></i></button>
-          <input class="input-label" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
-          <input class="planned-label" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
-          <span class="span-rem" data-value="<%= item.planned - item.sumOfTransactions %>"><%= item.planned - item.sumOfTransactions %></span>
+          <!-- input-label
+          planned-label
+          span-rem -->
+          <input class="Input-Name" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
+          <input class="Input-Planned" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
+          <span class="Budget-Row-Remaining" data-value="<%= item.planned - item.sumOfTransactions %>"><%= item.planned - item.sumOfTransactions %></span>
         </div>
 
         <% }) %>
@@ -144,7 +154,7 @@
       <% }); %>
 
       <!-- add category button -->
-      <div class="container mx-auto">
+      <div class="container Budget-Container mx-auto">
         <button class="itemCategory addCat" type="button" name="button" value="">Add Category</button>
       </div>
 
@@ -207,7 +217,7 @@
       <canvas id="myChart" width="480px" height="360px"></canvas>
       </div>
       <div class='Budget-List-Container'>
-      <div class="Budget-List-Item container">
+      <div class="Budget-List-Item">
         <button id='closeBudgetListItem' style='padding: 0'><i class="far fa-times-circle"></i></button>
         <div class="Budget-List-Item-Row">
           <span id="catName" class="">Housing</span><span class="">Remaining</span>
@@ -234,7 +244,7 @@
         </div>
       </div>
 
-      <div id="Transaction-Container" class="Transactions-List container">
+      <div id="Transaction-Container" class="Transactions-List">
         <div class="Transactions-List-Row">
           <div><span id="numTransactions">1</span><span> Transactions</span></div>
           <button id="addTransaction" style="padding: 0"><i class="fas fa-plus"></i> Add New</button>
