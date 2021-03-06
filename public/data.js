@@ -24,7 +24,7 @@ $(document).ready(function() {
   //listener when clicking off an item to hide item sidebar and re-display the chart
   $(document).click(function(event) {
     var $target = $(event.target);
-    if(!$target.closest('.item').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length) {
+    if(!$target.closest('.item').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length  && !$target.closest('.modal').length) {
       $('.item--selected').removeClass('item--selected');
       $('#myChart').css("display", "block");
       $('.Budget-List-Container').css("display", "none");
@@ -491,6 +491,7 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           console.log(res.labels);
           console.log(res.data);
+
           createChart(res.labels, res.data);
         } else {
           alert('data did not get added');

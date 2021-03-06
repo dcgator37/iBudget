@@ -436,7 +436,7 @@ app.post('/switchmonth', (req, res) => {
       newBudget.user = req.user.username;
       newBudget.month = month;
       newBudget.year = parseInt(req.body.year);
-      newBudget.monthNum = req.body.monthNum;
+      newBudget.monthNum = req.body.button;
 
       newBudget.category = defaultBudget.category;
 
@@ -698,11 +698,11 @@ app.post('/getTransactions', (req, res) => {
   // Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
 
 
-  Budget.find({user: req.user.username, monthNum: priorMonth, year: priorMonthYear, 'category.name': categoryName, 'category.items.name': itemName}, (err, budget) => {
+  Budget.find({user: req.user.username, monthNum: priorMonth, year: priorMonthYear}, 'category', (err, budget) => {
     if (err) {
-      alert(err);
+
     } else if (budget.length) {
-      console.log(budget);
+      console.log("last month's budget" + budget);
       budget[0].category.find( function (el, index, array) {
         if (el.name == categoryName) {
           el.items.find( function (item, index, array) {
