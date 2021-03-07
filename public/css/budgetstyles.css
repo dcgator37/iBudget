@@ -342,12 +342,13 @@ body.monthHeader{
   justify-content: space-between;
   align-items: center;
   padding: 5px;
+  font-size: 1.4rem;
 
 }
 
 .Budget-List-Item-Row span {
     color: #69757a;
-    font-size: 1.4rem;
+
     /* font-weight: 600; */
 }
 

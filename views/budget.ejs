@@ -62,7 +62,7 @@
             <%=budget.month%>
           </button>
         <p>
-          <span id="sumofPlannedAmt"></span>
+          <span id="leftToBudget" data-value=""></span><span id="leftToBudgetText"></span>
         </p>
         </p>
         <div class="collapse" id="collapseExample">
@@ -242,6 +242,9 @@
         </div>
         <div class="Budget-List-Item-Row dueDate">
           <span id="dueDate">Set Due Date</span><i class="fas fa-angle-down"></i>
+        </div>
+        <div class="Budget-List-Item-Row">
+          <button id="setPlannedOnBudget" style="padding: 0"><i class="fas fa-plus"></i> Set Planned On Budget</button>
         </div>
       </div>
 

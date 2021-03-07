@@ -254,6 +254,17 @@ $(document).ready(function() {
     });
   });
 
+  $(document).on('click', '#setPlannedOnBudget', function() {
+    const el = $('.item--selected');
+    const plannedAmt = parseInt(el.children('.Input-Planned').attr('data-value'));
+    const leftToBudget = parseInt($('#leftToBudget').attr('data-value'));
+    const newPlanned = plannedAmt + leftToBudget;
+    
+    el.children('.Input-Planned').val(newPlanned);
+    el.children('.Input-Planned').change();
+
+  });
+
 
   // Add category button click event. Sends post request to server.
   // The server adds the new blank category to the database and responds with the index of the new category. When the server responds, run
@@ -659,25 +670,50 @@ $(document).ready(function() {
       if(index>0){
         sumofPlannedAmt = sumofPlannedAmt + plannedAmt;
       }
-    })
+    });
 
     if(sumofPlannedAmt ==  income){
-      $('#sumofPlannedAmt').text("You are on budget");
-      $('#sumofPlannedAmt').addClass("on-buget");
+      //if on budget, remove the span with the value
+      $('#leftToBudget').remove();
+      $('#leftToBudgetText').text("You are on budget");
+      //remove prior css class before adding new one
+      $('#leftToBudgetText').removeClass();
+      $('#leftToBudgetText').addClass("on-buget");
     }
     else if(sumofPlannedAmt < income){
-      $('#sumofPlannedAmt').text((income - sumofPlannedAmt)+ " left to budget");
-      $('#sumofPlannedAmt').addClass("left-to-buget");
-      //$('#sumofPlannedAmt').toNumber().formatCurrency();
+      //if the leftToBudget value span is missing, add it
+      if (!$('#leftToBudget').length) {
+        $('#leftToBudgetText').before('<span id="leftToBudget" data-value=""></span>');
+      }
+
+      $('#leftToBudget').text(income - sumofPlannedAmt);
+      $('#leftToBudget').attr('data-value', income - sumofPlannedAmt);
+      $('#leftToBudgetText').text(" left to budget");
+      //remove prior css classes before adding new ones
+      $('#leftToBudget').removeClass();
+      $('#leftToBudgetText').removeClass();
+      $('#leftToBudget').addClass("left-to-buget");
+      $('#leftToBudgetText').addClass("left-to-buget");
     }
     else if (sumofPlannedAmt > income){
-      $('#sumofPlannedAmt').text((sumofPlannedAmt - income)+ " over budget");
-      $('#sumofPlannedAmt').addClass("over-buget");
-    }
-  }
-  //$('#sumofPlannedAmt').text(income - sumofPlannedAmt);
-//  $(‘#sumofPlannedAmt').toNumber().formatCurrency();
+      //if the leftToBudget value span is missing, add it
+      if (!$('#leftToBudget').length) {
+        $('#leftToBudgetText').before('<span id="leftToBudget" data-value=""></span>');
+      }
 
+      $('#leftToBudget').text(sumofPlannedAmt - income);
+      //if over budget, set data-value to negative number
+      $('#leftToBudget').attr('data-value', (sumofPlannedAmt - income) * -1);
+      $('#leftToBudgetText').text(" over budget");
+      //remove prior css classes before adding new one
+      $('#leftToBudget').removeClass();
+      $('#leftToBudgetText').removeClass();
+      $('#leftToBudget').addClass("over-buget");
+      $('#leftToBudgetText').addClass("over-buget");
+    }
+
+    $('#leftToBudget').toNumber().formatCurrency();
+  }
 
   function deleteCatFromChart(index) {
 
