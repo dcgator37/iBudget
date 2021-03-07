@@ -208,6 +208,20 @@ body.monthHeader{
 
 }
 
+.on-buget{
+  color:green;
+  font-size: 1em;
+
+}
+.left-to-buget{
+  color:black;
+  font-size: 1em;
+}
+.over-buget{
+  color:red;
+  font-size: 1em;
+}
+
 
 
 .input-label {

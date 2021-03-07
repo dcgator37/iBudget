@@ -440,6 +440,7 @@ $(document).ready(function() {
       success: function(res) {
         if (res.msg == 'success') {
           updateChartLabels(index, name);
+
           convertCat(el, name);
           //need to update chart since a category was added or the name changed. use the index.
 
@@ -587,8 +588,8 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           console.log(res.labels);
           console.log(res.data);
-
           createChart(res.labels, res.data);
+          budgetRemaining(res.data);
         } else {
           alert('data did not get added');
         }
@@ -639,6 +640,8 @@ $(document).ready(function() {
 
     myChart.config.data.datasets[0].data[index] = newCatSum;
     myChart.update();
+    const data = myChart.config.data.datasets[0].data;
+    budgetRemaining(data);
   }
 
   function updateChartLabels(index, name) {
@@ -646,8 +649,35 @@ $(document).ready(function() {
       myChart.data.labels[index] = name;
       myChart.update();
     }
-
   }
+  // function to determine if the user is over budget, under budget or on budget
+  function budgetRemaining(data){
+    const income = data[0];
+    var sumofPlannedAmt = 0;
+
+    data.forEach(function(plannedAmt, index){
+      if(index>0){
+        sumofPlannedAmt = sumofPlannedAmt + plannedAmt;
+      }
+    })
+
+    if(sumofPlannedAmt ==  income){
+      $('#sumofPlannedAmt').text("You are on budget");
+      $('#sumofPlannedAmt').addClass("on-buget");
+    }
+    else if(sumofPlannedAmt < income){
+      $('#sumofPlannedAmt').text((income - sumofPlannedAmt)+ " left to budget");
+      $('#sumofPlannedAmt').addClass("left-to-buget");
+      //$('#sumofPlannedAmt').toNumber().formatCurrency();
+    }
+    else if (sumofPlannedAmt > income){
+      $('#sumofPlannedAmt').text((sumofPlannedAmt - income)+ " over budget");
+      $('#sumofPlannedAmt').addClass("over-buget");
+    }
+  }
+  //$('#sumofPlannedAmt').text(income - sumofPlannedAmt);
+//  $(‘#sumofPlannedAmt').toNumber().formatCurrency();
+
 
   function deleteCatFromChart(index) {
 
