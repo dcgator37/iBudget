@@ -423,3 +423,20 @@ body.monthHeader{
 #myChart {
   position: fixed;
 }
+
+.modal-header {
+  background-color: #0091d9;
+  color: white;
+}
+
+.modalFooterContent {
+  margin: auto;
+}
+
+#transactionModalAmt {
+  text-align: center;
+}
+
+#transactionModalDate, #transactionModalMerchant {
+  text-align: left;
+}
