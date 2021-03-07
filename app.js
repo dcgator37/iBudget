@@ -133,6 +133,11 @@ const defaultBudget = new Budget({
           name: "Emergency Fund",
           planned: 0,
           sumOfTransactions: 0
+        },
+        {
+          name: "Savings",
+          planned: 0,
+          sumOfTransactions: 0
         }
       ]
     },
@@ -692,6 +697,10 @@ app.post('/addTransaction', (req, res) => {
 
   //send the sum back to the client so it can do the math and update the remaining span and data-value attribute
   res.json({msg: 'success', sum: sum});
+});
+
+app.post('/testmodalpost', (req, res) => {
+  
 });
 
 app.post('/getTransactions', (req, res) => {

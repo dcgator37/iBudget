@@ -254,12 +254,45 @@ $(document).ready(function() {
     });
   });
 
+  $(document).on('click', '#testTransaction', function() {
+
+    const today = new Date().toISOString().substring(0, 10);
+    $('#transactionModalDate').val(today);
+
+    // this is the click event for the Test button that opens the modal
+
+    // you have to get the values from the budget details sidebar to fill in the modal
+    // merchant input is the same as the budget item
+    // item span is also the budget item.
+
+    // budget details sidebar
+    // id="itemName"
+
+    // modal
+    // id="transactionModalMerchant"
+    // id="transactionModalItem"
+
+    // spans are changed by using .text()
+    // inputs by .val()
+
+    // look at my example above with transactionModalDate. # means id=
+    // make some const variables for the budget details sidebar
+    // assign the variables to modal elements
+
+    // we'll use the red stopsign thing if we want to assign to a different budget item and
+    // we'll use your form select that I commented out. Good job!
+
+
+
+
+  });
+
   $(document).on('click', '#setPlannedOnBudget', function() {
     const el = $('.item--selected');
     const plannedAmt = parseInt(el.children('.Input-Planned').attr('data-value'));
     const leftToBudget = parseInt($('#leftToBudget').attr('data-value'));
     const newPlanned = plannedAmt + leftToBudget;
-    
+
     el.children('.Input-Planned').val(newPlanned);
     el.children('.Input-Planned').change();
 
