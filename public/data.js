@@ -708,7 +708,7 @@ $(document).ready(function() {
     if(sumofPlannedAmt ==  income){
       //if on budget, remove the span with the value
       $('#leftToBudget').remove();
-      $('#leftToBudgetText').text("You are on budget");
+      $('#leftToBudgetText').text("You are on budget!");
       //remove prior css class before adding new one
       $('#leftToBudgetText').removeClass();
       $('#leftToBudgetText').addClass("on-buget");

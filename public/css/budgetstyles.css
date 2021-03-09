@@ -28,6 +28,7 @@ button {
 
 p {
   padding: 0 5px;
+
 }
 
 input {
@@ -55,6 +56,12 @@ input:last-child {
 }
 
 /* ******************* Main Budget Styling *************************** */
+.col-lg-6 {
+    flex: 0 0 auto;
+    width: 50%;
+    margin-top: 6.6rem;
+
+}
 
 .Budget-Container {
   background: white;
@@ -128,17 +135,26 @@ input:last-child {
 }
 
   /* the header column */
-body.monthHeader{
-  background: white;
-  margin: 20px;
-  max-width: 700px;
+.monthHeader{
+
+  /* margin: 20px; */
+  /* max-width: 700px; */
   /* max-width: 480px; */
-  border-radius: 5px;
-  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
-  padding: 0;
+   /* border-radius: 5px; */
+  /* box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3); */
+  padding: 1.2rem 0;
   position: fixed;
+  top: 0;
+  z-index: 5;
+  background-color: #f5f7f8;
+
+  width: 50%;
+  height: 13%;
+  border-bottom: .1rem solid #b6bec2
 
 }
+
+
 
 .item {
   border-bottom: 1px solid #F1F1F1;
