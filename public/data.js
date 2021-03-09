@@ -259,6 +259,9 @@ $(document).ready(function() {
     const today = new Date().toISOString().substring(0, 10);
     $('#transactionModalDate').val(today);
 
+    $('#modalRemoveItem').css("display", "block");
+    $('#modalItemDropdown').css("display", "none");
+
     // this is the click event for the Test button that opens the modal
 
     // you have to get the values from the budget details sidebar to fill in the modal
@@ -285,6 +288,56 @@ $(document).ready(function() {
 
 
 
+  });
+
+  $('#transactionForm').on('submit', function(e) {
+    e.preventDefault();
+    const dropdown = $('#modalItemSelect');
+    const index = dropdown.find('option:selected').data('cat');
+    const itemIndex = dropdown.find('option:selected').data('item');
+    console.log('do stuff to submit the form to the backend');
+    console.log($('#modalItemSelect').val());
+    console.log(index);
+    console.log(itemIndex);
+  });
+
+  $(document).on('click', '.fa-minus-circle', function() {
+    const el = $('#modalItemSelect');
+    var html = '';
+    var index = 0;
+    var itemIndex = 0;
+    var name = '';
+
+    //empty the item dropdown of all options
+    $(el).empty();
+
+    //hide the default item and show the dropdown
+    $("#modalRemoveItem").css("display", "none");
+    $('#modalItemDropdown').css("display", "block");
+
+    html = "<option selected>Choose Budget Item(s)</option>";
+
+    //loop through the budget containers, getting the array index for the category and the name
+    //build the disabled category option html
+    $('.Budget-Container').each(function() {
+      index = $(this).data('cat');
+      name = $(this).data('catName');
+      html += "<option disabled='true' class='select-disabled' data-cat=" + index + ">" + name + "</option>";
+
+      // loop through the item rows, getting the item index and name
+      $(this).children('.Budget-Row').each(function() {
+        itemIndex = $(this).data('item');
+
+        //access the input with the name of the item. build the option html
+        $(this).children('.Input-Name').each(function() {
+          name = $(this).val();
+          html += "<option data-cat=" + index + " data-item=" + itemIndex + ">" + name + "</option>";
+        });
+      });
+    });
+
+    //append the options html
+    $(el).append(html);
   });
 
   $(document).on('click', '#setPlannedOnBudget', function() {

@@ -66,6 +66,16 @@ input:last-child {
   margin-left: 5rem;
 }
 
+.Category-Button {
+  background: white;
+  width: 50rem;
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  padding: 0 10px;
+  margin: 20px 0;
+  margin-left: 5rem;
+}
+
 .Category-Header {
   display: flex;
   align-items: center;
@@ -424,9 +434,16 @@ body.monthHeader{
   position: fixed;
 }
 
+/*--------------------------Modal--------------------------------*/
+
 .modal-header {
   background-color: #0091d9;
   color: white;
+}
+
+.select-disabled {
+  color: blue;
+  font-weight: bold;
 }
 
 .modalFooterContent {
