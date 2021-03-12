@@ -12,6 +12,7 @@
   <script src="https://kit.fontawesome.com/0edefc6157.js" crossorigin="anonymous"></script>
   <script src="/jquery/jquery.js"></script>
   <script src="https://unpkg.com/@mongodb-js/charts-embed-dom"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
   <script type="text/javascript" src="/data.js"></script>
 
   <!-- <script type="text/javascript" src="/js/jquery.formatCurrency-1.4.0.js"></script> -->
@@ -153,11 +154,11 @@
 
           <input class="Input-Name" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
           <input class="Input-Planned" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
-          <span class="Budget-Row-Remaining" data-value="<%= item.planned - item.sumOfTransactions %>"><%= item.planned - item.sumOfTransactions %></span>
-
+          <span class="Budget-Row-Remaining" data-value="<%= (item.planned - item.sumOfTransactions).toFixed(2) %>"><%= (item.planned - item.sumOfTransactions).toFixed(2) %></span>
+          
         </div>
-        <div class="progress" style="height: 1px;">
-          <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress Budget-Row-Progress">
+          <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
 
         <% }) %>
@@ -224,16 +225,16 @@
 
               <form id="transactionForm" class="row">
               <div class="transactionModalInput col-12 my-2">
-                <input type="text" name="modalAmt" placeholder="$0.00" id="transactionModalAmt" class= "form-control"required>
+                <input type="text" name="modalAmt" placeholder="$0.00" id="transactionModalAmt" data-value="" class= "form-control"required>
               </div>
               <div class="col-4 my-2">
                 <input type="date" name="modalDate" value="" id="transactionModalDate" class="transactionModalInput form-control">
               </div>
               <div class="col-8 my-2">
-                <input type="text" name="modalMerchant" value="Church" placeholder="" id="transactionModalMerchant" class="transactionModalInput form-control">
+                <input type="text" name="modalMerchant" value="Church" placeholder="" id="transactionModalMerchant" class="transactionModalInput form-control" onclick="this.select()">
               </div>
               <div class="col-12 my-2" id="modalRemoveItem">
-                <i class="fas fa-minus-circle" style="color: red"></i><span id="" class="" name="modalItem"> Church</span>
+                <i class="fas fa-minus-circle" style="color: red"></i><span id="modalItem" class="" name="modalItem"></span>
               </div>
               <div class="col-12 my-2" id="modalItemDropdown" style="display: none">
                 <select id="modalItemSelect" class="transactionModalInput form-control form-select">
@@ -264,6 +265,7 @@
       <div class="chart-container">
       <canvas id="myChart" width="480px" height="360px"></canvas>
       </div>
+
       <div class='Budget-List-Container'>
       <div class="Budget-List-Item">
         <button id='closeBudgetListItem' style='padding: 0'><i class="far fa-times-circle"></i></button>
@@ -275,11 +277,11 @@
         </div>
 
           <div class="progress Budget-List-Item-Progress">
-            <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar bg-success" id="budgetSideBarProgress" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
 
         <div class="Budget-List-Item-Row">
-          <div><span id="spent">$0.00</span><span> spent</span></div>
+          <div><span id="spent" data-value=''>$0.00</span><span> spent</span></div>
         </div>
         <div class="Budget-List-Item-Row">
           <span id="lastMonth">Last Month</span><span id="last-Month-Val">-$200.00</span>
@@ -291,15 +293,18 @@
           <span id="dueDate">Set Due Date</span><i class="fas fa-angle-down"></i>
         </div>
         <div class="Budget-List-Item-Row">
-          <button id="setPlannedOnBudget" style="padding: 0"><i class="fas fa-plus"></i> Set Planned On Budget</button>
+          <button id="setPlannedOnBudget" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Be On Budget</button>
+        </div>
+        <div class="Budget-List-Item-Row">
+          <button id="setPlannedToSpent" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Spent</button>
         </div>
       </div>
 
       <div id="Transaction-Container" class="Transactions-List">
         <div class="Transactions-List-Row">
           <div><span id="numTransactions">1</span><span> Transactions</span></div>
-          <button id="addTransaction" style="padding: 0"><i class="fas fa-plus"></i> Add New</button>
-          <button id="testTransaction" data-bs-toggle="modal" data-bs-target="#transactionModal"></i> Test</button>
+          <!-- <button id="addTransaction" style="padding: 0"><i class="fas fa-plus"></i> Add New</button> -->
+          <button id="testTransaction" data-bs-toggle="modal" data-bs-target="#transactionModal"><i class="fas fa-plus"></i> Add New</button>
         </div>
 
         <!-- <div class="Transactions-List-Row">

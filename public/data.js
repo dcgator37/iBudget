@@ -17,6 +17,9 @@ $(document).ready(function() {
   //load budget data from db and create the chart with it
   getChartData();
 
+  //update budget progressbar
+  loadProgressBar();
+
   //format all the values on the site as currency
   $('.Input-Planned').toNumber().formatCurrency();
   $('.Budget-Row-Remaining').toNumber().formatCurrency();
@@ -45,9 +48,9 @@ $(document).ready(function() {
     }
   });
 
-  $(document).on('click', '.Budget-Row', function(e) {
+  //*****************************************************Main Budget****************************************************************************
 
-    console.log('click event for budget row');
+  $(document).on('click', '.Budget-Row', function(e) {
 
     const index = $(this).parent().attr('data-cat');
     const itemIndex = $(this).attr('data-item');
@@ -67,16 +70,15 @@ $(document).ready(function() {
     //Add the my-list--selected class to the clicked element
     $(this).addClass('item--selected');
 
-
-
     //set the values from the clicked item for the sidebar spans and progress bar
     $('#catName').text(categoryName);
     $('#itemName').text(itemName);
     $('#remaining').text(remaining);
     $('#spent').text(spent);
+    $('#spent').attr('data-value', spent);
     $('#spent').toNumber().formatCurrency();
-    $('.progress-bar').css('width', progressAmt + '%');
-    $('.progress-bar').attr('aria-valuenow', progressAmt);
+    $('#budgetSideBarProgress').css('width', progressAmt + '%');
+    $('#budgetSideBarProgress').attr('aria-valuenow', progressAmt);
 
     //remove all elements of the transaction container except the first one
     $('#Transaction-Container').children('.Transactions-List-Row').slice(1).remove();
@@ -132,15 +134,6 @@ $(document).ready(function() {
     convertCatToInput(el, name);
   });
 
-
-
-  $(document).on('click', '#closeBudgetListItem', function() {
-    $('.Transactions-List').css("display", "none");
-    $('.Budget-List-Item').css("display", "none");
-
-    $('#myChart').css("display", "block");
-  });
-
   // Add item button click event. Sends post request to server, sending the index of the category array you're adding an item to.
   // The server adds the new blank item to the database and responds with the index of the new item. When the server responds, run
   // addItem function which appends new item html with the itemIndex
@@ -167,190 +160,6 @@ $(document).ready(function() {
       }
     });
   });
-
-  // type: String,
-  // amt: Number,
-  // date: Date,
-  // merchant: String,
-  // notes: String,
-
-
-  // Add transaction button click event. Sends post request to server, sending the transaction data.
-  //
-  $(document).on('click', 'button.addTransaction', function() {
-    // var index = $(this).parent().attr('data-cat');
-    // var itemIndex = $(this).attr('data-item');
-
-    const itemIndex = $('.item--selected').attr('data-item');
-    const index = $('.item--selected').parent().attr('data-cat');
-    const el = $('.item--selected');
-
-    // index = 5;
-    // itemIndex = 0;
-
-    $.ajax({
-      url: '/addTransaction',
-      method: 'post',
-      dataType: 'json',
-      data: {
-        'type': 'Expense',
-        'amt': 25,
-        'date': new Date(),
-        'merchant': 'test merchant',
-        'notes': 'test',
-        'index': index,
-        'itemIndex': itemIndex
-      },
-      success: function(res) {
-        if (res.msg == 'success') {
-          console.log('Success');
-          updateRemaining(el, res.sum);
-        } else {
-          alert('data did not get added');
-        }
-      },
-      error: function(res) {
-        alert('server error occurred');
-      }
-    });
-  });
-
-  $(document).on('click', '#addTransaction', function() {
-    // var index = $(this).parent().attr('data-cat');
-    // var itemIndex = $(this).attr('data-item');
-
-    const itemIndex = $('.item--selected').attr('data-item');
-    const index = $('.item--selected').parent().attr('data-cat');
-    const el = $('.item--selected');
-    const amt = 25;
-    const merchant = 'test';
-
-    $.ajax({
-      url: '/addTransaction',
-      method: 'post',
-      dataType: 'json',
-      data: {
-        'type': 'Expense',
-        'amt': amt,
-        'date': new Date(),
-        'merchant': merchant,
-        'notes': 'test',
-        'index': index,
-        'itemIndex': itemIndex
-      },
-      success: function(res) {
-        if (res.msg == 'success') {
-          console.log('Success');
-          updateRemaining(el, res.sum);
-          updateBudgetListItem(el);
-          addTransactionList(merchant, amt);
-        } else {
-          alert('data did not get added');
-        }
-      },
-      error: function(res) {
-        alert('server error occurred');
-      }
-    });
-  });
-
-  $(document).on('click', '#testTransaction', function() {
-
-    const today = new Date().toISOString().substring(0, 10);
-    $('#transactionModalDate').val(today);
-
-    $('#modalRemoveItem').css("display", "block");
-    $('#modalItemDropdown').css("display", "none");
-
-    // this is the click event for the Test button that opens the modal
-
-    // you have to get the values from the budget details sidebar to fill in the modal
-    // merchant input is the same as the budget item
-    // item span is also the budget item.
-
-    // budget details sidebar
-    // id="itemName"
-
-    // modal
-    // id="transactionModalMerchant"
-    // id="transactionModalItem"
-
-    // spans are changed by using .text()
-    // inputs by .val()
-
-    // look at my example above with transactionModalDate. # means id=
-    // make some const variables for the budget details sidebar
-    // assign the variables to modal elements
-
-    // we'll use the red stopsign thing if we want to assign to a different budget item and
-    // we'll use your form select that I commented out. Good job!
-
-
-
-
-  });
-
-  $('#transactionForm').on('submit', function(e) {
-    e.preventDefault();
-    const dropdown = $('#modalItemSelect');
-    const index = dropdown.find('option:selected').data('cat');
-    const itemIndex = dropdown.find('option:selected').data('item');
-    console.log('do stuff to submit the form to the backend');
-    console.log($('#modalItemSelect').val());
-    console.log(index);
-    console.log(itemIndex);
-  });
-
-  $(document).on('click', '.fa-minus-circle', function() {
-    const el = $('#modalItemSelect');
-    var html = '';
-    var index = 0;
-    var itemIndex = 0;
-    var name = '';
-
-    //empty the item dropdown of all options
-    $(el).empty();
-
-    //hide the default item and show the dropdown
-    $("#modalRemoveItem").css("display", "none");
-    $('#modalItemDropdown').css("display", "block");
-
-    html = "<option selected>Choose Budget Item(s)</option>";
-
-    //loop through the budget containers, getting the array index for the category and the name
-    //build the disabled category option html
-    $('.Budget-Container').each(function() {
-      index = $(this).data('cat');
-      name = $(this).data('catName');
-      html += "<option disabled='true' class='select-disabled' data-cat=" + index + ">" + name + "</option>";
-
-      // loop through the item rows, getting the item index and name
-      $(this).children('.Budget-Row').each(function() {
-        itemIndex = $(this).data('item');
-
-        //access the input with the name of the item. build the option html
-        $(this).children('.Input-Name').each(function() {
-          name = $(this).val();
-          html += "<option data-cat=" + index + " data-item=" + itemIndex + ">" + name + "</option>";
-        });
-      });
-    });
-
-    //append the options html
-    $(el).append(html);
-  });
-
-  $(document).on('click', '#setPlannedOnBudget', function() {
-    const el = $('.item--selected');
-    const plannedAmt = parseInt(el.children('.Input-Planned').attr('data-value'));
-    const leftToBudget = parseInt($('#leftToBudget').attr('data-value'));
-    const newPlanned = plannedAmt + leftToBudget;
-
-    el.children('.Input-Planned').val(newPlanned);
-    el.children('.Input-Planned').change();
-
-  });
-
 
   // Add category button click event. Sends post request to server.
   // The server adds the new blank category to the database and responds with the index of the new category. When the server responds, run
@@ -433,8 +242,6 @@ $(document).ready(function() {
     });
   });
 
-
-
   // Edit item name event. Sends put request to server with category index, itemIndex, and name.
   // The server edits the item in the database and responds with success. When the server responds, do nothing since the input is already edited
   $(document).on('change', '.Input-Name', function() {
@@ -504,6 +311,7 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           //function to update remaining value
           updateRemaining(el, res.sum);
+          updateProgressBar(el);
           updateChart(index, res.newCatSum);
           updateBudgetListItem(el);
         } else {
@@ -553,6 +361,255 @@ $(document).ready(function() {
 
 
 
+  ////*****************************************************Budget Item Sidebar****************************************************************************
+
+  $(document).on('click', '#closeBudgetListItem', function() {
+    $('.Transactions-List').css("display", "none");
+    $('.Budget-List-Item').css("display", "none");
+
+    $('#myChart').css("display", "block");
+  });
+
+  $(document).on('click', '#setPlannedOnBudget', function() {
+    const el = $('.item--selected');
+    const plannedAmt = parseFloat(el.children('.Input-Planned').attr('data-value'));
+    const leftToBudget = parseFloat($('#leftToBudget').attr('data-value'));
+    const newPlanned = plannedAmt + leftToBudget;
+
+    el.children('.Input-Planned').val(newPlanned);
+    el.children('.Input-Planned').change();
+
+  });
+
+  $(document).on('click', '#setPlannedToSpent', function() {
+    const el = $('.item--selected');
+    const spent = $('#spent').attr('data-value');
+
+    el.children('.Input-Planned').val(spent);
+    el.children('.Input-Planned').change();
+
+  });
+
+  ////*****************************************************Modal Popup****************************************************************************
+
+  $(document).on('click', '#testTransaction', function() {
+
+    const today = moment().format('YYYY-MM-DD');
+    const itemIndex = $('.item--selected').attr('data-item');
+    const index = $('.item--selected').parent().attr('data-cat');
+    const item = $('#itemName').text();
+
+    //reset amt
+    $('#transactionModalAmt').val('');
+    $('#transactionModalAmt').attr('data-value', '');
+
+    //set date picker to today
+    $('#transactionModalDate').val(today);
+
+    //display item span and hide dropdown
+    $('#modalRemoveItem').css("display", "block");
+    $('#modalItemDropdown').css("display", "none");
+
+    //set merchant and item
+    $('#transactionModalMerchant').val(item);
+    $('#modalItem').text(item);
+
+  });
+
+  $('#transactionForm').on('submit', function(e) {
+    e.preventDefault();
+    const dropdown = $('#modalItemSelect');
+    var el = $('.item--selected');
+
+    var index;
+    var itemIndex;
+    var budgetItem;
+    var budgetContainer;
+    const amtDB = $('#transactionModalAmt').data('value');
+    const merchant = $('#transactionModalMerchant').val();
+    const notes = $('#transactionModalNote').val();
+    const date = $('#transactionModalDate').val();
+
+    if ($('#modalRemoveItem').is(":visible")) {
+      // console.log('modal remove is visible');
+      index = $('.item--selected').parent().attr('data-cat');
+      itemIndex = $('.item--selected').attr('data-item');
+      budgetItem = $('#modalItem').text();
+
+    } else {
+      // console.log('dropdown is visible');
+      index = dropdown.find('option:selected').data('cat');
+      itemIndex = dropdown.find('option:selected').data('item');
+      budgetItem = dropdown.find('option:selected').val();
+
+      budgetContainer = $(document).find("div.Budget-Container[data-cat='" + index + "']");
+      el = budgetContainer.find("div.Budget-Row[data-item='"+ itemIndex + "']");
+
+    }
+
+    $.ajax({
+      url: '/addTransaction',
+      method: 'post',
+      dataType: 'json',
+      data: {
+        'type': 'Expense',
+        'amt': amtDB,
+        'date': date,
+        'merchant': merchant,
+        'notes': notes,
+        'index': index,
+        'itemIndex': itemIndex
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          console.log('Success');
+          updateRemaining(el, res.sum);
+          updateProgressBar(el);
+          if ($('#modalRemoveItem').is(":visible")) {
+            updateBudgetListItem(el);
+            addTransactionList(merchant, amtDB, date);
+          }
+          $('#transactionModal').modal('hide');
+        } else {
+          alert('data did not get added');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+  });
+
+  $(document).on('click', '.fa-minus-circle', function() {
+    const el = $('#modalItemSelect');
+    var html = '';
+    var index = 0;
+    var itemIndex = 0;
+    var name = '';
+
+    //empty the item dropdown of all options
+    $(el).empty();
+
+    //hide the default item and show the dropdown
+    $("#modalRemoveItem").css("display", "none");
+    $('#modalItemDropdown').css("display", "block");
+
+    html = "<option selected>Choose Budget Item(s)</option>";
+
+    //loop through the budget containers, getting the array index for the category and the name
+    //build the disabled category option html
+    $('.Budget-Container').each(function() {
+      index = $(this).data('cat');
+      name = $(this).data('catName');
+      html += "<option disabled='true' class='select-disabled' data-cat=" + index + ">" + name + "</option>";
+
+      // loop through the item rows, getting the item index and name
+      $(this).children('.Budget-Row').each(function() {
+        itemIndex = $(this).data('item');
+
+        //access the input with the name of the item. build the option html
+        $(this).children('.Input-Name').each(function() {
+          name = $(this).val();
+          html += "<option value='" + name + "' data-cat=" + index + " data-item=" + itemIndex + ">" + name + "</option>";
+        });
+      });
+    });
+
+    //append the options html
+    $(el).append(html);
+  });
+
+  $(document).on('change', '#transactionModalAmt', function() {
+    var amtDB = parseFloat($('#transactionModalAmt').val()).toFixed(2);   //change the value entered to two decimal places
+    $('#transactionModalAmt').attr('data-value', amtDB);
+    $('#transactionModalAmt').toNumber().formatCurrency();
+  });
+
+  $(document).on('change', '#modalItemSelect', function() {
+
+    const item = $(this).find('option:selected').val();
+    $('#transactionModalMerchant').val(item);
+  });
+
+  // Add transaction button click event. Sends post request to server, sending the transaction data.
+  //
+  // $(document).on('click', 'button.addTransaction', function() {
+  //   // var index = $(this).parent().attr('data-cat');
+  //   // var itemIndex = $(this).attr('data-item');
+  //
+  //   const itemIndex = $('.item--selected').attr('data-item');
+  //   const index = $('.item--selected').parent().attr('data-cat');
+  //   const el = $('.item--selected');
+  //
+  //   // index = 5;
+  //   // itemIndex = 0;
+  //
+  //   $.ajax({
+  //     url: '/addTransaction',
+  //     method: 'post',
+  //     dataType: 'json',
+  //     data: {
+  //       'type': 'Expense',
+  //       'amt': 25,
+  //       'date': new Date(),
+  //       'merchant': 'test merchant',
+  //       'notes': 'test',
+  //       'index': index,
+  //       'itemIndex': itemIndex
+  //     },
+  //     success: function(res) {
+  //       if (res.msg == 'success') {
+  //         console.log('Success');
+  //         updateRemaining(el, res.sum);
+  //       } else {
+  //         alert('data did not get added');
+  //       }
+  //     },
+  //     error: function(res) {
+  //       alert('server error occurred');
+  //     }
+  //   });
+  // });
+
+  // $(document).on('click', '#addTransaction', function() {
+  //   // var index = $(this).parent().attr('data-cat');
+  //   // var itemIndex = $(this).attr('data-item');
+  //
+  //   const itemIndex = $('.item--selected').attr('data-item');
+  //   const index = $('.item--selected').parent().attr('data-cat');
+  //   const el = $('.item--selected');
+  //   const amt = 25;
+  //   const merchant = 'test';
+  //
+  //   $.ajax({
+  //     url: '/addTransaction',
+  //     method: 'post',
+  //     dataType: 'json',
+  //     data: {
+  //       'type': 'Expense',
+  //       'amt': amt,
+  //       'date': new Date(),
+  //       'merchant': merchant,
+  //       'notes': 'test',
+  //       'index': index,
+  //       'itemIndex': itemIndex
+  //     },
+  //     success: function(res) {
+  //       if (res.msg == 'success') {
+  //         console.log('Success');
+  //         updateRemaining(el, res.sum);
+  //         updateBudgetListItem(el);
+  //         addTransactionList(merchant, amt);
+  //       } else {
+  //         alert('data did not get added');
+  //       }
+  //     },
+  //     error: function(res) {
+  //       alert('server error occurred');
+  //     }
+  //   });
+  // });
+
   //function to add item html
   function addItem(el, data) {
     const item = "<div class='Budget-Row' onmouseover='dosomething(this)' onmouseout='dothat(this)' onclick='clickItem(this)' data-item='" + data.itemIndex + "'>" +
@@ -586,29 +643,76 @@ $(document).ready(function() {
     $(el).remove();
   }
 
+  //converts the category back to input when clicking on it
   function convertCatToInput(el, name) {
     $(el).before("<input class='cat-label --selected--' type='text' name='catName' value='"+ name + "' placeholder=''></input>");
     $(el).remove();
   }
 
+  //update the Remaining to spend span next to planned
   function updateRemaining(el, sum) {
-    console.log('data-value from label: ' + $(el).children('.Input-Planned').attr('data-value'));
-    console.log('value from label before edit: ' + $(el).children('.Input-Planned').val());
+    // console.log('data-value from label: ' + $(el).children('.Input-Planned').attr('data-value'));
+    // console.log('value from label before edit: ' + $(el).children('.Input-Planned').val());
 
     // get the planned amt from the html data element
     plannedAmt = $(el).children('.Input-Planned').attr('data-value');
-    console.log('value from label: ' + plannedAmt);
+    // console.log('value from label: ' + plannedAmt);
+    // console.log(sum);
 
     //set the text of the remaining span; planned amount - all the transactions for the item
-    $(el).children('span').text(plannedAmt - sum);
+    $(el).children('span').text((plannedAmt - sum).toFixed(2));
 
     //set the data-value for remaining
-    $(el).children('span').attr('data-value', plannedAmt - sum );
+    $(el).children('span').attr('data-value', (plannedAmt - sum).toFixed(2) );
 
     //format the span remaining as currency
     $(el).children('span').formatCurrency();
   }
 
+  function loadProgressBar() {
+    const el = $('.Budget-Row');
+    var planned;
+    var remaining;
+    var progressAmt;
+    var progressBar;
+
+    $('.Budget-Row').each(function() {
+      planned = $(this).children('.Input-Planned').attr('data-value');
+      remaining = $(this).children('.Budget-Row-Remaining').attr('data-value');
+      progressAmt = ((planned - remaining) / planned * 100).toFixed(1);
+      if (isNaN(progressAmt)) {
+        progressAmt = 0;
+      }
+
+      if (remaining < 0) {
+        $(this).next().children('.progress-bar').removeClass('bg-success');
+        $(this).next().children('.progress-bar').addClass('bg-danger');
+      }
+      $(this).next().children('.progress-bar').css('width', progressAmt + '%');
+      $(this).next().children('.progress-bar').attr('aria-valuenow', progressAmt);
+    });
+  }
+
+  function updateProgressBar(el) {
+    const planned = $(el).children('.Input-Planned').attr('data-value');
+    const remaining = $(el).children('.Budget-Row-Remaining').attr('data-value');
+    const progressAmt = ((planned - remaining) / planned * 100).toFixed(1);
+
+    $(el).next().children('.progress-bar').removeClass('bg-success');
+    $(el).next().children('.progress-bar').removeClass('bg-danger');
+
+    if (remaining < 0) {
+      $(el).next().children('.progress-bar').addClass('bg-danger');
+    } else {
+      $(el).next().children('.progress-bar').addClass('bg-success');
+    }
+
+    $(el).next().children('.progress-bar').css('width', progressAmt + '%');
+    $(el).next().children('.progress-bar').attr('aria-valuenow', progressAmt);
+
+  }
+
+  //after clicking on an item row, add in all the data to the budget sidebar
   function updateBudgetListItem(el) {
     const remaining = $(el).children('.Budget-Row-Remaining').text();
     const spent = $(el).children('.Input-Planned').attr('data-value') - $(el).children('.Budget-Row-Remaining').attr('data-value');
@@ -620,16 +724,16 @@ $(document).ready(function() {
     $('#itemName').text(name);
     $('#remaining').text(remaining);
     $('#spent').text(spent);
+    $('#spent').attr('data-value', spent);
+
     $('#spent').toNumber().formatCurrency();
-    $('.progress-bar').css('width', progressAmt + '%');
-    $('.progress-bar').attr('aria-valuenow', progressAmt);
+    $('#budgetSideBarProgress').css('width', progressAmt + '%');
+    $('#budgetSideBarProgress').attr('aria-valuenow', progressAmt);
   }
 
+  //load transactions for the item clicked
   function updateTransactions(transactions) {
     const numTransactions = transactions.length;
-
-
-
     const el = $('#Transaction-Container');
     var htmlRow = '';
 
@@ -655,13 +759,20 @@ $(document).ready(function() {
     $('.transactionAmt').toNumber().formatCurrency();
   }
 
-  function addTransactionList(merchant, amt) {
+  //after adding a transaction, add it as html to the sidebar
+  function addTransactionList(merchant, amt, date) {
     const el = $('#Transaction-Container');
     var htmlRow = '';
     var numOfTransactions = $('#numTransactions').text();
-    var theDate = new Date();
-    var month = theDate.toLocaleDateString("en-US", {month: "short"});
-    var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
+    var month = moment(date).format('MMM');
+    var day = moment(date).date();
+    console.log(month);
+    console.log(day);
+    // var theDate = new Date(date);
+    // console.log(theDate);
+    // console.log(date);
+    // var month = Date.toLocaleDateString("en-US", {month: "short"});
+    // var day = Date.toLocaleDateString("en-US", {day: "numeric"});
 
     htmlRow = "<div class='Transactions-List-Row'>" +
                 "<div class='monthDay-container'>" +
@@ -676,6 +787,7 @@ $(document).ready(function() {
     $('#numTransactions').text(++numOfTransactions);
   }
 
+  //load data from the db to populate the chart
   function getChartData() {
     $.ajax({
       url: '/testData',
@@ -697,6 +809,7 @@ $(document).ready(function() {
     });
   }
 
+  //create the chart
   function createChart(labels, data) {
     const chartData = {
       datasets: [{
@@ -732,6 +845,7 @@ $(document).ready(function() {
     });
   }
 
+  //update the chart when the planned amt changes for an item
   function updateChart(index, newCatSum) {
     //var ctx = document.getElementById('myChart');
 
@@ -741,6 +855,7 @@ $(document).ready(function() {
     budgetRemaining(data);
   }
 
+  //update the chart labels when an item name changes
   function updateChartLabels(index, name) {
     if (myChart.data.labels[index]) {
       myChart.data.labels[index] = name;
@@ -789,7 +904,7 @@ $(document).ready(function() {
 
       $('#leftToBudget').text(sumofPlannedAmt - income);
       //if over budget, set data-value to negative number
-      $('#leftToBudget').attr('data-value', (sumofPlannedAmt - income) * -1);
+      $('#leftToBudget').attr('data-value', (sumofPlannedAmt - income).toFixed(2) * -1);
       $('#leftToBudgetText').text(" over budget");
       //remove prior css classes before adding new one
       $('#leftToBudget').removeClass();
@@ -819,7 +934,5 @@ $(document).ready(function() {
 function capitalizeFirstLetter(string) {
   return string[0].toUpperCase() + string.slice(1);
 }
-
-
 
 });

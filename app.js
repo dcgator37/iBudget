@@ -692,8 +692,8 @@ app.post('/addTransaction', (req, res) => {
   //   sum =  sum + transaction.amt;
   // });
 
-  console.log('transaction: ' + amt);
-  console.log('sum of transactions: ' + sum);
+  // console.log('transaction: ' + amt);
+  // console.log('sum of transactions: ' + sum);
 
   //send the sum back to the client so it can do the math and update the remaining span and data-value attribute
   res.json({msg: 'success', sum: sum});
@@ -728,7 +728,7 @@ app.post('/getTransactions', (req, res) => {
     if (err) {
 
     } else if (budget.length) {
-      console.log("last month's budget" + budget);
+      // console.log("last month's budget" + budget);
       budget[0].category.find( function (el, index, array) {
         if (el.name == categoryName) {
           el.items.find( function (item, index, array) {

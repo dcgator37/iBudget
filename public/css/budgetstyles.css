@@ -132,6 +132,10 @@ input:last-child {
   text-align: right;
 }
 
+.Budget-Row-Progress {
+  height: 2px;
+}
+
 .container {
   /* commented for 3/6/21 flex box changes */
 
