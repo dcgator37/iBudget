@@ -363,6 +363,85 @@ $(document).ready(function() {
 
   ////*****************************************************Budget Item Sidebar****************************************************************************
 
+  $(document).on('click', '#Accounts', function() {
+      $.ajax({
+        url: '/api/accounts',
+        method: 'get',
+        success: function(res) {
+          console.log(res.error, res.accounts);
+          loadAccounts(res.accounts);
+        },
+        error: function(res) {
+
+        }
+      });
+  });
+
+  $(document).on('click', '#addPlaidAccount', function() {
+    $.ajax({
+      url: '/api/create_link_token',
+      method: 'post',
+      dataType: 'json',
+      data: {},
+      success: function(res) {
+        loadPlaidLink(res);
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+  });
+
+  function loadPlaidLink(res) {
+    var handler = Plaid.create({
+      token: res.link_token,
+      onSuccess: (public_token, metadata) => {
+        $.ajax({
+          url: '/api/get_public_token',
+          method: 'post',
+          dataType: 'json',
+          data: {'public_token': public_token},
+          success: function(res) {
+
+          },
+          error: function(res) {
+
+          }
+
+        });
+      },
+      onLoad: () => {},
+      onExit: () => {},
+      onEvent: (eventName, metadata) => {},
+      receivedRedirectUri: null
+    });
+
+    handler.open();
+  }
+
+  function loadAccounts(accounts) {
+    el = $('#addPlaidAccount');
+    var html = '';
+    accounts.accounts.forEach((account) => {
+      var name = account.name;
+      var balance = account.balances.current;
+      html += '<div class="col-12 my-2">' +
+                '<span class="PlaidAccountName">' + name +'</span>' +
+                '<span class="PlaidAccountBalance">' + balance + '</span>' +
+                "</div>";
+
+    });
+
+    el.before(html);
+
+    $('.PlaidAccountBalance').formatCurrency();
+  }
+
+  $(document).on('click', '#PlaidTransactions', function() {
+
+  });
+
+
   $(document).on('click', '#closeBudgetListItem', function() {
     $('.Transactions-List').css("display", "none");
     $('.Budget-List-Item').css("display", "none");

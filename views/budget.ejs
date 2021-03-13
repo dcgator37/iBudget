@@ -13,6 +13,7 @@
   <script src="/jquery/jquery.js"></script>
   <script src="https://unpkg.com/@mongodb-js/charts-embed-dom"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script type="text/javascript" src="/data.js"></script>
 
   <!-- <script type="text/javascript" src="/js/jquery.formatCurrency-1.4.0.js"></script> -->
@@ -174,7 +175,7 @@
       <% }); %>
 
       <!-- add category button -->
-      <div class="container Category-Button mx-auto">
+      <div class="container Category-Button">
         <button class="itemCategory addCat" type="button" name="button" value="">Add Category</button>
       </div>
 
@@ -264,6 +265,39 @@
           </div>
       </div>
     </div>
+
+    <div class="modal fade" id="PlaidAccountModal" tabindex="-1" aria-labelledby="PlaidAccountModal" aria-hidden="true">
+
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Plaid Accounts</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="PlaidAccountModalBody"class="modal-body">
+            <!-- <div class="col-3 my-2">
+              <span class='PlaidAccountName'></span>
+              <span class='PlaidAccountBalance'></span>
+            </div> -->
+            <div class="col-12 my-2">
+              <button id="addPlaidAccount">Add Plaid Account</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="modalFooterContent">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save</button>
+            </div>
+          </div>
+          </form>
+        </div>
+    </div>
+  </div>
+
+
+
+      <button id='Accounts' data-bs-toggle="modal" data-bs-target="#PlaidAccountModal"><i class="fas fa-piggy-bank" style="font-size: 3rem; color: green"></i></button>
+      <button id='PlaidTransactions'><i class="fas fa-credit-card" style="font-size: 3rem; color: green"></i></button>
 
       <div class="chart-container">
       <canvas id="myChart" width="480px" height="360px"></canvas>

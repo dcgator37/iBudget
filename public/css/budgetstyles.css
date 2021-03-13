@@ -75,7 +75,7 @@ input:last-child {
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
   padding: 0 10px;
   margin: 20px 0;
-  margin-left: 2rem;
+  margin-left: 3rem;
 }
 
 .Category-Button {
@@ -85,7 +85,7 @@ input:last-child {
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
   padding: 0 10px;
   margin: 20px 0;
-  margin-left: 5rem;
+  margin-left: 2rem;
 }
 
 .Category-Header {
@@ -168,7 +168,7 @@ input:last-child {
   z-index: 5;
   background-color: #f5f7f8;
 
-  width: 50rem;
+  width: 52rem;
   margin-left: 2rem;
   height: 8rem;
   /* height: 13%; */
@@ -337,7 +337,9 @@ input:last-child {
   font-weight: bold;
 }
 
-
+.PlaidAccountBalance {
+  margin-left: 5px;
+}
 
 .chart-container {
   width: 30rem;
