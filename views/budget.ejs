@@ -56,11 +56,11 @@
 
   <div class="row">
 
-    <div class="col-lg-2" style="background-color: white">
+    <div class="col-lg-1" style="background-color: white">
 
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-5">
       <div class="monthHeader">
         <p>
           <!-- button for current month's budget -->
@@ -183,7 +183,7 @@
     </div> <!-- end of middle column -->
 
     <!-- right column -->
-    <div class="col-lg-4" style="background-color: white">
+    <div class="col-lg-6">
       <!-- <button type="button" name="button" class="addTransaction"><i class="fas fa-plus" style="color: green; font-size: 3em"></i></button> -->
 
       <!-- <iframe style="background: #FFFFFF;border: none;border-radius: 2px;box-shadow: 0 2px 10px 0 rgba(70, 76, 79, .2);" width="480" height="360" src=""></iframe> -->
@@ -268,20 +268,28 @@
 
     <div class="modal fade" id="PlaidAccountModal" tabindex="-1" aria-labelledby="PlaidAccountModal" aria-hidden="true">
 
-      <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Plaid Accounts</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div id="PlaidAccountModalBody"class="modal-body">
-            <!-- <div class="col-3 my-2">
-              <span class='PlaidAccountName'></span>
-              <span class='PlaidAccountBalance'></span>
+          <div id="PlaidAccountModalBody" class="modal-body PlaidAccountBody">
+            <!-- <div class="col-3 my-2"> -->
+            <!-- <div class="PlaidAccountRow">
+              <button type="button" data-bs-toggle="collapse" data-bs-target="#PlaidAccountCollapse" aria-expanded="false" aria-controls="PlaidAccountCollapse"><span class='PlaidAccountName'>Plaid Savings <i class="fas fa-angle-down"></i></span></button>
+
+              <span class='PlaidAccountBalance'>$100.00</span>
+            </div>
+            <div class="collapse" id="PlaidAccountCollapse">
+              <button type="button">Delete this account</button>
             </div> -->
-            <div class="col-12 my-2">
+            <!-- </div> -->
+            <!-- <div class="col-12 my-2"> -->
+            <div class="PlaidAccountRow">
               <button id="addPlaidAccount">Add Plaid Account</button>
             </div>
+            <!-- </div> -->
           </div>
           <div class="modal-footer">
             <div class="modalFooterContent">
@@ -295,10 +303,10 @@
   </div>
 
 
-
+    <div class='RightHeader'>
       <button id='Accounts' data-bs-toggle="modal" data-bs-target="#PlaidAccountModal"><i class="fas fa-piggy-bank" style="font-size: 3rem; color: green"></i></button>
       <button id='PlaidTransactions'><i class="fas fa-credit-card" style="font-size: 3rem; color: green"></i></button>
-
+    </div>
       <div class="chart-container">
       <canvas id="myChart" width="480px" height="360px"></canvas>
       </div>

@@ -4,6 +4,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const Budget = require('./models/budget');
+const PlaidItem = require('./models/plaid_item');
+const PlaidAccount = require('./models/plaid_account');
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
@@ -14,6 +16,7 @@ const utils = require(__dirname + "/date.js");
 const $ = require('jquery');
 const datejs = require('datejs');
 const plaid = require('plaid');
+
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 const PLAID_SECRET = process.env.PLAID_SECRET;
@@ -844,7 +847,7 @@ app.post('/api/create_link_token', (req, res, next) => {
       // This should correspond to a unique id for the current user.
       client_user_id: req.user._id,
     },
-    client_name: 'Plaid Quickstart',
+    client_name: 'iBudget',
     products: PLAID_PRODUCTS,
     country_codes: PLAID_COUNTRY_CODES,
     language: 'en',
@@ -871,18 +874,30 @@ app.post('/api/create_link_token', (req, res, next) => {
 
 });
 
-app.post('/api/get_public_token', (req, res, next) => {
+app.post('/api/get_public_token', async (req, res, next) => {
   PUBLIC_TOKEN = req.body.public_token;
 
   client.exchangePublicToken(PUBLIC_TOKEN, function (error, tokenResponse) {
     if (error != null) {
 
       return res.json({
-        error,
+        error
       });
     }
     ACCESS_TOKEN = tokenResponse.access_token;
     ITEM_ID = tokenResponse.item_id;
+
+
+
+
+    const plaidItem = new PlaidItem({
+      user_id: req.user._id,
+      item_id: ITEM_ID,
+      access_token: ACCESS_TOKEN
+    });
+
+     plaidItem.save();
+
 
     res.json({
       access_token: ACCESS_TOKEN,
@@ -893,17 +908,107 @@ app.post('/api/get_public_token', (req, res, next) => {
 
 });
 
-app.get('/api/accounts', (req, res, next) => {
-  client.getAccounts(ACCESS_TOKEN, function (error, accountsResponse) {
+// const configs = {
+//   user: {
+//     // This should correspond to a unique id for the current user.
+//     client_user_id: req.user._id,
+//   },
+//   client_name: 'iBudget',
+//   country_codes: PLAID_COUNTRY_CODES,
+//   language: 'en',
+//   webhook: 'https://webhook.sample.com',
+//   access_token: myToken,
+// };
+//
+// client.createLinkToken(configs, function (error, createTokenResponse) {
+//   if (error != null) {
+//     console.log(error);
+//     return res.json({
+//       error: error
+//     });
+//   }
+//   console.log('new token response', createTokenResponse);
+//   return res.json({error: theError, token: createTokenResponse.link_token});
+// });
+
+app.post('/api/updateLink', (req, res, next) => {
+  const configs = {
+    user: {
+      // This should correspond to a unique id for the current user.
+      client_user_id: req.user._id,
+    },
+    client_name: 'iBudget',
+    country_codes: PLAID_COUNTRY_CODES,
+    language: 'en',
+    webhook: 'https://webhook.sample.com',
+    access_token: req.body.token,
+  };
+
+  client.createLinkToken(configs, function (error, createTokenResponse) {
     if (error != null) {
+      console.log(error);
+      return res.json({
+        error: error
+      });
+    }
+    console.log('new token response', createTokenResponse);
+    res.json({error: error, token: createTokenResponse.link_token});
+  });
+
+});
+
+app.get('/api/accounts', async (req, res, next) => {
+
+
+  // MSU key
+  //'access_token': 'access-development-20030bfd-65f2-4551-bb5f-c90f0c8c8dbd'
+
+  //sandbox
+  //'access_token': 'access-sandbox-d62e2d33-723b-46d0-a670-c6189e391078'
+
+  var item = await PlaidItem.findOne({'user_id': req.user._id});
+  //item = null;
+  var theError;
+  var token = item.access_token;
+
+  token = ACCESS_TOKEN;
+
+  if (token) {
+
+
+  console.log('access token from db ', token);
+  //console.log(ACCESS_TOKEN);
+  client.getAccounts(token, function (error, accountsResponse) {
+    if (error != null) {
+      theError = error;
+      console.log('the error ', theError);
+
 
       return res.json({
         error: error,
+        token: token
       });
     }
 
+    console.log('accounts response ', accountsResponse);
+
+
+  //   if (!item.institution_name) {
+  //   client.getInstitutionById(accountsResponse.item.institution_id, 'US', (err, result) => {
+  //     item.institution_name = result.institution.name;
+  //     item.save();
+  //   });
+  // } else {
+  //   //console.log(result.institution.name);
+  // }
+
     res.json({ error: null, accounts: accountsResponse });
   });
+} else {
+  res.json({error: 'no accounts'});
+}
+
+
 });
 
 

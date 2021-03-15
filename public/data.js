@@ -359,17 +359,43 @@ $(document).ready(function() {
     });
   });
 
-
-
-  ////*****************************************************Budget Item Sidebar****************************************************************************
+  ////*****************************************************Sidebar Header - Plaid Accounts and Transactions***********************************************
 
   $(document).on('click', '#Accounts', function() {
+
+    // load accounts from database
+    // ajax load from database
+
       $.ajax({
         url: '/api/accounts',
         method: 'get',
         success: function(res) {
-          console.log(res.error, res.accounts);
+
+          if (res.error) {
+            //reauthenticate
+            //updatePlaidLink(res.token);
+
+            // $.ajax({
+            //   url: '/api/updateLink',
+            //   method: 'post',
+            //   dataType: 'json',
+            //   data: {token: res.token},
+            //   success: function(res) {
+            //     updatePlaidLink(res.token);
+            //   },
+            //   error: function(res) {
+            //
+            //   }
+            // });
+
+
+
+
+
+
+          } else {
           loadAccounts(res.accounts);
+        }
         },
         error: function(res) {
 
@@ -393,6 +419,7 @@ $(document).ready(function() {
   });
 
   function loadPlaidLink(res) {
+
     var handler = Plaid.create({
       token: res.link_token,
       onSuccess: (public_token, metadata) => {
@@ -402,16 +429,22 @@ $(document).ready(function() {
           dataType: 'json',
           data: {'public_token': public_token},
           success: function(res) {
+            console.log('Plaid public token res');
+            console.log('access token ', res.access_token);
+            console.log('item_id ', res.item_id);
+            console.log('res object ', res);
 
+            //make another ajax call to get the accounts;
           },
           error: function(res) {
+            console.log(res);
 
           }
 
         });
       },
       onLoad: () => {},
-      onExit: () => {},
+      onExit: () => {console.log('Link on Exit');},
       onEvent: (eventName, metadata) => {},
       receivedRedirectUri: null
     });
@@ -419,20 +452,40 @@ $(document).ready(function() {
     handler.open();
   }
 
-  function loadAccounts(accounts) {
-    el = $('#addPlaidAccount');
-    var html = '';
-    accounts.accounts.forEach((account) => {
-      var name = account.name;
-      var balance = account.balances.current;
-      html += '<div class="col-12 my-2">' +
-                '<span class="PlaidAccountName">' + name +'</span>' +
-                '<span class="PlaidAccountBalance">' + balance + '</span>' +
-                "</div>";
+  function updatePlaidLink(token) {
+    const updateLink = Plaid.create({
+      token: token,
+      onSuccess: (public_token, metadata) => {
 
+      },
+      onExit: (err, metadata) => {
+
+      },
     });
 
+    updateLink.open();
+  }
+
+  function loadAccounts(accounts) {
+    el = $('#addPlaidAccount').parent();
+    var html = '';
+    if ($('#PlaidAccountModalBody').children().length == 1) {
+      accounts.accounts.forEach((account, index) => {
+        var name = account.name;
+        var balance = account.balances.current;
+        html += '<div class="PlaidAccountRow">' +
+                //'<div class="col-12 my-2">' +
+                '<button type="button" data-bs-toggle="collapse" data-bs-target="#PlaidAccountCollapse' + index + '" aria-expanded="false" aria-controls="PlaidAccountCollapse"><span class="PlaidAccountName">' + name + '<i class="fas fa-angle-down"></i></span></button>' +
+                //'<span class="PlaidAccountName">' + name +'</span>' +
+                '<span class="PlaidAccountBalance">' + balance + '</span>' +
+                '</div>' +
+                '<div class="collapse" id="PlaidAccountCollapse' + index + '">' +
+                  '<button type="button">Delete this account</button>' +
+                '</div>';
+      });
+
     el.before(html);
+    }
 
     $('.PlaidAccountBalance').formatCurrency();
   }
@@ -440,6 +493,10 @@ $(document).ready(function() {
   $(document).on('click', '#PlaidTransactions', function() {
 
   });
+
+  ////*****************************************************Budget Item Sidebar****************************************************************************
+
+
 
 
   $(document).on('click', '#closeBudgetListItem', function() {

@@ -337,12 +337,41 @@ input:last-child {
   font-weight: bold;
 }
 
+.RightHeader {
+  width: 100%;
+  height: 8rem;
+  position: fixed;
+  display: flex;
+
+}
+
+#PlaidAccountModal {
+  font-size: 1.2rem;
+}
+
+.PlaidAccountBody {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.PlaidAccountRow {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+
+}
+
 .PlaidAccountBalance {
   margin-left: 5px;
 }
 
 .chart-container {
   width: 30rem;
+  margin-top: 8rem;
 }
 
 .Budget-List-Container {
@@ -350,7 +379,7 @@ input:last-child {
   width: 40rem;
   position: fixed;
   overflow-y: auto;
-  top: 0;
+  top: 8rem;
   bottom: 0;
 }
 
@@ -525,7 +554,8 @@ input:last-child {
   padding-left: 0px;
   text-align: center;
   list-style: none;
-  width: 280px;
+  /* width: 280px; */
+  width: 14.5rem;
   border-bottom: 1px solid rgba(0,0,0,0.05);
   border-top: 1px solid rgba(225, 225, 225, 0.05);
 }
