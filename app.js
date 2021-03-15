@@ -960,11 +960,7 @@ app.post('/api/updateLink', (req, res, next) => {
 app.get('/api/accounts', async (req, res, next) => {
 
 
-  // MSU key
-  //'access_token': 'access-development-20030bfd-65f2-4551-bb5f-c90f0c8c8dbd'
 
-  //sandbox
-  //'access_token': 'access-sandbox-d62e2d33-723b-46d0-a670-c6189e391078'
 
   var item = await PlaidItem.findOne({'user_id': req.user._id});
   //item = null;
