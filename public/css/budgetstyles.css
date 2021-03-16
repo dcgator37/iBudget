@@ -18,7 +18,9 @@ body {
   color: #69757a;
   font-size: 1.4rem;
 }
-
+.remainingnegative {
+  color: red;
+}
 button {
   text-align: center;
   border-color: transparent;
@@ -302,6 +304,7 @@ input:last-child {
 .span-rem {
   width: 200px;
   text-align: right;
+
 }
 
 .card {

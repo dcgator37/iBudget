@@ -794,8 +794,13 @@ $(document).ready(function() {
     plannedAmt = $(el).children('.Input-Planned').attr('data-value');
     // console.log('value from label: ' + plannedAmt);
     // console.log(sum);
-
-    //set the text of the remaining span; planned amount - all the transactions for the item
+    const value = plannedAmt - sum;
+    if (value < 0) {
+        $(el).children('span').addClass('remainingnegative');
+    } else {
+      $(el).children('span').removeClass('remainingnegative');
+    }
+    //eset the text of the remaining span; planned amount - all the transactions for the item
     $(el).children('span').text((plannedAmt - sum).toFixed(2));
 
     //set the data-value for remaining
