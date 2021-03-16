@@ -374,6 +374,7 @@ input:last-child {
 .chart-container {
   width: 30rem;
   margin-top: 8rem;
+  position: fixed;
 }
 
 /* @media (max-width: 1920px) {
@@ -501,7 +502,7 @@ input:last-child {
 }
 
 #myChart {
-  position: fixed;
+  /* position: fixed; */
 }
 
 /*--------------------------Modal--------------------------------*/
