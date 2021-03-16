@@ -966,10 +966,23 @@ app.get('/api/accounts', async (req, res, next) => {
   //item = null;
   var theError;
   var token = item.access_token;
-
+  console.log('token from db ', token);
   token = ACCESS_TOKEN;
 
   if (token) {
+
+
+    // const response = await client
+    // .invalidateAccessToken(token)
+    // .catch((err) => {
+    //   // handle error
+    // });
+    // // Store the new access_token in a persistent, secure datastore
+    // const accessToken = response.new_access_token;
+    // console.log('new token ', accessToken);
+    // item.access_token = accessToken;
+    // item.save();
+
 
 
   console.log('access token from db ', token);
@@ -1000,6 +1013,7 @@ app.get('/api/accounts', async (req, res, next) => {
 
     res.json({ error: null, accounts: accountsResponse });
   });
+
 } else {
   res.json({error: 'no accounts'});
 }
