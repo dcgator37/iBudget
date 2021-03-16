@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const Budget = require('./models/budget');
+const PlaidItem = require('./models/plaid_item');
+const PlaidAccount = require('./models/plaid_account');
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
@@ -12,6 +15,53 @@ const path = require('path');
 const utils = require(__dirname + "/date.js");
 const $ = require('jquery');
 const datejs = require('datejs');
+const plaid = require('plaid');
+
+
+const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
+const PLAID_SECRET = process.env.PLAID_SECRET;
+const PLAID_ENV = process.env.PLAID_ENV || 'sandbox';
+const PLAID_PRODUCTS = (process.env.PLAID_PRODUCTS || 'transactions').split(
+  ',',
+);
+// PLAID_COUNTRY_CODES is a comma-separated list of countries for which users
+// will be able to select institutions from.
+const PLAID_COUNTRY_CODES = (process.env.PLAID_COUNTRY_CODES || 'US').split(
+  ',',
+);
+// Parameters used for the OAuth redirect Link flow.
+//
+// Set PLAID_REDIRECT_URI to 'http://localhost:3000'
+// The OAuth redirect flow requires an endpoint on the developer's website
+// that the bank website should redirect to. You will need to configure
+// this redirect URI for your client ID through the Plaid developer dashboard
+// at https://dashboard.plaid.com/team/api.
+const PLAID_REDIRECT_URI = process.env.PLAID_REDIRECT_URI || '';
+
+// Parameter used for OAuth in Android. This should be the package name of your app,
+// e.g. com.plaid.linksample
+const PLAID_ANDROID_PACKAGE_NAME = process.env.PLAID_ANDROID_PACKAGE_NAME || '';
+
+// We store the access_token in memory - in production, store it in a secure
+// persistent data store
+let ACCESS_TOKEN = null;
+let PUBLIC_TOKEN = null;
+let ITEM_ID = null;
+// The payment_id is only relevant for the UK Payment Initiation product.
+// We store the payment_id in memory - in production, store it in a secure
+// persistent data store
+let PAYMENT_ID = null;
+
+// Initialize the Plaid client
+// Find your API keys in the Dashboard (https://dashboard.plaid.com/account/keys)
+const client = new plaid.Client({
+  clientID: PLAID_CLIENT_ID,
+  secret: PLAID_SECRET,
+  env: plaid.environments[PLAID_ENV],
+  options: {
+    version: '2019-05-29',
+  },
+});
 
 const app = express();
 
@@ -59,226 +109,232 @@ const userSchema = new mongoose.Schema ({
   }]
 });
 
-const budgetSchema = new mongoose.Schema ({
-  user: String,
-  month: String,
-  monthNum: Number,
-  year: Number,
-  category: [
-    {
-      name: String,
-      items: [
-        {
-          name: String,
-          planned: Number,
-          sumOfTransactions: Number,
-          transactions: [
-            {
-              type: String,
-              amt: Number,
-              date: Date,
-              merchant: String,
-              notes: String,
-            }
-          ]
-        }
-      ]
-    }
-  ],
-
-},
-{ typeKey: '$type' });
+// const budgetSchema = new mongoose.Schema ({
+//   user: String,
+//   month: String,
+//   monthNum: Number,
+//   year: Number,
+//   category: [
+//     {
+//       name: String,
+//       items: [
+//         {
+//           name: String,
+//           planned: Number,
+//           sumOfTransactions: Number,
+//           transactions: [
+//             {
+//               type: String,
+//               amt: Number,
+//               date: Date,
+//               merchant: String,
+//               notes: String,
+//             }
+//           ]
+//         }
+//       ]
+//     }
+//   ],
+//
+// },
+// { typeKey: '$type' });
 
 userSchema.plugin(passportLocalMongoose);
 
 const User = new mongoose.model("User", userSchema);
-const Budget = new mongoose.model("Budget", budgetSchema);
+// const Budget = new mongoose.model("Budget", budgetSchema);
 
-const defaultBudget = new Budget({
-  category: [
-    {
-      name: "Income",
-      items: [
-        {
-          name: "Paycheck 1",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Paycheck 2",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Giving",
-      items: [
-        {
-          name: "Church",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Charity",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Savings",
-      items: [
-        {
-          name: "Emergency Fund",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Housing",
-      items: [
-        {
-          name: "Mortgage/Rent",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Electricity",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Cable and Internet",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Transportation",
-      items: [
-        {
-          name: "Gas",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Uber/Bus",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Food",
-      items: [
-        {
-          name: "Groceries",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Restaurants",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Personal",
-      items: [
-        {
-          name: "Cellphone",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Subscriptions",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Lifestyle",
-      items: [
-        {
-          name: "Entertainment",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Misc",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Health",
-      items: [
-        {
-          name: "Gym",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Medicine",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Doctor",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Insurance",
-      items: [
-        {
-          name: "Auto",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Homeowner/Renter",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-    {
-      name: "Debt",
-      items: [
-        {
-          name: "Car",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Student Loans",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Medical Bill",
-          planned: 0,
-          sumOfTransactions: 0
-        },
-        {
-          name: "Personal Loan",
-          planned: 0,
-          sumOfTransactions: 0
-        }
-      ]
-    },
-  ],
-
-});
+const defaultBudget = new Budget(Budget.defaultBudget);
+// const defaultBudget = new Budget({
+//   category: [
+//     {
+//       name: "Income",
+//       items: [
+//         {
+//           name: "Paycheck 1",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Paycheck 2",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Giving",
+//       items: [
+//         {
+//           name: "Church",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Charity",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Savings",
+//       items: [
+//         {
+//           name: "Emergency Fund",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Savings",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Housing",
+//       items: [
+//         {
+//           name: "Mortgage/Rent",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Electricity",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Cable and Internet",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Transportation",
+//       items: [
+//         {
+//           name: "Gas",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Uber/Bus",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Food",
+//       items: [
+//         {
+//           name: "Groceries",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Restaurants",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Personal",
+//       items: [
+//         {
+//           name: "Cellphone",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Subscriptions",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Lifestyle",
+//       items: [
+//         {
+//           name: "Entertainment",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Misc",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Health",
+//       items: [
+//         {
+//           name: "Gym",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Medicine",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Doctor",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Insurance",
+//       items: [
+//         {
+//           name: "Auto",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Homeowner/Renter",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//     {
+//       name: "Debt",
+//       items: [
+//         {
+//           name: "Car",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Student Loans",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Medical Bill",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         },
+//         {
+//           name: "Personal Loan",
+//           planned: 0,
+//           sumOfTransactions: 0
+//         }
+//       ]
+//     },
+//   ],
+//
+// });
 
 let activeBudget;
 let monthArr;
@@ -295,28 +351,35 @@ app.get("/", function(req, res) {
   res.render("login");
 });
 
-app.post("/", function(req, res) {
-  if (req.body.button === "login") {
+// app.post("/", function(req, res) {
+//   if (req.body.button === "login") {
+//
+//     const user = new User({
+//       username: req.body.username,
+//       password: req.body.password,
+//     });
+//
+//     req.login(user, function(err) {
+//       if (err) {
+//         console.log(err);
+//       } else {
+//
+//         console.log('about to be authenticated');
+//
+//         passport.authenticate('local')(req, res, function(error) {
+//
+//           res.redirect("/budget");
+//         });
+//       }
+//     });
+//   } else  {
+//     res.redirect("/create");
+//   }
+// });
 
-    const user = new User({
-      username: req.body.username,
-      password: req.body.password,
-    });
+app.post("/login", passport.authenticate('local', { successRedirect: '/budget', failureRedirect: '/'})
 
-    req.login(user, function(err) {
-      if(err) {
-        console.log(err);
-      } else {
-
-        passport.authenticate('local')(req, res, function() {
-          res.redirect("/budget");
-        });
-      }
-    });
-  } else  {
-    res.redirect("/create");
-  }
-});
+);
 
 app.get("/deleteAccount", function(req, res) {
 
@@ -358,7 +421,7 @@ app.get("/budget", function(req, res) {
 
       Budget.findOne({user: req.user.username, month: utils.getMonth(today)}, function (err, budget) {
         if (err) {
-          alert('Mongo is down!');
+          console.log('mongo is down!');
         } else if(!budget) {
           console.log("no budget in db for this month. generating default budget");
           // next idea is to display website or popup that asks user if they want to load from the past month
@@ -392,11 +455,15 @@ app.get("/budget", function(req, res) {
 
           req.user.save();
 
+          // const url = createChart(activeBudget._id);
+
           res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
 
         } else {
           console.log("Budget found in db for this month. loading budget");
           activeBudget = budget;
+
+          // const url = createChart(activeBudget._id);
 
           res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
         }
@@ -404,10 +471,13 @@ app.get("/budget", function(req, res) {
 
     } else {
       console.log('refreshing screen. there is an activebudget');
+
+      // const url = createChart(activeBudget._id);
+
       res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
     }
   } else {
-
+    console.log("Not authenticated");
     //not authenticated. haven't logged in yet
     res.redirect("/");
   }
@@ -429,7 +499,7 @@ app.post('/switchmonth', (req, res) => {
       newBudget.user = req.user.username;
       newBudget.month = month;
       newBudget.year = parseInt(req.body.year);
-      newBudget.monthNum = req.body.monthNum;
+      newBudget.monthNum = req.body.button;
 
       newBudget.category = defaultBudget.category;
 
@@ -552,9 +622,20 @@ app.put("/editItemAmt", (req, res) => {
   activeBudget.category[index].items[itemIndex].planned = amt;
   activeBudget.save();
 
+  //when you edit the planned amount, the remaining will change. so get the total transaction amt
   const sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
 
-  res.json({msg: 'success', sum: sum });
+  //loop through the items in the category, summing the total planned amt. this is used to update the chart
+  var newCatSum = 0;
+  activeBudget.category[index].items.forEach((item, index) => {
+    if (item.planned) {
+    newCatSum += item.planned;
+  } else {
+    newCatSum += 0;
+  }
+  });
+
+  res.json({msg: 'success', sum: sum, newCatSum: newCatSum });
 });
 
 app.put("/editItemName", (req, res) => {
@@ -564,6 +645,8 @@ app.put("/editItemName", (req, res) => {
 
   activeBudget.category[index].items[itemIndex].name = name;
   activeBudget.save();
+
+  res.json({msg: 'success'});
 });
 
 app.delete("/deleteItem", function(req, res) {
@@ -573,7 +656,34 @@ app.delete("/deleteItem", function(req, res) {
   activeBudget.category[index].items[itemIndex].remove();
   activeBudget.save();
 
-  res.json({msg: 'success' });
+  var newCatSum = 0;
+
+  activeBudget.category[index].items.forEach((item, index) => {
+    if (item.planned) {
+    newCatSum += item.planned;
+  } else {
+    newCatSum += 0;
+  }
+  });
+
+  res.json({msg: 'success', newCatSum: newCatSum });
+});
+
+app.delete("/deleteCategory", function(req, res) {
+  const index = req.body.index;
+
+  activeBudget.category[index].remove();
+  activeBudget.save();
+
+  // activeBudget.category[index].items.forEach((item, index) => {
+  //   if (item.planned) {
+  //   newCatSum += item.planned;
+  // } else {
+  //   newCatSum += 0;
+  // }
+  // });
+
+  res.json({msg: 'success'});
 });
 
 app.post("/addCat", function(req, res) {
@@ -640,12 +750,265 @@ app.post('/addTransaction', (req, res) => {
   //   sum =  sum + transaction.amt;
   // });
 
-  console.log('transaction: ' + amt);
-  console.log('sum of transactions: ' + sum);
+  // console.log('transaction: ' + amt);
+  // console.log('sum of transactions: ' + sum);
 
   //send the sum back to the client so it can do the math and update the remaining span and data-value attribute
   res.json({msg: 'success', sum: sum});
 });
+
+app.post('/testmodalpost', (req, res) => {
+
+});
+
+app.post('/getTransactions', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const categoryName = activeBudget.category[index].name;
+  const itemName = activeBudget.category[index].items[itemIndex].name;
+  const currentMonth = activeBudget.monthNum;
+  const currentYear = activeBudget.year;
+  var priorMonth = currentMonth - 1;
+  var priorMonthYear = currentYear;
+  var sum;
+
+  if (currentMonth == 1) {
+    priorMonth = 12;
+    --priorMonthYear;
+  }
+
+  const transactions = activeBudget.category[index].items[itemIndex].transactions;
+
+  // Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
+
+
+  Budget.find({user: req.user.username, monthNum: priorMonth, year: priorMonthYear}, 'category', (err, budget) => {
+    if (err) {
+
+    } else if (budget.length) {
+      // console.log("last month's budget" + budget);
+      budget[0].category.find( function (el, index, array) {
+        if (el.name == categoryName) {
+          el.items.find( function (item, index, array) {
+            if (item.name == itemName) {
+              sum = item.sumOfTransactions;
+            } else {
+
+            }
+          });
+        } else {
+
+        }
+      });
+
+      res.json({msg: 'success', transactions: transactions, sum: sum});
+    } else {
+
+      res.json({msg: 'success', transactions: transactions, sum: sum});
+    }
+  });
+
+  // res.json({msg: 'success', transactions: transactions, budget: budget});
+
+});
+
+app.get('/testData', (req, res) => {
+  const labels = [];
+  const data = [];
+  var plannedSum;
+
+
+  activeBudget.category.forEach((category, index) => {
+    labels.push(category.name);
+
+    plannedSum = 0;
+
+    category.items.forEach((item, index) => {
+      if (item.planned) {
+      plannedSum += item.planned;
+    } else {
+      plannedSum += 0;
+    }
+    });
+
+    data.push(plannedSum);
+  });
+
+  res.json({msg: 'success', labels: labels, data: data});
+});
+
+//***********************************Plaid***********************************************
+
+app.post('/api/create_link_token', (req, res, next) => {
+  console.log(req.user._id);
+
+  const configs = {
+    user: {
+      // This should correspond to a unique id for the current user.
+      client_user_id: req.user._id,
+    },
+    client_name: 'iBudget',
+    products: PLAID_PRODUCTS,
+    country_codes: PLAID_COUNTRY_CODES,
+    language: 'en',
+  };
+
+  if (PLAID_REDIRECT_URI !== '') {
+    configs.redirect_uri = PLAID_REDIRECT_URI;
+  }
+
+  if (PLAID_ANDROID_PACKAGE_NAME !== '') {
+    configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
+  }
+
+  client.createLinkToken(configs, function (error, createTokenResponse) {
+    if (error != null) {
+      console.log(error);
+      return res.json({
+        error: error
+      });
+    }
+    res.json(createTokenResponse);
+  });
+
+
+});
+
+app.post('/api/get_public_token', async (req, res, next) => {
+  PUBLIC_TOKEN = req.body.public_token;
+
+  client.exchangePublicToken(PUBLIC_TOKEN, function (error, tokenResponse) {
+    if (error != null) {
+
+      return res.json({
+        error
+      });
+    }
+    ACCESS_TOKEN = tokenResponse.access_token;
+    ITEM_ID = tokenResponse.item_id;
+
+
+
+
+    const plaidItem = new PlaidItem({
+      user_id: req.user._id,
+      item_id: ITEM_ID,
+      access_token: ACCESS_TOKEN
+    });
+
+     plaidItem.save();
+
+
+    res.json({
+      access_token: ACCESS_TOKEN,
+      item_id: ITEM_ID,
+      error: null,
+    });
+  });
+
+});
+
+// const configs = {
+//   user: {
+//     // This should correspond to a unique id for the current user.
+//     client_user_id: req.user._id,
+//   },
+//   client_name: 'iBudget',
+//   country_codes: PLAID_COUNTRY_CODES,
+//   language: 'en',
+//   webhook: 'https://webhook.sample.com',
+//   access_token: myToken,
+// };
+//
+// client.createLinkToken(configs, function (error, createTokenResponse) {
+//   if (error != null) {
+//     console.log(error);
+//     return res.json({
+//       error: error
+//     });
+//   }
+//   console.log('new token response', createTokenResponse);
+//   return res.json({error: theError, token: createTokenResponse.link_token});
+// });
+
+app.post('/api/updateLink', (req, res, next) => {
+  const configs = {
+    user: {
+      // This should correspond to a unique id for the current user.
+      client_user_id: req.user._id,
+    },
+    client_name: 'iBudget',
+    country_codes: PLAID_COUNTRY_CODES,
+    language: 'en',
+    webhook: 'https://webhook.sample.com',
+    access_token: req.body.token,
+  };
+
+  client.createLinkToken(configs, function (error, createTokenResponse) {
+    if (error != null) {
+      console.log(error);
+      return res.json({
+        error: error
+      });
+    }
+    console.log('new token response', createTokenResponse);
+    res.json({error: error, token: createTokenResponse.link_token});
+  });
+
+});
+
+app.get('/api/accounts', async (req, res, next) => {
+
+
+
+
+  var item = await PlaidItem.findOne({'user_id': req.user._id});
+  //item = null;
+  var theError;
+  var token = item.access_token;
+
+  token = ACCESS_TOKEN;
+
+  if (token) {
+
+
+  console.log('access token from db ', token);
+  //console.log(ACCESS_TOKEN);
+  client.getAccounts(token, function (error, accountsResponse) {
+    if (error != null) {
+      theError = error;
+      console.log('the error ', theError);
+
+
+      return res.json({
+        error: error,
+        token: token
+      });
+    }
+
+    console.log('accounts response ', accountsResponse);
+
+
+  //   if (!item.institution_name) {
+  //   client.getInstitutionById(accountsResponse.item.institution_id, 'US', (err, result) => {
+  //     item.institution_name = result.institution.name;
+  //     item.save();
+  //   });
+  // } else {
+  //   //console.log(result.institution.name);
+  // }
+
+    res.json({ error: null, accounts: accountsResponse });
+  });
+} else {
+  res.json({error: 'no accounts'});
+}
+
+
+});
+
+
+
 
 app.listen(process.env.PORT || 3000, function() {
   console.log("Server is running on port 3000.");
@@ -735,4 +1098,14 @@ function createBudgetArray(req) {
     req.user.save();
   });
 
+}
+
+function createChart(id) {
+  const src= 'https://charts.mongodb.com/charts-ibudget-zqzdh/embed/charts?id=df5582b5-8d8d-45a9-9817-80e7ed5de323&theme=light&autoRefresh=true&maxDataAge=30';
+
+  const filterDoc = {"_id": id};
+  const encodedFilter = encodeURIComponent(JSON.stringify(filterDoc));
+
+  const url = src + '&filter={"_id":' + id + '}';
+  return url;
 }

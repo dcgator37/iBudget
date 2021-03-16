@@ -12,6 +12,7 @@
   "dependencies": {
     "@mongodb-js/charts-embed-dom": "^2.0.1",
     "body-parser": "^1.19.0",
+    "chart.js": "^2.9.4",
     "connect-flash": "^0.1.1",
     "datejs": "^1.0.0-rc3",
     "dotenv": "^8.2.0",
@@ -26,6 +27,7 @@
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^6.1.0",
     "path": "^0.12.7",
+    "plaid": "^8.2.0",
     "request": "^2.88.2",
     "two-step-auth": "^1.1.1"
   }
