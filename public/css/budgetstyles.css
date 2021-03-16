@@ -2,7 +2,9 @@ body {
   background-color: #f5f7f8;
   color: #69757a;
 }
-
+.remainingnegative{
+  color: red;
+}
 .container {
   background: white;
   margin: 20px;
@@ -133,6 +135,7 @@ input:last-child {
 .span-rem {
   width: 200px;
   text-align: right;
+
 }
 
 .card {
