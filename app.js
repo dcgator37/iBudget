@@ -105,7 +105,8 @@ const userSchema = new mongoose.Schema ({
     active: Boolean,
     month: Number,
     year: Number,
-    monthString: String
+    monthString: String,
+    date: Date
   }]
 });
 
@@ -414,6 +415,10 @@ app.get("/budget", function(req, res) {
       createBudgetArray(req);
     }
 
+    //createBudgetArray(req);
+
+    //createPastBudgets(req);
+
     if (!activeBudget) {
       console.log("no active budget");
 
@@ -429,9 +434,12 @@ app.get("/budget", function(req, res) {
           var newBudget = new Budget();
 
           newBudget.user = req.user.username;
+          newBudget.user_id = req.user._id;
           newBudget.month = utils.getMonth(today);
           newBudget.year = utils.getYear(today);
           newBudget.monthNum = utils.getMonthNum(today);
+          const date = new Date(utils.getYear(today) + "-" + utils.getMonthNum(today) + "-" + "1");
+          newBudget.date = date;
 
           newBudget.category = defaultBudget.category;
 
@@ -447,7 +455,7 @@ app.get("/budget", function(req, res) {
           activeBudget = newBudget;
 
           //save the monthsArray for new month
-          let arraySearch = req.user.monthsArray.find((month, index) => {
+          req.user.monthsArray.find((month, index) => {
             if (month.monthString === newBudget.month) {
               req.user.monthsArray[index].active = true;
             }
@@ -461,6 +469,10 @@ app.get("/budget", function(req, res) {
 
         } else {
           console.log("Budget found in db for this month. loading budget");
+          // if (budget.user_id == undefined) {
+          //   budget.user_id = req.user._id;
+          //   budget.save();
+          // }
           activeBudget = budget;
 
           // const url = createChart(activeBudget._id);
@@ -496,10 +508,14 @@ app.post('/switchmonth', (req, res) => {
       //load default budget
 
       var newBudget = new Budget();
+      const date = new Date(req.body.year + "-" + req.body.button + "-" + "1");
+
       newBudget.user = req.user.username;
+      newBudget.user_id = req.user._id;
       newBudget.month = month;
       newBudget.year = parseInt(req.body.year);
       newBudget.monthNum = req.body.button;
+      newBudget.date = date;
 
       newBudget.category = defaultBudget.category;
 
@@ -515,7 +531,7 @@ app.post('/switchmonth', (req, res) => {
       activeBudget = newBudget;
 
       //save the monthsArray for new month
-      let arraySearch = req.user.monthsArray.find((month, index) => {
+      req.user.monthsArray.find((month, index) => {
         if (month.monthString === newBudget.month) {
           req.user.monthsArray[index].active = true;
         }
@@ -527,6 +543,10 @@ app.post('/switchmonth', (req, res) => {
     } else {
         //laod the actual budget because it exists
         console.log('loading actual budget');
+        if (budget.user_id == undefined) {
+          budget.user_id = req.user._id;
+          budget.save();
+        }
         activeBudget = budget;
 
         res.redirect('/budget');
@@ -837,6 +857,30 @@ app.get('/testData', (req, res) => {
   res.json({msg: 'success', labels: labels, data: data});
 });
 
+//***********************************Insights***********************************************
+
+app.get('/insights', (req, res) => {
+  res.render('insights');
+});
+
+app.get('/getBudgetData', async (req, res) => {
+  const user = req.user.username;
+  const id = req.user._id;
+  const today = new Date();
+  //const fourMonths = today.add(4).months();
+  const twelveMonthsAgo = new Date().add(-12).months();
+  console.log(twelveMonthsAgo);
+  try {
+    const budgets = await Budget.find({'user_id': id, date: { $gte: twelveMonthsAgo, $lte: today}});
+    res.json({msg: 'success', data: budgets});
+  } catch(e) {
+    res.status(500).send();
+  }
+
+
+});
+
+
 //***********************************Plaid***********************************************
 
 app.post('/api/create_link_token', (req, res, next) => {
@@ -1081,26 +1125,145 @@ function deleteNotVerified() {
   });
 }
 
-function createBudgetArray(req) {
+async function fixBudgets() {
+  const id = '601956cc9805010004ff17ad';
+  var user = await User.findOne({_id: id});
 
   let monthArray = [];
   var i;
   let myDate = new Date();
-
-  console.log(myDate);
+  var newDate;
 
   for (i = 0; i < 24; i++) {
-    monthArray.push({active: false, month: utils.getMonthNum(myDate), year: utils.getYear(myDate), monthString: utils.getMonth(myDate)});
+    monthArray.push({active: false, date: new Date(utils.getYear(myDate) + "-" + utils.getMonthNum(myDate) + "-" + "1"), month: utils.getMonthNum(myDate), year: utils.getYear(myDate), monthString: utils.getMonth(myDate)});
     myDate = myDate.add(1).month();
+    //console.log(myDate);
   }
 
-  Budget.find({user: req.user.username}, "month", (err, budgets) => {
-    console.log(budgets);
+  Budget.find({user: ''}, "month", (err, budgets) => {
+
     monthArray.forEach((month, index, theArray) => {
       budgets.forEach((budget) => {
         if (month.monthString === budget.month) {
-          console.log('there is an active month');
           theArray[index].active = true;
+
+          if (budget.date == undefined) {
+            budget.date = month.date;
+            budget.user_id = id;
+            budget.save();
+          }
+        }
+      });
+    });
+
+    user.monthsArray = monthArray;
+    user.save();
+
+  });
+
+}
+
+async function createPastBudgets(req) {
+  var id = req.user._id;
+  id = '602eafb82982f1000477ec5a';
+  // console.log(id);
+  if (id == '602eafb82982f1000477ec5a') {
+    // var startMonth = req.user.monthsArray[0].date;
+    // console.log(startMonth);
+    // startMonth.add(-11).months();
+    // console.log(startMonth);
+    // const userArray = req.user.monthsArray;
+    // var theArray = [];
+    // const transactionDate = startMonth;
+    // transactionDate.add(5).days();
+
+    // Budget.deleteMany({user_id: id}, (budget) => {
+    //
+    // });
+
+var transactionDate;
+    const connor = await User.findOne({_id: '602eafb82982f1000477ec5a'});
+
+    for (i = 0; i < 12; i++) {
+
+      //req.user.monthsArray.forEach((month, index, theArray) => {
+        // if (req.user.monthsArray[i].active === false) {
+          var newBudget = new Budget();
+
+          newBudget.user = connor.username;
+          newBudget.user_id = id;
+          newBudget.month = connor.monthsArray[i].monthString;
+          newBudget.year = connor.monthsArray[i].year;
+          newBudget.monthNum = connor.monthsArray[i].month;
+          newBudget.date = connor.monthsArray[i].date;
+
+          transactionDate = newBudget.date;
+          //console.log(transactionDate);
+          transactionDate.add(5).days();
+          //console.log(transactionDate);
+          newBudget.category = Budget.chartBudgets;
+          newBudget.category.forEach((category) => {
+            category.items.forEach((item) => {
+              //console.log(item.transactions);
+              //console.log(transactionDate);
+              if (item.transactions.length !== 0) {
+                item.transactions[0].date = transactionDate;
+              }
+
+            });
+          });
+          newBudget.save();
+
+          connor.monthsArray[i].active = true;
+
+          //theArray[index].active = true;
+
+        // }
+
+      //});
+
+
+    }
+    connor.save();
+
+    // req.user.monthsArray = theArray.concat(req.user.monthsArray);
+    // req.user.save();
+
+    //console.log('user array ', req.user.monthsArray);
+  }
+}
+
+ function createBudgetArray(req) {
+
+  let monthArray = [];
+  var i;
+  let myDate = new Date();
+  myDate.add(-12).months();
+  var newDate;
+
+  console.log(myDate);
+
+  for (i = 0; i < 36; i++) {
+    monthArray.push({active: false, date: new Date(utils.getYear(myDate) + "-" + utils.getMonthNum(myDate) + "-" + "1"), month: utils.getMonthNum(myDate), year: utils.getYear(myDate), monthString: utils.getMonth(myDate)});
+    // console.log(new Date(utils.getYear(myDate) + "-" + utils.getMonthNum(myDate) + "-" + "1"));
+    myDate = myDate.add(1).month();
+    //console.log(myDate);
+  }
+
+  //user: req.user.username
+
+  Budget.find({user: req.user.username}, "month", (err, budgets) => {
+    // console.log(budgets);
+    monthArray.forEach((month, index, theArray) => {
+      budgets.forEach((budget) => {
+        if (month.monthString === budget.month) {
+          // console.log('there is an active month');
+          theArray[index].active = true;
+
+          // if (budget.date == undefined) {
+          //   budget.date = month.date;
+          //   budget.save();
+          // }
         }
       });
     });
@@ -1108,11 +1271,17 @@ function createBudgetArray(req) {
     // console.log('month array');
     // console.log(monthArray);
 
-    req.user.monthsArray = monthArray;
-    req.user.save();
+    //const connor = await User.findOne({_id: '602eafb82982f1000477ec5a'});
+     req.user.monthsArray = monthArray;
+     req.user.save();
+    // console.log(connor);
+    // connor.monthsArray = monthArray;
+    // connor.save();
   });
 
 }
+
+
 
 function createChart(id) {
   const src= 'https://charts.mongodb.com/charts-ibudget-zqzdh/embed/charts?id=df5582b5-8d8d-45a9-9817-80e7ed5de323&theme=light&autoRefresh=true&maxDataAge=30';

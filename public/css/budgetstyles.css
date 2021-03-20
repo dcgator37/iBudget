@@ -604,7 +604,7 @@ input:last-child {
   top: 0;
   font-size: 36px;
   margin-left: 25px;
-  cursor:pointer
+  cursor: pointer;
 }
 
 .openbtn:hover{

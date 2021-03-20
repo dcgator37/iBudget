@@ -11,6 +11,8 @@ $(document).ready(function() {
 //   console.log('chart loaded');
 // });
 
+
+
   //initialize global chart variable
   var myChart;
 
@@ -49,6 +51,36 @@ $(document).ready(function() {
   });
 
   //*****************************************************Main Budget****************************************************************************
+
+  $(document).on('click', '#monthPicker', function() {
+    console.log('postion ', $('.card-body').scrollLeft());
+
+    indexOfCurrent = $('.btn--current').attr('data-index');
+    //indexOfCurrent = 23;
+    if (indexOfCurrent > 4) {
+      // const calcScroll = (indexOfCurrent * 62) - 178;
+
+      //const calcScroll = ((indexOfCurrent-4) * 62) + ((indexOfCurrent-4) + 30 - 20);
+      //this one kinda works
+      const calcScroll = (indexOfCurrent * 62) - 50;
+      //const calcScroll = (indexOfCurrent * 62) - 248 + 10;
+      console.log('calc position ',calcScroll);
+      $('.card-body').scrollLeft(calcScroll);
+
+    }
+
+    // 92 to cover first month; 20px padding at from; plus an extra 30 px
+    // about 76 with 5th index august in middle
+    //4 to left and 4 to Right
+    // 5 * 62 = 310
+    //34.5 + 24 + 1
+    // index * 62 - 248 + 14
+    //62 width
+    //20px padding in between
+    //564ish
+    //$('.card-body').scrollLeft(300);
+  });
+
 
   $(document).on('click', '.Budget-Row', function(e) {
 
@@ -881,7 +913,9 @@ $(document).ready(function() {
     $('#numTransactions').text(numTransactions);
 
     transactions.forEach((transaction) => {
+      console.log(transaction.date);
       var theDate = new Date(transaction.date);
+      console.log(theDate);
       var month = theDate.toLocaleDateString("en-US", {month: "short"});
       var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
 

@@ -58,6 +58,17 @@
 
     <div class="col-lg-1" style="background-color: white">
 
+      <div id="leftNav" class="leftnav" style="width: 0px;">
+        <ul>
+        <li><a href="/insights"><i class="fas fa-chart-pie"></i> Insights</a></li>
+        <li><a href="/"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
+        </ul>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="far fa-window-close"></i></a>
+      </div>
+
+      <!-- Use any element to open the sidenav -->
+    <span class="openbtn" onclick="openNav()"><i class="fas fa-bars"></i></span>
+
     </div>
 
     <div class="col-lg-6">
@@ -80,15 +91,15 @@
             <!-- <div class="card card-body-prev"></div> -->
 
             <!-- loop through and create buttons for each month for two years -->
-            <% months.forEach(function(month) { %>
+            <% months.forEach(function(month, index) { %>
             <form action="/switchmonth" method="post">
               <p>
                 <% if(month.monthString == budget.month ){ %>
-                  <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                  <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>" data-index="<%= index %>"> <%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else if(month.active == true){ %>
-                  <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                  <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else { %>
-                  <button class="btn btn--month" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button>
+                  <button class="btn btn--month" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } %>
                 <!-- <button class="btn btn-primary" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button> -->
                 <input type="hidden" name="year" value="<%= month.year %>">
@@ -364,16 +375,7 @@
 
 
     <!--    Side Nav    -->
-    <div id="leftNav" class="leftnav" style="width: 0px;">
-      <ul>
-      <li><a href="/"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
-      <li><a href="#"><i class="fas fa-chart-pie"></i> Insights</a></li>
-      </ul>
-      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="far fa-window-close"></i></a>
-    </div>
 
-    <!-- Use any element to open the sidenav -->
-  <span class="openbtn" onclick="openNav()"><i class="fas fa-bars"></i></span>
 
 
   </div>
