@@ -481,6 +481,14 @@ input:last-child {
   padding: 5px;
 }
 
+.Transactions-List-Header {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+}
+
 .monthDay-container {
   display: flex;
   flex-direction: column;
@@ -526,6 +534,14 @@ input:last-child {
 }
 
 #transactionModalDate, #transactionModalMerchant {
+  text-align: left;
+}
+
+#transactionEditModalAmt {
+  text-align: center;
+}
+
+#transactionEditModalDate, #transactionEditModalMerchant {
   text-align: left;
 }
 

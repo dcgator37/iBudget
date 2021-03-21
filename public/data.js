@@ -62,10 +62,15 @@ $(document).ready(function() {
 
       //const calcScroll = ((indexOfCurrent-4) * 62) + ((indexOfCurrent-4) + 30 - 20);
       //this one kinda works
-      const calcScroll = (indexOfCurrent * 62) - 50;
+      //const calcScroll = (indexOfCurrent * 62) - 50;
       //const calcScroll = (indexOfCurrent * 62) - 248 + 10;
-      console.log('calc position ',calcScroll);
-      $('.card-body').scrollLeft(calcScroll);
+
+      //const calcScroll = 52.44 * indexOfCurrent;
+
+      var myScrollPos = $('.btn--current').offset().left + $('.btn--current').outerWidth(true)/2 - $('.card-body').width()/2 - 190;
+      $('.card-body').scrollLeft(myScrollPos);
+      // console.log('calc position ',calcScroll);
+      // $('.card-body').scrollLeft(calcScroll);
 
     }
 
@@ -113,7 +118,7 @@ $(document).ready(function() {
     $('#budgetSideBarProgress').attr('aria-valuenow', progressAmt);
 
     //remove all elements of the transaction container except the first one
-    $('#Transaction-Container').children('.Transactions-List-Row').slice(1).remove();
+    $('#Transaction-Container').children('.Transactions-List-Row').remove();
 
     //ajax query to retrieve transactions from database
     $.ajax({
@@ -558,6 +563,66 @@ $(document).ready(function() {
 
   });
 
+  $(document).on('click', '.Transactions-List-Row', function() {
+    const el = $(this);
+    const itemIndex = $('.item--selected').attr('data-item');
+    const index = $('.item--selected').parent().attr('data-cat');
+    const transactionIndex = $(this).attr('data-index');
+    const item = $('#itemName').text();
+    const merchant = $(this).children('.transactionMerchant').text();
+    const today = moment().format('YYYY-MM-DD');
+
+
+    $.ajax({
+      url: '/getTransaction',
+      method: 'post',
+      dataType: 'json',
+      data: {
+        'index': index,
+        'itemIndex': itemIndex,
+        'transactionIndex': transactionIndex
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          //res.transaction
+
+          const theDate = moment(res.transaction.date).format('YYYY-MM-DD');
+          $('#transactionEditModalDate').val(theDate);
+          $('#transactionEditModalAmt').val(res.transaction.amt);
+          $('#transactionEditModalAmt').attr('data-value', res.transaction.amt);
+          $('#transactionEditModalNote').text(res.transaction.notes);
+          $('#transactionEditModal').attr('data-index', transactionIndex);
+
+          $('#transactionEditModalAmt').formatCurrency();
+
+        } else {
+          alert('data did not get retrieved');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+
+    //reset amt
+    // $('#transactionEditModalAmt').val('');
+    // $('#transactionEditModalAmt').attr('data-value', '');
+
+    //set date picker to today
+    //$('#transactionEditModalDate').val(today);
+
+    //display item span and hide dropdown
+    $('#modalEditRemoveItem').css("display", "block");
+    $('#modalEditItemDropdown').css("display", "none");
+
+    //set merchant and item
+    $('#transactionEditModalMerchant').val(merchant);
+    $('#modalEditItem').text(item);
+
+    $('#transactionEditModal').modal('show');
+
+  });
+
   ////*****************************************************Modal Popup****************************************************************************
 
   $(document).on('click', '#testTransaction', function() {
@@ -581,6 +646,9 @@ $(document).ready(function() {
     //set merchant and item
     $('#transactionModalMerchant').val(item);
     $('#modalItem').text(item);
+
+
+
 
   });
 
@@ -635,7 +703,7 @@ $(document).ready(function() {
           updateProgressBar(el);
           if ($('#modalRemoveItem').is(":visible")) {
             updateBudgetListItem(el);
-            addTransactionList(merchant, amtDB, date);
+            addTransactionList(merchant, amtDB, date, res.transactionIndex);
           }
           $('#transactionModal').modal('hide');
         } else {
@@ -697,6 +765,88 @@ $(document).ready(function() {
 
     const item = $(this).find('option:selected').val();
     $('#transactionModalMerchant').val(item);
+  });
+
+
+
+  $('#transactionEditForm').on('submit', function(e) {
+    e.preventDefault();
+    const dropdown = $('#modalEditItemSelect');
+    var el = $('.item--selected');
+
+    var index;
+    var itemIndex;
+    var budgetItem;
+    var budgetContainer;
+    const amtDB = $('#transactionEditModalAmt').data('value');
+    const merchant = $('#transactionEditModalMerchant').val();
+    const notes = $('#transactionEditModalNote').val();
+    const date = $('#transactionEditModalDate').val();
+    const transactionIndex = $('#transactionEditModal').attr('data-index');
+    console.log('date when editing trans ',date);
+
+    if ($('#modalEditRemoveItem').is(":visible")) {
+      // console.log('modal remove is visible');
+      index = $('.item--selected').parent().attr('data-cat');
+      itemIndex = $('.item--selected').attr('data-item');
+      budgetItem = $('#modalEditItem').text();
+
+    } else {
+      // console.log('dropdown is visible');
+      index = dropdown.find('option:selected').data('cat');
+      itemIndex = dropdown.find('option:selected').data('item');
+      budgetItem = dropdown.find('option:selected').val();
+
+      budgetContainer = $(document).find("div.Budget-Container[data-cat='" + index + "']");
+      el = budgetContainer.find("div.Budget-Row[data-item='"+ itemIndex + "']");
+
+    }
+
+    $.ajax({
+      url: '/editTransaction',
+      method: 'post',
+      dataType: 'json',
+      data: {
+        'type': 'Expense',
+        'amt': amtDB,
+        'date': date,
+        'merchant': merchant,
+        'notes': notes,
+        'index': index,
+        'itemIndex': itemIndex,
+        'transactionIndex': transactionIndex
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          console.log('Success');
+          updateRemaining(el, res.sum);
+          updateProgressBar(el);
+          if ($('#modalEditRemoveItem').is(":visible")) {
+            updateBudgetListItem(el);
+            //addTransactionList(merchant, amtDB, date, res.transactionIndex);
+            editTransactionList(merchant, amtDB, date, transactionIndex);
+          }
+          $('#transactionEditModal').modal('hide');
+        } else {
+          alert('data did not get added');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+  });
+
+  $(document).on('change', '#transactionEditModalAmt', function() {
+    var amtDB = parseFloat($('#transactionEditModalAmt').val()).toFixed(2);   //change the value entered to two decimal places
+    $('#transactionEditModalAmt').attr('data-value', amtDB);
+    $('#transactionEditModalAmt').toNumber().formatCurrency();
+  });
+
+  $(document).on('change', '#modalEditItemSelect', function() {
+
+    const item = $(this).find('option:selected').val();
+    $('#transactionEditModalMerchant').val(item);
   });
 
   // Add transaction button click event. Sends post request to server, sending the transaction data.
@@ -912,18 +1062,18 @@ $(document).ready(function() {
 
     $('#numTransactions').text(numTransactions);
 
-    transactions.forEach((transaction) => {
+    transactions.forEach((transaction, index) => {
       console.log(transaction.date);
       var theDate = new Date(transaction.date);
       console.log(theDate);
       var month = theDate.toLocaleDateString("en-US", {month: "short"});
       var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
 
-      htmlRow = "<div class='Transactions-List-Row'>" +
+      htmlRow = "<div class='Transactions-List-Row' data-index=" + index + ">" +
                   "<div class='monthDay-container'>" +
                   "<span class='transaction-month'>" + month + "</span><span class='transaction-day'>" + day + "</span>" +
                   "</div>" +
-                  "<span>" + transaction.merchant + "</span>" +
+                  "<span class='transactionMerchant'>" + transaction.merchant + "</span>" +
                   "<span class='transactionAmt'>" + transaction.amt + "</span>" +
                 "</div>";
 
@@ -935,7 +1085,7 @@ $(document).ready(function() {
   }
 
   //after adding a transaction, add it as html to the sidebar
-  function addTransactionList(merchant, amt, date) {
+  function addTransactionList(merchant, amt, date, index) {
     const el = $('#Transaction-Container');
     var htmlRow = '';
     var numOfTransactions = $('#numTransactions').text();
@@ -949,17 +1099,31 @@ $(document).ready(function() {
     // var month = Date.toLocaleDateString("en-US", {month: "short"});
     // var day = Date.toLocaleDateString("en-US", {day: "numeric"});
 
-    htmlRow = "<div class='Transactions-List-Row'>" +
+    htmlRow = "<div class='Transactions-List-Row' data-index=" + index + ">" +
                 "<div class='monthDay-container'>" +
                 "<span class='transaction-month'>" + month + "</span><span class='transaction-day'>" + day + "</span>" +
                 "</div>" +
-                "<span>" + merchant + "</span>" +
+                "<span class='transactionMerchant'>" + merchant + "</span>" +
                 "<span class='transactionAmt'>" + amt + "</span>" +
               "</div>";
 
     $(el).append(htmlRow);
     $('.transactionAmt').toNumber().formatCurrency();
     $('#numTransactions').text(++numOfTransactions);
+  }
+
+  function editTransactionList(merchant, amt, date, index) {
+    const el = $('#Transaction-Container').children('.Transactions-List-Row').eq(index);
+    var month = moment(date).format('MMM');
+    var day = moment(date).date();
+    console.log(month);
+    console.log(day);
+
+    $(el).children('.transactionMerchant').text(merchant);
+    $(el).children('.transactionAmt').text(amt);
+    $(el).children('.transaction-month').text(month);
+    $(el).children('.transaction-day').text(day);
+
   }
 
   //load data from the db to populate the chart

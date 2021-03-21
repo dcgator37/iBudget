@@ -95,7 +95,7 @@
             <form action="/switchmonth" method="post">
               <p>
                 <% if(month.monthString == budget.month ){ %>
-                  <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>" data-index="<%= index %>"> <%= month.monthString.substring(0,3) + " " + month.year %></button>
+                  <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>" data-index="<%= index %>" data-length="<%= months.length %>"> <%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else if(month.active == true){ %>
                   <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else { %>
@@ -277,6 +277,54 @@
       </div>
     </div>
 
+    <!-- *****************************************Edit/Delete Transaction Modal*************************************************** -->
+    <div class="modal fade" id="transactionEditModal" data-index="" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
+
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="transactionEditModalLabel">Edit Transaction</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+
+            <form id="transactionEditForm" class="row">
+            <div class="transactionModalInput col-12 my-2">
+              <input type="text" name="modalAmt" placeholder="$0.00" id="transactionEditModalAmt" data-value="" class= "form-control" onclick="this.select()" required>
+            </div>
+            <div class="col-4 my-2">
+              <input type="date" name="modalDate" value="" id="transactionEditModalDate" class="transactionModalInput form-control">
+            </div>
+            <div class="col-8 my-2">
+              <input type="text" name="modalMerchant" value="Church" placeholder="" id="transactionEditModalMerchant" class="transactionModalInput form-control" onclick="this.select()">
+            </div>
+            <div class="col-12 my-2" id="modalEditRemoveItem">
+              <i class="fas fa-minus-circle" style="color: red"></i><span id="modalEditItem" class="" name="modalItem"></span>
+            </div>
+            <div class="col-12 my-2" id="modalEditItemDropdown" style="display: none">
+              <select id="modalEditItemSelect" class="transactionModalInput form-control form-select">
+
+              </select>
+            </div>
+            <div class="col-12 my-2">
+              <label class="form-label">Note</label>
+                <textarea name="modalNotes" placeholder="Note" id="transactionEditModalNote" class="transactionModalInput form-control"></textarea>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <div class="modalFooterContent">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" id="transactionModalEdit" class="btn btn-primary">Save transaction</button>
+            </div>
+          </div>
+          </form>
+        </div>
+    </div>
+  </div>
+
+    <!-- *****************************************Plaid Account Modal*************************************************** -->
+
     <div class="modal fade" id="PlaidAccountModal" tabindex="-1" aria-labelledby="PlaidAccountModal" aria-hidden="true">
 
       <div class="modal-dialog modal-md modal-dialog-centered">
@@ -358,10 +406,11 @@
       </div>
 
       <div id="Transaction-Container" class="Transactions-List">
-        <div class="Transactions-List-Row">
+        <div class="Transactions-List-Header">
           <div><span id="numTransactions">1</span><span> Transactions</span></div>
           <!-- <button id="addTransaction" style="padding: 0"><i class="fas fa-plus"></i> Add New</button> -->
           <button id="testTransaction" data-bs-toggle="modal" data-bs-target="#transactionModal"><i class="fas fa-plus"></i> Add New</button>
+
         </div>
 
         <!-- <div class="Transactions-List-Row">

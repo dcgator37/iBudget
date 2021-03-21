@@ -726,6 +726,16 @@ app.put("/editCat" , function(req, res) {
   res.json({msg: 'success' });
 });
 
+app.post('/getTransaction', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const transactionIndex = req.body.transactionIndex;
+
+  const transaction = activeBudget.category[index].items[itemIndex].transactions[transactionIndex];
+
+  res.json({msg: 'success', transaction: transaction});
+});
+
 app.post('/addTransaction', (req, res) => {
   const index = req.body.index;
   const itemIndex = req.body.itemIndex;
@@ -774,6 +784,36 @@ app.post('/addTransaction', (req, res) => {
   // console.log('sum of transactions: ' + sum);
 
   //send the sum back to the client so it can do the math and update the remaining span and data-value attribute
+  res.json({msg: 'success', sum: sum, transactionIndex: activeBudget.category[index].items[itemIndex].transactions.length - 1});
+});
+
+app.post('/editTransaction', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const transactionIndex = req.body.transactionIndex;
+  const type = req.body.type;
+  const amt = parseFloat(req.body.amt);
+  const date = req.body.date;
+  const merchant = req.body.merchant;
+  const notes = req.body.notes;
+
+  var priorAmt = activeBudget.category[index].items[itemIndex].transactions[transactionIndex].amt;
+  var difference = amt - priorAmt;
+
+  activeBudget.category[index].items[itemIndex].transactions[transactionIndex].type = type;
+  activeBudget.category[index].items[itemIndex].transactions[transactionIndex].amt = amt;
+  activeBudget.category[index].items[itemIndex].transactions[transactionIndex].date = date;
+  activeBudget.category[index].items[itemIndex].transactions[transactionIndex].merchant = merchant;
+  activeBudget.category[index].items[itemIndex].transactions[transactionIndex].notes = notes;
+
+  //increment the sum with the new transaction
+  activeBudget.category[index].items[itemIndex].sumOfTransactions += difference;
+
+  //set sum to the sum from the db
+  sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
+
+  activeBudget.save();
+
   res.json({msg: 'success', sum: sum});
 });
 
