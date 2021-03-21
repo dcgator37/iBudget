@@ -882,26 +882,35 @@ app.post('/getTransactions', (req, res) => {
 app.get('/testData', (req, res) => {
   const labels = [];
   const data = [];
+  var income;
   var plannedSum;
 
 
   activeBudget.category.forEach((category, index) => {
-    labels.push(category.name);
+    if (index > 0) {
+      labels.push(category.name);
+    }
 
     plannedSum = 0;
 
     category.items.forEach((item, index) => {
-      if (item.planned) {
-      plannedSum += item.planned;
-    } else {
-      plannedSum += 0;
-    }
+
+        if (item.planned) {
+          plannedSum += item.planned;
+        } else {
+          plannedSum += 0;
+        }
+
     });
 
-    data.push(plannedSum);
+    if (index > 0) {
+      data.push(plannedSum);
+    } else {
+      income = plannedSum;
+    }
   });
 
-  res.json({msg: 'success', labels: labels, data: data});
+  res.json({msg: 'success', labels: labels, data: data, income: income});
 });
 
 //***********************************Insights***********************************************

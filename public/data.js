@@ -26,6 +26,7 @@ $(document).ready(function() {
   $('.Input-Planned').toNumber().formatCurrency();
   $('.Budget-Row-Remaining').toNumber().formatCurrency();
 
+
   //listener when clicking off an item to hide item sidebar and re-display the chart
   $(document).click(function(event) {
     var $target = $(event.target);
@@ -67,7 +68,7 @@ $(document).ready(function() {
 
       //const calcScroll = 52.44 * indexOfCurrent;
 
-      var myScrollPos = $('.btn--current').offset().left + $('.btn--current').outerWidth(true)/2 - $('.card-body').width()/2 - 190;
+      var myScrollPos = $('.btn--current').offset().left + $('.btn--current').outerWidth(true)/2 - $('.card-body').width()/2 - 260;
       $('.card-body').scrollLeft(myScrollPos);
       // console.log('calc position ',calcScroll);
       // $('.card-body').scrollLeft(calcScroll);
@@ -1136,8 +1137,8 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           console.log(res.labels);
           console.log(res.data);
-          createChart(res.labels, res.data);
-          budgetRemaining(res.data);
+          createChart(res.labels, res.data, res.income);
+          budgetRemaining(res.data, res.income);
         } else {
           alert('data did not get added');
         }
@@ -1149,7 +1150,10 @@ $(document).ready(function() {
   }
 
   //create the chart
-  function createChart(labels, data) {
+  function createChart(labels, data, income) {
+    //const income = data[0];
+    //data = data.slice(1);
+    //labels = labels.slice(1);
     const chartData = {
       datasets: [{
           data: data,
@@ -1174,7 +1178,9 @@ $(document).ready(function() {
       labels : labels
     };
 
-    const options = [];
+    const options = {
+      cutoutPercentage: 60
+    };
 
     var ctx = document.getElementById('myChart').getContext('2d');
     myChart = new Chart(ctx, {
@@ -1182,16 +1188,32 @@ $(document).ready(function() {
       data: chartData,
       options: options
     });
+
+    donutInner(income);
   }
 
   //update the chart when the planned amt changes for an item
   function updateChart(index, newCatSum) {
     //var ctx = document.getElementById('myChart');
+    var income;
 
-    myChart.config.data.datasets[0].data[index] = newCatSum;
-    myChart.update();
+    if (index > 0) {
+      index--;
+      myChart.config.data.datasets[0].data[index] = newCatSum;
+      myChart.update();
+    } else {
+      income = newCatSum;
+      donutInner(income);
+    }
+
+
+
+
     const data = myChart.config.data.datasets[0].data;
-    budgetRemaining(data);
+    budgetRemaining(data, income);
+
+
+
   }
 
   //update the chart labels when an item name changes
@@ -1201,15 +1223,24 @@ $(document).ready(function() {
       myChart.update();
     }
   }
+
+  function donutInner(income) {
+    $('.donut-inner h5').text(income);
+    $('.donut-inner h5').formatCurrency();
+  }
+
   // function to determine if the user is over budget, under budget or on budget
-  function budgetRemaining(data){
-    const income = data[0];
+  function budgetRemaining(data, income){
+    //const income = data[0];
     var sumofPlannedAmt = 0;
+    if (income == undefined) {
+      income = $('#leftToBudget').attr('data-income');
+    }
 
     data.forEach(function(plannedAmt, index){
-      if(index>0){
+      //if(index>0){
         sumofPlannedAmt = sumofPlannedAmt + plannedAmt;
-      }
+      //}
     });
 
     if(sumofPlannedAmt ==  income){
@@ -1223,11 +1254,12 @@ $(document).ready(function() {
     else if(sumofPlannedAmt < income){
       //if the leftToBudget value span is missing, add it
       if (!$('#leftToBudget').length) {
-        $('#leftToBudgetText').before('<span id="leftToBudget" data-value=""></span>');
+        $('#leftToBudgetText').before('<span id="leftToBudget" data-value="" data-income=""></span>');
       }
 
       $('#leftToBudget').text(income - sumofPlannedAmt);
       $('#leftToBudget').attr('data-value', income - sumofPlannedAmt);
+      $('#leftToBudget').attr('data-income', income);
       $('#leftToBudgetText').text(" left to budget");
       //remove prior css classes before adding new ones
       $('#leftToBudget').removeClass();
@@ -1238,12 +1270,13 @@ $(document).ready(function() {
     else if (sumofPlannedAmt > income){
       //if the leftToBudget value span is missing, add it
       if (!$('#leftToBudget').length) {
-        $('#leftToBudgetText').before('<span id="leftToBudget" data-value=""></span>');
+        $('#leftToBudgetText').before('<span id="leftToBudget" data-value="" data-income=""></span>');
       }
 
       $('#leftToBudget').text(sumofPlannedAmt - income);
       //if over budget, set data-value to negative number
       $('#leftToBudget').attr('data-value', (sumofPlannedAmt - income).toFixed(2) * -1);
+      $('#leftToBudget').attr('data-income', income);
       $('#leftToBudgetText').text(" over budget");
       //remove prior css classes before adding new one
       $('#leftToBudget').removeClass();
