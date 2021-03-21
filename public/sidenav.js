@@ -1,5 +1,5 @@
 
-/* Set the width of the side navigation to 250px */
+/* Set the width of the side navigation */
 function openNav() {
     document.getElementById("leftNav").style.width = "14.5rem";
   }

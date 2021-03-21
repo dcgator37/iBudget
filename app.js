@@ -403,6 +403,13 @@ app.post("/logout", function(req, res) {
 }
 });
 
+app.get("/logout", function(req, res) {
+  req.logout();
+  res.clearCookie();
+  req.session.destroy();
+  res.redirect('/');
+});
+
 app.post("/failure", function(req, res) {
   res.redirect("/");
 });

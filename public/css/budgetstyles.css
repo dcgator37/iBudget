@@ -553,7 +553,7 @@ input:last-child {
   display: flex;
   width: 0;
   position: fixed;
-  z-index: 1;
+  z-index: 99;
   top: 0;
   left: -25px;
   background-color: rgb(0, 145, 217);
@@ -591,7 +591,7 @@ input:last-child {
 /* Change font size and color on hover */
 .leftnav ul li:hover a{
   background: rgb(3, 166, 247);
-  font-size: 150%;
+  font-size: 120%;
   transition: 0.2s;
 }
 
