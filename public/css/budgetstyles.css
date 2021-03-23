@@ -261,6 +261,16 @@ input:last-child {
   font-size: 1em;
 }
 
+.sum-of-income{
+  color:black;
+  font-size: 1em;
+  font-weight: bold;
+  /* margin-left: 15px; */
+  width: 60%;
+  text-align: right;
+
+}
+
 
 
 .input-label {
