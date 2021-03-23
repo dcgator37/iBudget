@@ -16,6 +16,7 @@ const utils = require(__dirname + "/date.js");
 const $ = require('jquery');
 const datejs = require('datejs');
 const plaid = require('plaid');
+const flash = require('connect-flash');
 
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -73,6 +74,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.use(flash());
 
 //set the path of the jquery file
 app.use('/jquery', express.static(path.join(__dirname + '/node_modules/jquery/dist/')));
@@ -349,7 +351,11 @@ setInterval(deleteNotVerified, 1000 * 60 * 60 * 24);
 
 
 app.get("/", function(req, res) {
-  res.render("login");
+
+    var info;
+
+    res.render('login', {error: info});
+
 });
 
 // app.post("/", function(req, res) {
@@ -378,9 +384,21 @@ app.get("/", function(req, res) {
 //   }
 // });
 
-app.post("/login", passport.authenticate('local', { successRedirect: '/budget', failureRedirect: '/'})
+// app.post("/login", passport.authenticate('local', { successRedirect: '/budget', failureRedirect: '/', failureFlash: true})
+//
+// );
 
-);
+app.post('/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err) { return next(err); }
+    if (!user) {
+      return res.render('login', {error: info.message}); }
+    req.logIn(user, function(err) {
+      if (err) { return next(err); }
+      return res.redirect('/budget');
+    });
+  })(req, res, next);
+});
 
 app.get("/deleteAccount", function(req, res) {
 
