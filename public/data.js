@@ -942,11 +942,16 @@ $(document).ready(function() {
 
   //function to add category html
   function addCat(el, index) {
-    const category = "<div class='container Budget-Container mx-auto' data-cat-name='' data-cat='" + index + "'>" +
+    const category = "<div class='container Budget-Container' data-cat-name='' data-cat='" + index + "'>" +
       "<header class='Category-Header'>" +
       "<button type='button' class='btndelHidden' name='button'><i class='far fa-trash-alt'></i></button>" +
       "<input class='cat-label' type='text' name='catName' value='' placeholder='Untitled'></input>" +
-      "<span class='Header-Right'>Planned</span><span class='Header-Right'>Remaining <i class='fas fa-angle-down'></i></span>" +
+      "<span class='Header-Right'>Planned</span>" +
+      "<span class='Header-Right'>Remaining <button class='fas fa-angle-down' type='button' id='dropdownMenuButton1' data-bs-toggle='dropdown' aria-expanded='false'></button>" +
+        "<ul class='dropdown-menu' aria-labelledby='dropdownMenuButton1'>" +
+          "<li><a class='dropdown-item'>Remaining</a></li>" +
+          "<li><a class='dropdown-item'>Spent</a></li>" +
+        "</ul></span>" +
       "</header>" +
       "<div class='itemButton' data-cat='" + index + "'>" +
       "<button class='addItem' type='button' name='button'>Add Item</button>" +

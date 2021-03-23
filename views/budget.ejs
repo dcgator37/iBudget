@@ -61,7 +61,7 @@
       <div id="leftNav" class="leftnav" style="width: 0px;">
         <ul>
         <li><a href="/insights"><i class="fas fa-chart-pie"></i> Insights</a></li>
-        <li><a href="/"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
         </ul>
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="far fa-window-close"></i></a>
       </div>
@@ -82,7 +82,7 @@
           <!-- <span id="leftToBudget" data-value=""></span><span id="leftToBudgetText"></span> -->
         </p>
         </p>
-          <span id="leftToBudget" data-value=""></span><span id="leftToBudgetText"></span>
+          <span id="leftToBudget" data-value="" data-index=""></span><span id="leftToBudgetText"></span>
 
         </p>
 
@@ -129,7 +129,11 @@
           <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
           <input class="cat-label" type="text" name="catName" value="" placeholder="Untitled"></input>
           <span class="Header-Right">Planned</span>
-          <span class="Header-Right">Received <i class="fas fa-angle-down"></i></span>
+          <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a class="dropdown-item">Remaining</a></li>
+              <li><a class="dropdown-item">Spent</a></li>
+            </ul></span>
 
         <!-- </div> -->
         </header>
@@ -153,8 +157,8 @@
           <span class="Header-Right">Planned</span>
           <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item" href="#">Remaining</a></li>
-              <li><a class="dropdown-item" href="#">Sent</a></li>
+              <li><a class="dropdown-item">Remaining</a></li>
+              <li><a class="dropdown-item">Spent</a></li>
             </ul></span>
         </header>
 
@@ -376,6 +380,10 @@
 
       <div class="chart-container">
       <canvas id="myChart" width="480px" height="360px"></canvas>
+      <div class="donut-inner">
+        <span>Income</span>
+        <h5></h5>
+      </div>
       </div>
 
       <div class='Budget-List-Container'>
