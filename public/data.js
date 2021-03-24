@@ -142,6 +142,13 @@ $(document).ready(function() {
             $('#last-Month-Val').toNumber().formatCurrency();
           }
 
+          if (res.sumLastYear == undefined) {
+            $('#last-Year-Val').text('Not Found');
+          } else {
+            $('#last-Year-Val').text(res.sumLastYear);
+            $('#last-Year-Val').toNumber().formatCurrency();
+          }
+
         } else {
           alert('data did not get retrieved');
         }
@@ -165,11 +172,16 @@ $(document).ready(function() {
     const el = $(this);
     const name = $(this).text();
 
+    if (name !== "Income") {
+      $(this).parent().children('.btndelHidden').css("visibility", "visible");
+      convertCatToInput(el, name);
+    }
 
-    $(this).parent().children('.btndelHidden').css("visibility", "visible");
 
 
-    convertCatToInput(el, name);
+
+
+
   });
 
   // Add item button click event. Sends post request to server, sending the index of the category array you're adding an item to.

@@ -389,6 +389,15 @@ input:last-child {
   position: fixed;
 }
 
+.btn-group {
+  margin-left: 20%;
+  margin-top: 10px;
+}
+
+.btn-outline-primary {
+  width: 102px;
+}
+
 .donut-inner {
   /* margin-top: -100px;
   margin-bottom: 100px; */
