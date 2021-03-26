@@ -19,34 +19,31 @@
   <!-- <script type="text/javascript" src="/js/jquery.formatCurrency-1.4.0.js"></script> -->
 
   <script type="text/javascript">
-
-  //   $(document).ready(function() {
-  //
-  //
-  //
-  // });
-
-  function dothat(el) {
-    el.children[0].children[0].style.visibility = "hidden";
-  };
-
-  function dosomething(el) {
-    el.children[0].children[0].style.visibility = "visible";
-  };
-
-  function clickItem(el) {
-    //Remove the my-list--selected class from any elements that already have it
-    // $('.item--selected').removeClass('item--selected');
-    // //Add the my-list--selected class to the clicked element
-    // $(el).addClass('item--selected');
-    // $('.Transactions-List').css("display", "flex");
-    // $('.Budget-List-Item').css("display", "flex");
+    //   $(document).ready(function() {
     //
-    // $('#myChart').css("display", "none");
-    // document.getElementById("myChart").style.display = "none";
-  };
+    //
+    //
+    // });
 
+    function dothat(el) {
+      el.children[0].children[0].style.visibility = "hidden";
+    };
 
+    function dosomething(el) {
+      el.children[0].children[0].style.visibility = "visible";
+    };
+
+    function clickItem(el) {
+      //Remove the my-list--selected class from any elements that already have it
+      // $('.item--selected').removeClass('item--selected');
+      // //Add the my-list--selected class to the clicked element
+      // $(el).addClass('item--selected');
+      // $('.Transactions-List').css("display", "flex");
+      // $('.Budget-List-Item').css("display", "flex");
+      //
+      // $('#myChart').css("display", "none");
+      // document.getElementById("myChart").style.display = "none";
+    };
   </script>
 
   <link rel="stylesheet" href="css/budgetstyles.css">
@@ -60,14 +57,14 @@
 
       <div id="leftNav" class="leftnav" style="width: 0px;">
         <ul>
-        <li><a href="/insights"><i class="fas fa-chart-pie"></i> Insights</a></li>
-        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
+          <li><a href="/insights"><i class="fas fa-chart-pie"></i> Insights</a></li>
+          <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
         </ul>
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="far fa-window-close"></i></a>
       </div>
 
       <!-- Use any element to open the sidenav -->
-    <span class="openbtn" onclick="openNav()"><i class="fas fa-bars"></i></span>
+      <span class="openbtn" onclick="openNav()"><i class="fas fa-bars"></i></span>
 
     </div>
 
@@ -82,7 +79,7 @@
           <!-- <span id="leftToBudget" data-value=""></span><span id="leftToBudgetText"></span> -->
         </p>
         </p>
-          <span id="leftToBudget" data-value="" data-index=""></span><span id="leftToBudgetText"></span>
+        <span id="leftToBudget" data-value="" data-index=""></span><span id="leftToBudgetText"></span>
 
         </p>
 
@@ -95,11 +92,11 @@
             <form action="/switchmonth" method="post">
               <p>
                 <% if(month.monthString == budget.month ){ %>
-                  <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>" data-index="<%= index %>" data-length="<%= months.length %>"> <%= month.monthString.substring(0,3) + " " + month.year %></button>
+                <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>" data-index="<%= index %>" data-length="<%= months.length %>"> <%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else if(month.active == true){ %>
-                  <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
+                <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else { %>
-                  <button class="btn btn--month" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
+                <button class="btn btn--month" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } %>
                 <!-- <button class="btn btn-primary" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button> -->
                 <input type="hidden" name="year" value="<%= month.year %>">
@@ -116,92 +113,94 @@
 
       <div class="Budget-Main">
 
-      <!-- <hr> -->
+        <!-- <hr> -->
 
-      <!-- loop through the budget building category boxes -->
-      <% budget.category.forEach(function(category, index) { %>
+        <!-- loop through the budget building category boxes -->
+        <% budget.category.forEach(function(category, index) { %>
 
-      <div class="container Budget-Container" data-cat-name="<%= category.name %>" data-cat="<%= index %>">
-        <% if (!category.name) { %>
-        <!-- if this is a new category and the name is blank, make the name an input so it can be edited -->
-        <header class="Category-Header">
-        <!-- <div class="itemHeader"> -->
-          <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
-          <input class="cat-label" type="text" name="catName" value="" placeholder="Untitled"></input>
-          <span class="Header-Right">Planned</span>
-          <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item active">Remaining</a></li>
-              <li><a class="dropdown-item">Spent</a></li>
-            </ul></span>
+        <div class="container Budget-Container" data-cat-name="<%= category.name %>" data-cat="<%= index %>">
+          <% if (!category.name) { %>
+          <!-- if this is a new category and the name is blank, make the name an input so it can be edited -->
+          <header class="Category-Header">
+            <!-- <div class="itemHeader"> -->
+            <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
+            <input class="cat-label" type="text" name="catName" value="" placeholder="Untitled"></input>
+            <span class="Header-Right">Planned</span>
+            <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item active">Remaining</a></li>
+                <li><a class="dropdown-item">Spent</a></li>
+              </ul>
+            </span>
 
-        <!-- </div> -->
-        </header>
-        <% } else if (category.name === "Income") { %>
-        <!-- if the category is Income, make it say Received -->
-        <!-- <div class="itemHeader"> -->
-        <header class="Category-Header">
-          <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
-          <span class="Header-Left"><%= category.name %></span>
-          <span class="Header-Right">Planned</span>
-          <span class="Header-Right">Received <i class="fas fa-angle-down"></i></span>
+            <!-- </div> -->
+          </header>
+          <% } else if (category.name === "Income") { %>
+          <!-- if the category is Income, make it say Received -->
+          <!-- <div class="itemHeader"> -->
+          <header class="Category-Header">
+            <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
+            <span class="Header-Left"><%= category.name %></span>
+            <span class="Header-Right">Planned</span>
+            <span class="Header-Right">Received <i class="fas fa-angle-down"></i></span>
 
-        </header>
-        <!-- </div> -->
-        <% } else { %>
-        <!-- otherwise make it say Remaining -->
-        <!-- <div class="itemHeader"> -->
-        <header class="Category-Header">
-          <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
-          <span class="Header-Left"><%= category.name %></span>
-          <span class="Header-Right">Planned</span>
-          <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item active">Remaining</a></li>
-              <li><a class="dropdown-item">Spent</a></li>
-            </ul></span>
-        </header>
+          </header>
+          <!-- </div> -->
+          <% } else { %>
+          <!-- otherwise make it say Remaining -->
+          <!-- <div class="itemHeader"> -->
+          <header class="Category-Header">
+            <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
+            <span class="Header-Left"><%= category.name %></span>
+            <span class="Header-Right">Planned</span>
+            <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item active">Remaining</a></li>
+                <li><a class="dropdown-item">Spent</a></li>
+              </ul>
+            </span>
+          </header>
 
-        <!-- </div> -->
-        <% } %>
+          <!-- </div> -->
+          <% } %>
 
-        <!-- Loop through each budget item in the category -->
-        <% category.items.forEach(function(item, itemIndex) { %>
+          <!-- Loop through each budget item in the category -->
+          <% category.items.forEach(function(item, itemIndex) { %>
 
-        <div class="Budget-Row" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>">
+          <div class="Budget-Row" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>">
 
-          <button type="button" class="btndel" name="button"><i class="far fa-trash-alt"></i></button>
+            <button type="button" class="btndel" name="button"><i class="far fa-trash-alt"></i></button>
 
-          <!-- input-label
+            <!-- input-label
           planned-label
           span-rem -->
 
-          <input class="Input-Name" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
-          <input class="Input-Planned" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
-          <span class="Budget-Row-Remaining" data-value="<%= (item.planned - item.sumOfTransactions).toFixed(2) %>"><%= (item.planned - item.sumOfTransactions).toFixed(2) %></span>
+            <input class="Input-Name" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
+            <input class="Input-Planned" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
+            <span class="Budget-Row-Remaining" data-value="<%= (item.planned - item.sumOfTransactions).toFixed(2) %>"><%= (item.planned - item.sumOfTransactions).toFixed(2) %></span>
+
+          </div>
+          <div class="progress Budget-Row-Progress">
+            <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+
+          <% }) %>
+          <!-- add item button -->
+          <div class="itemButton" data-cat="<%= index %>">
+            <button class="addItem" type="button" name="button">Add Item</button>
+            <span id="sumOfIncome" data-value=""></span>
+          </div>
 
         </div>
-        <div class="progress Budget-Row-Progress">
-          <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
+        <!-- end of loop to make each budget category container -->
+        <% }); %>
 
-        <% }) %>
-        <!-- add item button -->
-        <div class="itemButton" data-cat="<%= index %>">
-          <button class="addItem" type="button" name="button">Add Item</button>
-          <span id="sumOfIncome" data-value=""></span>
+        <!-- add category button -->
+        <div class="container Category-Button">
+          <button class="addCat" type="button" name="button" value="">Add Category</button>
         </div>
 
       </div>
-      <!-- end of loop to make each budget category container -->
-      <% }); %>
-
-      <!-- add category button -->
-      <div class="container Category-Button">
-        <button class="addCat" type="button" name="button" value="">Add Category</button>
-      </div>
-
-    </div>
     </div> <!-- end of middle column -->
 
     <!-- right column -->
@@ -250,103 +249,103 @@
             <div class="modal-body">
 
               <form id="transactionForm" class="row">
-              <div class="transactionModalInput col-12 my-2">
-                <input type="text" name="modalAmt" placeholder="$0.00" id="transactionModalAmt" data-value="" class= "form-control"required>
-              </div>
-              <div class="col-4 my-2">
-                <input type="date" name="modalDate" value="" id="transactionModalDate" class="transactionModalInput form-control">
-              </div>
-              <div class="col-8 my-2">
-                <input type="text" name="modalMerchant" value="Church" placeholder="" id="transactionModalMerchant" class="transactionModalInput form-control" onclick="this.select()">
-              </div>
-              <div class="col-12 my-2" id="modalRemoveItem">
-                <i class="fas fa-minus-circle" style="color: red"></i><span id="modalItem" class="" name="modalItem"></span>
-              </div>
-              <div class="col-12 my-2" id="modalItemDropdown" style="display: none">
-                <select id="modalItemSelect" class="transactionModalInput form-control form-select">
+                <div class="transactionModalInput col-12 my-2">
+                  <input type="text" name="modalAmt" placeholder="$0.00" id="transactionModalAmt" data-value="" class="form-control" required>
+                </div>
+                <div class="col-4 my-2">
+                  <input type="date" name="modalDate" value="" id="transactionModalDate" class="transactionModalInput form-control">
+                </div>
+                <div class="col-8 my-2">
+                  <input type="text" name="modalMerchant" value="Church" placeholder="" id="transactionModalMerchant" class="transactionModalInput form-control" onclick="this.select()">
+                </div>
+                <div class="col-12 my-2" id="modalRemoveItem">
+                  <i class="fas fa-minus-circle" style="color: red"></i><span id="modalItem" class="" name="modalItem"></span>
+                </div>
+                <div class="col-12 my-2" id="modalItemDropdown" style="display: none">
+                  <select id="modalItemSelect" class="transactionModalInput form-control form-select">
 
-                </select>
-              </div>
-              <div class="col-12 my-2">
-                <label class="form-label">Note</label>
+                  </select>
+                </div>
+                <div class="col-12 my-2">
+                  <label class="form-label">Note</label>
                   <textarea name="modalNotes" placeholder="Note" id="transactionModalNote" class="transactionModalInput form-control"></textarea>
-              </div>
+                </div>
 
 
-              <!--vaidation?-->
-              <!--calendar default to "today"-->
-              <!--option for the transactionModalItem is depending on the item in the main screen (backend)-->
+                <!--vaidation?-->
+                <!--calendar default to "today"-->
+                <!--option for the transactionModalItem is depending on the item in the main screen (backend)-->
             </div>
             <div class="modal-footer">
               <div class="modalFooterContent">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="submit" id="transactionModalSave" class="btn btn-primary">Save transaction</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" id="transactionModalSave" class="btn btn-primary">Save transaction</button>
               </div>
             </div>
             </form>
           </div>
-      </div>
-    </div>
-
-    <!-- *****************************************Edit/Delete Transaction Modal*************************************************** -->
-    <div class="modal fade" id="transactionEditModal" data-index="" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
-
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="transactionEditModalLabel">Edit Transaction</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-
-            <form id="transactionEditForm" class="row">
-            <div class="transactionModalInput col-12 my-2">
-              <input type="text" name="modalAmt" placeholder="$0.00" id="transactionEditModalAmt" data-value="" class= "form-control" onclick="this.select()" required>
-            </div>
-            <div class="col-4 my-2">
-              <input type="date" name="modalDate" value="" id="transactionEditModalDate" class="transactionModalInput form-control">
-            </div>
-            <div class="col-8 my-2">
-              <input type="text" name="modalMerchant" value="Church" placeholder="" id="transactionEditModalMerchant" class="transactionModalInput form-control" onclick="this.select()">
-            </div>
-            <div class="col-12 my-2" id="modalEditRemoveItem">
-              <i class="fas fa-minus-circle" style="color: red"></i><span id="modalEditItem" class="" name="modalItem"></span>
-            </div>
-            <div class="col-12 my-2" id="modalEditItemDropdown" style="display: none">
-              <select id="modalEditItemSelect" class="transactionModalInput form-control form-select">
-
-              </select>
-            </div>
-            <div class="col-12 my-2">
-              <label class="form-label">Note</label>
-                <textarea name="modalNotes" placeholder="Note" id="transactionEditModalNote" class="transactionModalInput form-control"></textarea>
-            </div>
-
-          </div>
-          <div class="modal-footer">
-            <div class="modalFooterContent">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" id="transactionModalEdit" class="btn btn-primary">Save transaction</button>
-            </div>
-          </div>
-          </form>
         </div>
-    </div>
-  </div>
+      </div>
 
-    <!-- *****************************************Plaid Account Modal*************************************************** -->
+      <!-- *****************************************Edit/Delete Transaction Modal*************************************************** -->
+      <div class="modal fade" id="transactionEditModal" data-index="" tabindex="-1" aria-labelledby="transactionEditModalLabel" aria-hidden="true">
 
-    <div class="modal fade" id="PlaidAccountModal" tabindex="-1" aria-labelledby="PlaidAccountModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="transactionEditModalLabel">Edit Transaction</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
 
-      <div class="modal-dialog modal-md modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Plaid Accounts</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              <form id="transactionEditForm" class="row">
+                <div class="transactionModalInput col-12 my-2">
+                  <input type="text" name="modalAmt" placeholder="$0.00" id="transactionEditModalAmt" data-value="" class="form-control" onclick="this.select()" required>
+                </div>
+                <div class="col-4 my-2">
+                  <input type="date" name="modalDate" value="" id="transactionEditModalDate" class="transactionModalInput form-control">
+                </div>
+                <div class="col-8 my-2">
+                  <input type="text" name="modalMerchant" value="Church" placeholder="" id="transactionEditModalMerchant" class="transactionModalInput form-control" onclick="this.select()">
+                </div>
+                <div class="col-12 my-2" id="modalEditRemoveItem">
+                  <i class="fas fa-minus-circle" style="color: red"></i><span id="modalEditItem" class="" name="modalItem"></span>
+                </div>
+                <div class="col-12 my-2" id="modalEditItemDropdown" style="display: none">
+                  <select id="modalEditItemSelect" class="transactionModalInput form-control form-select">
+
+                  </select>
+                </div>
+                <div class="col-12 my-2">
+                  <label class="form-label">Note</label>
+                  <textarea name="modalNotes" placeholder="Note" id="transactionEditModalNote" class="transactionModalInput form-control"></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+              <div class="modalFooterContent">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" id="transactionModalEdit" class="btn btn-primary">Save transaction</button>
+              </div>
+            </div>
+            </form>
           </div>
-          <div id="PlaidAccountModalBody" class="modal-body PlaidAccountBody">
-            <!-- <div class="col-3 my-2"> -->
-            <!-- <div class="PlaidAccountRow">
+        </div>
+      </div>
+
+      <!-- *****************************************Plaid Account Modal*************************************************** -->
+
+      <div class="modal fade" id="PlaidAccountModal" tabindex="-1" aria-labelledby="PlaidAccountModal" aria-hidden="true">
+
+        <div class="modal-dialog modal-md modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Plaid Accounts</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="PlaidAccountModalBody" class="modal-body PlaidAccountBody">
+              <!-- <div class="col-3 my-2"> -->
+              <!-- <div class="PlaidAccountRow">
               <button type="button" data-bs-toggle="collapse" data-bs-target="#PlaidAccountCollapse" aria-expanded="false" aria-controls="PlaidAccountCollapse"><span class='PlaidAccountName'>Plaid Savings <i class="fas fa-angle-down"></i></span></button>
 
               <span class='PlaidAccountBalance'>$100.00</span>
@@ -354,97 +353,149 @@
             <div class="collapse" id="PlaidAccountCollapse">
               <button type="button">Delete this account</button>
             </div> -->
-            <!-- </div> -->
-            <!-- <div class="col-12 my-2"> -->
-            <div class="PlaidAccountRow">
-              <button id="addPlaidAccount">Add Plaid Account</button>
+              <!-- </div> -->
+              <!-- <div class="col-12 my-2"> -->
+              <div class="PlaidAccountRow">
+                <button id="addPlaidAccount">Add Plaid Account</button>
+              </div>
+              <!-- </div> -->
             </div>
-            <!-- </div> -->
-          </div>
-          <div class="modal-footer">
-            <div class="modalFooterContent">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save</button>
+            <div class="modal-footer">
+              <div class="modalFooterContent">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save</button>
+              </div>
             </div>
+            </form>
           </div>
-          </form>
         </div>
-    </div>
-  </div>
+      </div>
 
 
-    <div class='RightHeader'>
-      <button id='Accounts' data-bs-toggle="modal" data-bs-target="#PlaidAccountModal"><i class="fas fa-piggy-bank" style="font-size: 3rem; color: green"></i></button>
-      <button id='PlaidTransactions'><i class="fas fa-credit-card" style="font-size: 3rem; color: green"></i></button>
-    </div>
+      <div class='RightHeader'>
+        <button id='Accounts' data-bs-toggle="modal" data-bs-target="#PlaidAccountModal"><i class="fas fa-piggy-bank" style="font-size: 3rem; color: green"></i></button>
+        <button id='PlaidTransactions'><i class="fas fa-credit-card" style="font-size: 3rem; color: green"></i></button>
+      </div>
 
       <div class="chart-container">
-      <canvas id="myChart" width="480px" height="360px"></canvas>
-      <div class="donut-inner">
-        <span>Income</span>
-        <h5></h5>
-      </div>
-      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-  <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-  <label class="btn btn-outline-primary" for="btnradio1">Planned</label>
+        <canvas id="myChart" width="480px" height="360px"></canvas>
+        <div class="donut-inner">
+          <span>Income</span>
+          <h5></h5>
+        </div>
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+          <label class="btn btn-outline-primary" for="btnradio1">Planned</label>
 
-  <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-  <label class="btn btn-outline-primary" for="btnradio2">Spent</label>
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+          <label class="btn btn-outline-primary" for="btnradio2">Spent</label>
 
-  <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
-  <label class="btn btn-outline-primary" for="btnradio3">Remaining</label>
-</div>
+          <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+          <label class="btn btn-outline-primary" for="btnradio3">Remaining</label>
+        </div>
       </div>
 
       <div class='Budget-List-Container'>
-      <div class="Budget-List-Item">
-        <button id='closeBudgetListItem' style='padding: 0'><i class="far fa-times-circle"></i></button>
-        <div class="Budget-List-Item-Row">
-          <span id="catName" class="">Housing</span><span class="">Remaining</span>
-        </div>
-        <div class="Budget-List-Item-Row">
-          <span id="itemName">Mortgage</span><span id="remaining">$1,300.00</span>
-        </div>
+        <div class="Budget-List-Item">
+          <button id='closeBudgetListItem' style='padding: 0'><i class="far fa-times-circle"></i></button>
+          <div class="Budget-List-Item-Row">
+            <span id="catName" class="">Housing</span><span class="">Remaining</span>
+          </div>
+          <div class="Budget-List-Item-Row">
+            <span id="itemName">Mortgage</span><span id="remaining">$1,300.00</span>
+          </div>
 
           <div class="progress Budget-List-Item-Progress">
             <div class="progress-bar bg-success" id="budgetSideBarProgress" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
 
-        <div class="Budget-List-Item-Row">
-          <div><span id="spent" data-value=''>$0.00</span><span> spent</span></div>
-        </div>
-        <div class="Budget-List-Item-Row">
-          <span id="lastMonth">Last Month</span><span id="last-Month-Val">-$200.00</span>
-        </div>
-        <div class="Budget-List-Item-Row">
-          <span id="lastYear">Last <%=budget.month.split(" ",1)%></span><span id="last-Year-Val">-$200.00</span>
-        </div>
-        <div class="Budget-List-Item-Row dueDate">
-          <span id="dueDate">Set Due Date</span><i class="fas fa-angle-down"></i>
-        </div>
-        <div class="Budget-List-Item-Row">
-          <button id="setPlannedOnBudget" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Be On Budget</button>
-        </div>
-        <div class="Budget-List-Item-Row">
-          <button id="setPlannedToSpent" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Spent</button>
-        </div>
-      </div>
-
-      <div id="Transaction-Container" class="Transactions-List">
-        <div class="Transactions-List-Header">
-          <div><span id="numTransactions">1</span><span> Transactions</span></div>
-          <!-- <button id="addTransaction" style="padding: 0"><i class="fas fa-plus"></i> Add New</button> -->
-          <button id="testTransaction" data-bs-toggle="modal" data-bs-target="#transactionModal"><i class="fas fa-plus"></i> Add New</button>
-
+          <div class="Budget-List-Item-Row">
+            <div><span id="spent" data-value=''>$0.00</span><span> spent</span></div>
+          </div>
+          <div class="Budget-List-Item-Row">
+            <span id="lastMonth">Last Month</span><span id="last-Month-Val"></span>
+          </div>
+          <div class="Budget-List-Item-Row">
+            <span id="lastYear">Last <%=budget.month.split(" ",1)%></span><span id="last-Year-Val"></span>
+          </div>
+          <div class="Budget-List-Item-Row dueDate">
+            <span id="dueDate">Set Due Date</span><i class="fas fa-angle-down"></i>
+          </div>
+          <div class="Budget-List-Item-Row">
+            <button id="setPlannedOnBudget" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Be On Budget</button>
+          </div>
+          <div class="Budget-List-Item-Row">
+            <button id="setPlannedToSpent" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Spent</button>
+          </div>
         </div>
 
-        <!-- <div class="Transactions-List-Row">
+        <div id="Transaction-Container" class="Transactions-List">
+          <div class="Transactions-List-Header">
+            <div><span id="numTransactions">1</span><span> Transactions</span></div>
+            <!-- <button id="addTransaction" style="padding: 0"><i class="fas fa-plus"></i> Add New</button> -->
+            <button id="testTransaction" data-bs-toggle="modal" data-bs-target="#transactionModal"><i class="fas fa-plus"></i> Add New</button>
+
+          </div>
+
+          <!-- <div class="Transactions-List-Row">
           <span>Date</span>
           <span>Mortgage</span>
           <span>-$1,300.00</span>
         </div> -->
+        </div>
+
+
+
       </div>
+
+      <div class="Plaid-Transaction-Container">
+        <div class="Plaid-Transactions">
+          <div class="Plaid-Transaction-Header">
+            <span>Transactions</span>
+
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-new-tab" data-bs-toggle="pill" data-bs-target="#pills-new" type="button" role="tab" aria-controls="pills-new" aria-selected="true">New</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-tracked-tab" data-bs-toggle="pill" data-bs-target="#pills-tracked" type="button" role="tab" aria-controls="pills-tracked" aria-selected="false">Tracked</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-deleted-tab" data-bs-toggle="pill" data-bs-target="#pills-deleted" type="button" role="tab" aria-controls="pills-deleted" aria-selected="false">Deleted</button>
+              </li>
+            </ul>
+
+
+          </div>
+
+          <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-new" role="tabpanel" aria-labelledby="pills-new-tab">
+              <!-- <div class="Plaid-Transaction-Row">
+                <span>Mar 24</span>
+                <span>Wawa</span>
+                <span>-$40.00</span>
+              </div> -->
+            </div>
+            <div class="tab-pane fade" id="pills-tracked" role="tabpanel" aria-labelledby="pills-tracked-tab">
+              <div class="Plaid-Transaction-Row">
+                <span>Mar 21</span>
+                <span>Pbx</span>
+                <span>-$78.56</span>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="pills-deleted" role="tabpanel" aria-labelledby="pills-deleted-tab">
+              <div class="Plaid-Transaction-Row">
+                <span>Mar 20</span>
+                <span>Pornhub</span>
+                <span>-$69.69</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
+
+
     </div>
 
 

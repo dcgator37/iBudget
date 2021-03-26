@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const Budget = require('./models/budget');
 const PlaidItem = require('./models/plaid_item');
-const PlaidAccount = require('./models/plaid_account');
+const PlaidTransaction = require('./models/plaid_transaction');
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
@@ -1034,10 +1034,10 @@ app.post('/api/create_link_token', (req, res, next) => {
 
 });
 
-app.post('/api/get_public_token', async (req, res, next) => {
+app.post('/api/get_public_token', (req, res, next) => {
   PUBLIC_TOKEN = req.body.public_token;
 
-  client.exchangePublicToken(PUBLIC_TOKEN, function (error, tokenResponse) {
+  client.exchangePublicToken(PUBLIC_TOKEN, async function (error, tokenResponse) {
     if (error != null) {
 
       return res.json({
@@ -1047,16 +1047,37 @@ app.post('/api/get_public_token', async (req, res, next) => {
     ACCESS_TOKEN = tokenResponse.access_token;
     ITEM_ID = tokenResponse.item_id;
 
+    //add call to Plaid accounts before saving to the db
+    try {
+      const accounts = await client.getAccounts(ACCESS_TOKEN);
+      console.log('accounts from await ', accounts);
+      //console.log('balances from await ', accounts.accounts[0].balances);
+
+      const result = await client.getInstitutionById(accounts.item.institution_id, 'US');
+      //     item.institution_name = result.institution.name;;
+      //console.log('accounts from await ', accounts);
+      console.log('inst_name from await ', result.institution.name);
+
+    } catch (e) {
+      console.log(e);
+    }
+
+    //call to get insitution name from institution_id
 
 
-
-    const plaidItem = new PlaidItem({
-      user_id: req.user._id,
-      item_id: ITEM_ID,
-      access_token: ACCESS_TOKEN
-    });
-
-     plaidItem.save();
+    // const plaidItem = new PlaidItem({
+    //   user_id: req.user._id,
+    //   item_id: ITEM_ID,
+    //   access_token: ACCESS_TOKEN,
+    //   available_products: accounts.item.available_products ,
+    //   billed_products: accounts.item.billed_products,
+    //   institution_id: accounts.item.institution_id,
+    //   institution_name: result.institution.name,
+    //   webhook: accounts.item.webhook,
+    //   accounts: accounts.accounts
+    // });
+    //
+    //  plaidItem.save();
 
 
     res.json({
@@ -1161,6 +1182,10 @@ app.get('/api/accounts', async (req, res, next) => {
 
     console.log('accounts response ', accountsResponse);
 
+    //add code to check if the db item is missing fields and add and save them
+
+
+
 
   //   if (!item.institution_name) {
   //   client.getInstitutionById(accountsResponse.item.institution_id, 'US', (err, result) => {
@@ -1179,6 +1204,24 @@ app.get('/api/accounts', async (req, res, next) => {
 }
 
 
+});
+
+app.get('/api/getTransactions', async (req, res, next) => {
+  const account_ids = ['yEz61B4E9PT61rq1xXvzh17o6LKgVZhrpq1Zl'];
+
+  const response = await client
+  .getTransactions(ACCESS_TOKEN, '2020-01-01', '2020-02-01', {
+    count: 50,
+    offset: 0
+    //account_ids: account_ids
+  })
+  .catch((err) => {
+    // handle error
+  });
+const transactions = response.transactions;
+console.log('transaction response ', transactions);
+
+res.json({transactions: transactions});
 });
 
 

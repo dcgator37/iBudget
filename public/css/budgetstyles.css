@@ -356,7 +356,10 @@ input:last-child {
   height: 8rem;
   position: fixed;
   display: flex;
+}
 
+#PlaidTransactions {
+  margin-left: 10px;
 }
 
 #PlaidAccountModal {
@@ -549,6 +552,68 @@ margin-top: 0;
 
 #myChart {
   /* position: fixed; */
+}
+
+.PlaidAccountCollapse {
+  display: flex;
+  flex-direction:  column;
+  justify-content: flex-end;
+}
+
+.PlaidAccountCollapse input {
+  margin-right: 10px;
+}
+
+.PlaidAccountCollapse button {
+  color: red;
+}
+
+.Plaid-Transaction-Container {
+  display: none;
+  width: 40rem;
+  position: fixed;
+  overflow-y: auto;
+  top: 8rem;
+  bottom: 0;
+}
+
+.Plaid-Transactions {
+  display: none;
+  width: 70%;
+  padding: 10px;
+  font-size: 1.4rem;
+
+  margin-top: 20px;
+  margin-left: 20px;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+
+  flex-direction: column;
+}
+
+.Plaid-Transaction-Header {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  flex-direction: column;
+}
+.Plaid-Transaction-Header span {
+  align-self: flex-start;
+  margin-bottom: 20px;
+}
+
+.Plaid-Transaction-Row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  border: 1px solid grey;
+  border-radius: 2em;
+  margin: 10px 0;
 }
 
 /*--------------------------Modal--------------------------------*/

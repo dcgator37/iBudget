@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const accountSchema = new mongoose.Schema({
-  
+
   account_id: {
     type: String,
     required: true
@@ -21,6 +21,19 @@ const accountSchema = new mongoose.Schema({
   name: {
     type: String,
     require: true
+  },
+  official_name: {
+    type: String,
+  },
+  subtype: {
+    type: String
+  },
+  typeof: {
+    type: String
+  },
+  sync: {
+    $type: Boolean,
+    default: true
   }
 });
 

@@ -30,12 +30,13 @@ $(document).ready(function() {
   //listener when clicking off an item to hide item sidebar and re-display the chart
   $(document).click(function(event) {
     var $target = $(event.target);
-    if(!$target.closest('.Budget-Row').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length  && !$target.closest('.modal').length) {
+    if(!$target.closest('.Budget-Row').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length  && !$target.closest('.modal').length && !$target.closest('#PlaidTransactions').length && !$target.closest('#Accounts').length && !$target.closest('.Plaid-Transaction-Row').length && !$target.closest('#pills-tab').length) {
       $('.item--selected').removeClass('item--selected');
-      $('#myChart').css("display", "block");
+      $('.chart-container').css("display", "block");
       $('.Budget-List-Container').css("display", "none");
       $('.Transactions-List').css("display", "none");
       $('.Budget-List-Item').css("display", "none");
+      $('.Plaid-Transaction-Container').css("display", "none");
     }
 
     if(!$target.closest('.Header-Left').length && !$target.closest('.btndelHidden').length && !$target.closest('.cat-label').length) {
@@ -163,7 +164,7 @@ $(document).ready(function() {
     $('.Transactions-List').css("display", "flex");
     $('.Budget-List-Item').css("display", "flex");
 
-    $('#myChart').css("display", "none");
+    $('.chart-container').css("display", "none");
   }).on('click', 'button.btndel', function(e) {
     e.stopPropagation();
   });
@@ -453,6 +454,21 @@ $(document).ready(function() {
       });
   });
 
+  $(document).on('click', '#PlaidTransactions', () => {
+    $.ajax({
+      url: '/api/getTransactions',
+      method: 'get',
+      dataType: 'json',
+      data: {},
+      success: function(res) {
+        loadPlaidTransactions(res.transactions);
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+  });
+
   $(document).on('click', '#addPlaidAccount', function() {
     $.ajax({
       url: '/api/create_link_token',
@@ -529,7 +545,11 @@ $(document).ready(function() {
                 //'<span class="PlaidAccountName">' + name +'</span>' +
                 '<span class="PlaidAccountBalance">' + balance + '</span>' +
                 '</div>' +
-                '<div class="collapse" id="PlaidAccountCollapse' + index + '">' +
+                '<div class="collapse PlaidAccountCollapse" id="PlaidAccountCollapse' + index + '">' +
+                  '<div>' +
+                  '<input type="checkbox" id="sync' + index + '" name="sync" checked>' +
+                  '<label for="sync">Sync transactions</label>' +
+                  '</div>' +
                   '<button type="button">Delete this account</button>' +
                 '</div>';
       });
@@ -542,7 +562,59 @@ $(document).ready(function() {
 
   $(document).on('click', '#PlaidTransactions', function() {
 
+    //$('.Budget-List-Container').css("display", "block");
+
+    $('.Budget-List-Container').css("display", "none");
+    $('.Transactions-List').css("display", "none");
+    $('.Budget-List-Item').css("display", "none");
+
+    $('.Plaid-Transaction-Container').css("display", "block");
+    $('.Plaid-Transactions').css("display", "flex");
+    $('.chart-container').css("display", "none");
+    //$('#myChart').css("display", "none");
+
+
   });
+
+  function loadPlaidTransactions(transactions) {
+    const el = $('#pills-new');
+    var html = '';
+
+    transactions.forEach((transaction) => {
+      var theDate = new Date(transaction.date);
+      console.log('date from Plaid ', transaction.date);
+      // var month = theDate.toLocaleDateString("en-US", {month: "short"});
+      // var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
+      var month = moment(transaction.date).format('MMM');
+      var day = moment(transaction.date).date();
+      var amt = transaction.amount;
+      var merchant = transaction.name;
+      if (merchant.length > 18) {
+        merchant = merchant.substring(0,18) + "...";
+      }
+      var category = transaction.category[1];
+      var type = transaction.category[0];
+      console.log(month);
+      console.log(day);
+      console.log(merchant);
+      console.log(type);
+      console.log(category);
+      console.log(amt);
+
+      html += '<div class="Plaid-Transaction-Row">' +
+                '<div class="monthDay-container" style="margin-left: 5px">' +
+                  '<span class="transaction-month">' + month + '</span><span class="transaction-day">' + day + '</span>' +
+                '</div>' +
+                '<span>' + merchant + '</span>' +
+                '<span class="PlaidTransactionAmt">'+ amt + '</span>' +
+              '</div>';
+
+      el.append(html);
+    });
+
+    $('.PlaidTransactionAmt').formatCurrency();
+
+  }
 
   ////*****************************************************Budget Item Sidebar****************************************************************************
 
@@ -553,7 +625,8 @@ $(document).ready(function() {
     $('.Transactions-List').css("display", "none");
     $('.Budget-List-Item').css("display", "none");
 
-    $('#myChart').css("display", "block");
+    //$('#myChart').css("display", "block");
+    $('.chart-container').css("display", "block");
   });
 
   $(document).on('click', '#setPlannedOnBudget', function() {
@@ -1081,11 +1154,10 @@ $(document).ready(function() {
     $('#numTransactions').text(numTransactions);
 
     transactions.forEach((transaction, index) => {
-      console.log(transaction.date);
-      var theDate = new Date(transaction.date);
-      console.log(theDate);
-      var month = theDate.toLocaleDateString("en-US", {month: "short"});
-      var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
+
+      const dateString = transaction.date.substring(0,10);
+      const month = moment(dateString).format('MMM');
+      const day = moment(dateString).date();
 
       htmlRow = "<div class='Transactions-List-Row' data-index=" + index + ">" +
                   "<div class='monthDay-container'>" +
@@ -1109,6 +1181,7 @@ $(document).ready(function() {
     var numOfTransactions = $('#numTransactions').text();
     var month = moment(date).format('MMM');
     var day = moment(date).date();
+    console.log('date when adding to list ', date);
     console.log(month);
     console.log(day);
     // var theDate = new Date(date);
