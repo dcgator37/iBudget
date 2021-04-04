@@ -81,6 +81,21 @@ input:last-child {
   margin-left: 3rem;
 }
 
+.Copy-Month-Container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  width: 40rem;
+  height: 40rem;
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  padding: 0 10px;
+  margin: 20px 0;
+  margin-left: 3rem;
+}
+
 .Category-Button {
   background: white;
   width: 40rem;
@@ -366,6 +381,53 @@ input:last-child {
   font-size: 1.2rem;
 }
 
+.PlaidTransactionBox {
+  display: flex;
+  align-items: center;
+}
+
+.PlaidTransactionIcon {
+  position: relative;
+
+}
+
+/* .ui-draggable-handle {
+  width: 10rem;
+} */
+
+/* .ui-draggable-dragging { z-index: 10000 } */
+
+.dragging {
+    opacity: 0.4;
+
+    background-color: #b3e6ff;
+
+}
+
+.hover {
+  background-color: #b3e6ff;
+}
+
+.countTransactions {
+
+  font-size: 0.8rem;
+  font-weight: bold;
+  height: 1.75rem;
+  width: 1.75rem;
+  border-radius: 100px;
+  border: 1px solid green;
+  color: green;
+  padding: 2px;
+  background-color: white;
+  position: absolute;
+  top: 1.9rem;
+  right: -0.7rem;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
 .PlaidAccountBody {
   display: flex;
   width: 100%;
@@ -471,7 +533,19 @@ margin-top: 0;
 .Budget-List-Item-Row span {
     color: #69757a;
 
+
     /* font-weight: 600; */
+}
+
+.fund {
+  color: #0091d9;
+}
+
+.fundCollapse {
+  /* display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; */
 }
 
 .Budget-List-Item-Progress {
@@ -614,6 +688,22 @@ margin-top: 0;
   border: 1px solid grey;
   border-radius: 2em;
   margin: 10px 0;
+}
+
+.Plaid-Merchant-Box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.Plaid-Merchant-Span {
+
+}
+
+.Plaid-Account-Span {
+  font-size: 0.7rem;
+  color: #0091d9;
 }
 
 /*--------------------------Modal--------------------------------*/

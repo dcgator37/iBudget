@@ -17,6 +17,7 @@ const $ = require('jquery');
 const datejs = require('datejs');
 const plaid = require('plaid');
 const flash = require('connect-flash');
+const moment = require('moment');
 
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -103,6 +104,10 @@ const userSchema = new mongoose.Schema ({
   username: String,
   password: String,
   verified: Boolean,
+  plus: {
+    type: Boolean,
+    default: false
+  },
   monthsArray: [{
     active: Boolean,
     month: Number,
@@ -148,196 +153,6 @@ const User = new mongoose.model("User", userSchema);
 // const Budget = new mongoose.model("Budget", budgetSchema);
 
 const defaultBudget = new Budget(Budget.defaultBudget);
-// const defaultBudget = new Budget({
-//   category: [
-//     {
-//       name: "Income",
-//       items: [
-//         {
-//           name: "Paycheck 1",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Paycheck 2",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Giving",
-//       items: [
-//         {
-//           name: "Church",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Charity",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Savings",
-//       items: [
-//         {
-//           name: "Emergency Fund",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Savings",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Housing",
-//       items: [
-//         {
-//           name: "Mortgage/Rent",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Electricity",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Cable and Internet",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Transportation",
-//       items: [
-//         {
-//           name: "Gas",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Uber/Bus",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Food",
-//       items: [
-//         {
-//           name: "Groceries",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Restaurants",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Personal",
-//       items: [
-//         {
-//           name: "Cellphone",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Subscriptions",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Lifestyle",
-//       items: [
-//         {
-//           name: "Entertainment",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Misc",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Health",
-//       items: [
-//         {
-//           name: "Gym",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Medicine",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Doctor",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Insurance",
-//       items: [
-//         {
-//           name: "Auto",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Homeowner/Renter",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//     {
-//       name: "Debt",
-//       items: [
-//         {
-//           name: "Car",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Student Loans",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Medical Bill",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         },
-//         {
-//           name: "Personal Loan",
-//           planned: 0,
-//           sumOfTransactions: 0
-//         }
-//       ]
-//     },
-//   ],
-//
-// });
 
 let activeBudget;
 let monthArr;
@@ -432,8 +247,10 @@ app.post("/failure", function(req, res) {
   res.redirect("/");
 });
 
-app.get("/budget", function(req, res) {
+app.get("/budget", async function(req, res) {
   if (req.isAuthenticated()) {
+
+    var count;
 
     if (req.user.monthsArray.length === 0) {
       console.log('no month array');
@@ -443,6 +260,11 @@ app.get("/budget", function(req, res) {
     //createBudgetArray(req);
 
     //createPastBudgets(req);
+
+    // if user has iBudget Plus, load Plaid transactions and pass count of new transactions
+    // if (req.user.plus == true) {
+    //   count = countofPlaidTransactions();
+    // }
 
     if (!activeBudget) {
       console.log("no active budget");
@@ -520,64 +342,128 @@ app.get("/budget", function(req, res) {
   }
 });
 
-app.post('/switchmonth', (req, res) => {
+app.post('/switchmonth', async (req, res) => {
   //load month
-  const month = req.body.monthString;
+  const month = req.body.currentString;
+  const lastMonth = req.body.lastString;
   console.log(month);
+  console.log(lastMonth);
+  try {
+    if (lastMonth == undefined) {
+      const budget = await Budget.findOne({user_id: req.user._id, month: month});
 
-  Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
+      activeBudget = budget;
+      res.status(200).json({msg: 'success'});
+      // return res.redirect('/budget');
+    } else {
 
-    if (err) {
-      alert('Error loading month');
-    } else if (!budget) {
-      //load default budget
+      const budget = await Budget.findOne({user_id: req.user._id, month: lastMonth});
 
       var newBudget = new Budget();
-      const date = new Date(req.body.year + "-" + req.body.button + "-" + "1");
+      const date = new Date(req.body.year + "-" + req.body.monthNum + "-" + "1");
 
       newBudget.user = req.user.username;
       newBudget.user_id = req.user._id;
       newBudget.month = month;
       newBudget.year = parseInt(req.body.year);
-      newBudget.monthNum = req.body.button;
+      newBudget.monthNum = req.body.monthNum;
       newBudget.date = date;
 
-      newBudget.category = defaultBudget.category;
+      if (budget) {
 
-      // defaultBudget.user = req.user.username;
-      // defaultBudget.month = month;
-      // defaultBudget.year = parseInt(req.body.year);
-      // defaultBudget.monthNum = req.body.monthNum;
-      //
-      // defaultBudget.save();
+        const category = budget.category;
 
-      newBudget.save();
+        category.forEach((cat) => {
+          cat.items.forEach((item, index, theArray) => {
+            theArray[index].sumOfTransactions = 0;
+            if (theArray[index].transactions.length > 0) {
+              theArray[index].transactions.splice(0);
+            }
 
+          });
+        });
+
+        newBudget.category = category;
+
+      } else {
+        newBudget.category = defaultBudget.category;
+      }
+
+      await newBudget.save();
       activeBudget = newBudget;
 
+
       //save the monthsArray for new month
-      req.user.monthsArray.find((month, index) => {
-        if (month.monthString === newBudget.month) {
-          req.user.monthsArray[index].active = true;
-        }
-      });
+         req.user.monthsArray.find((month, index) => {
+           if (month.monthString === newBudget.month) {
+             req.user.monthsArray[index].active = true;
+           }
+         });
 
-      req.user.save();
-      res.redirect('/budget');
+         await req.user.save();
 
-    } else {
-        //laod the actual budget because it exists
-        console.log('loading actual budget');
-        if (budget.user_id == undefined) {
-          budget.user_id = req.user._id;
-          budget.save();
-        }
-        activeBudget = budget;
+         res.status(200).json({msg: 'success'});
 
-        res.redirect('/budget');
     }
 
-  });
+
+  } catch (e) {
+    console.log(e);
+  }
+
+  // Budget.findOne({user: req.user.username, month: month}, (err, budget) => {
+  //
+  //   if (err) {
+  //     alert('Error loading month');
+  //   } else if (!budget) {
+  //     //load default budget
+  //
+  //     var newBudget = new Budget();
+  //     const date = new Date(req.body.year + "-" + req.body.button + "-" + "1");
+  //
+  //     newBudget.user = req.user.username;
+  //     newBudget.user_id = req.user._id;
+  //     newBudget.month = month;
+  //     newBudget.year = parseInt(req.body.year);
+  //     newBudget.monthNum = req.body.button;
+  //     newBudget.date = date;
+  //
+  //     newBudget.category = defaultBudget.category;
+  //
+  //     // defaultBudget.user = req.user.username;
+  //     // defaultBudget.month = month;
+  //     // defaultBudget.year = parseInt(req.body.year);
+  //     // defaultBudget.monthNum = req.body.monthNum;
+  //     //
+  //     // defaultBudget.save();
+  //
+  //     newBudget.save();
+  //
+  //     activeBudget = newBudget;
+  //
+  //     //save the monthsArray for new month
+  //     req.user.monthsArray.find((month, index) => {
+  //       if (month.monthString === newBudget.month) {
+  //         req.user.monthsArray[index].active = true;
+  //       }
+  //     });
+  //
+  //     req.user.save();
+  //     res.redirect('/budget');
+  //
+  //   } else {
+  //       //laod the actual budget because it exists
+  //       console.log('loading actual budget');
+  //       if (budget.user_id == undefined) {
+  //         budget.user_id = req.user._id;
+  //         budget.save();
+  //       }
+  //       activeBudget = budget;
+  //
+  //       res.redirect('/budget');
+  //   }
+  //
+  // });
 
 });
 
@@ -662,7 +548,7 @@ app.post("/editItem" , function(req, res) {
 app.put("/editItemAmt", (req, res) => {
   const index = req.body.index;
   const itemIndex = req.body.itemIndex;
-  const amt = req.body.amt;
+  const amt = parseFloat(req.body.amt);
 
   activeBudget.category[index].items[itemIndex].planned = amt;
   activeBudget.save();
@@ -842,6 +728,21 @@ app.post('/editTransaction', (req, res) => {
   res.json({msg: 'success', sum: sum});
 });
 
+app.delete('/deleteTransaction', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const transactionIndex = req.body.transactionIndex;
+  const amt = parseFloat(req.body.amtDB);
+
+  activeBudget.category[index].items[itemIndex].sumOfTransactions -= amt;
+  const sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
+  activeBudget.category[index].items[itemIndex].transactions.splice(transactionIndex,1);
+  activeBudget.save();
+
+  res.json({msg: 'success', sum: sum});
+
+});
+
 app.post('/testmodalpost', (req, res) => {
 
 });
@@ -1000,7 +901,10 @@ app.get('/getBudgetData', async (req, res) => {
 //***********************************Plaid***********************************************
 
 app.post('/api/create_link_token', (req, res, next) => {
-  console.log(req.user._id);
+  //console.log(req.user._id);
+  if (req.user.plus !== true) {
+    return res.json({error: 'not a plus member'});
+  }
 
   const configs = {
     user: {
@@ -1138,17 +1042,26 @@ app.post('/api/updateLink', (req, res, next) => {
 
 });
 
+
 app.get('/api/accounts', async (req, res, next) => {
 
+  // loop through plaid_item doc, accounts, for any accounts with sync = true
+  // return the access token and account id?
+  // query plaid balances and update the balance in db and in html
 
+  // before that, query item doc and add anything that is missing
 
+  if (req.user.plus !== true) {
+    return res.json({error: 'not a plus member'});
+  }
 
-  var item = await PlaidItem.findOne({'user_id': req.user._id});
+  var item = await PlaidItem.findOne({'user_id': req.user._id, item_id: 'aJDdZX3LZ4i7486e8mM3fKEYvXbVdgujb6vKo'});
   //item = null;
   var theError;
   var token = item.access_token;
+  var dbAccounts = item.accounts;
   console.log('token from db ', token);
-  token = ACCESS_TOKEN;
+  //token = ACCESS_TOKEN;
 
   if (token) {
 
@@ -1164,40 +1077,73 @@ app.get('/api/accounts', async (req, res, next) => {
     // item.access_token = accessToken;
     // item.save();
 
+    // const response = await client.getBalance(token).catch((e) => {
+    //   console.log(e);
+    //   return res.json({error: e});
+    // });
+    //
+    // const accounts = response.accounts;
+    // console.log(response);
+
+
 
 
   console.log('access token from db ', token);
   //console.log(ACCESS_TOKEN);
-  client.getAccounts(token, function (error, accountsResponse) {
-    if (error != null) {
-      theError = error;
-      console.log('the error ', theError);
 
-
-      return res.json({
-        error: error,
-        token: token
-      });
-    }
-
-    console.log('accounts response ', accountsResponse);
-
-    //add code to check if the db item is missing fields and add and save them
-
-
-
-
-  //   if (!item.institution_name) {
-  //   client.getInstitutionById(accountsResponse.item.institution_id, 'US', (err, result) => {
-  //     item.institution_name = result.institution.name;
-  //     item.save();
-  //   });
-  // } else {
-  //   //console.log(result.institution.name);
-  // }
-
-    res.json({ error: null, accounts: accountsResponse });
+  const result = await client.getAccounts(token).catch((e) => {
+    console.log(e);
+    return res.json({error: e});
   });
+
+  item.accounts.forEach((dbAccount, index, theArray) => {
+    result.accounts.forEach((account) => {
+      if (dbAccount.account_id === account.account_id) {
+        theArray[index].balances = account.balances;
+      }
+    });
+  });
+
+  await item.save();
+
+  // client.getAccounts(token, function (error, accountsResponse) {
+  //   if (error != null) {
+  //     theError = error;
+  //     console.log('the error ', theError);
+  //
+  //
+  //     return res.json({
+  //       error: error,
+  //       token: token
+  //     });
+  //   }
+  //
+     //console.log('accounts response ', result);
+
+                //add code to check if the db item is missing fields and add and save them
+
+                // item.available_products = accountsResponse.item.available_products;
+                // item.billed_products = accountsResponse.item.billed_products;
+                // item.institution_id = accountsResponse.item.institution_id;
+                // item.webhook = accountsResponse.item.webhook;
+                // item.accounts = accountsResponse.accounts;
+                //
+                // await item.save();
+
+
+              //   if (!item.institution_name) {
+              //   client.getInstitutionById(accountsResponse.item.institution_id, 'US', (err, result) => {
+              //     item.institution_name = result.institution.name;
+              //     item.save();
+              //   });
+              // } else {
+              //   //console.log(result.institution.name);
+              // }
+
+    res.json({ error: null, item });
+  // });
+
+  // res.json({error: null, accounts: accounts, item: item});
 
 } else {
   res.json({error: 'no accounts'});
@@ -1206,23 +1152,370 @@ app.get('/api/accounts', async (req, res, next) => {
 
 });
 
-app.get('/api/getTransactions', async (req, res, next) => {
-  const account_ids = ['yEz61B4E9PT61rq1xXvzh17o6LKgVZhrpq1Zl'];
+app.get('/api/getNewTransactions', async (req, res, next) => {
 
-  const response = await client
-  .getTransactions(ACCESS_TOKEN, '2020-01-01', '2020-02-01', {
-    count: 50,
-    offset: 0
-    //account_ids: account_ids
-  })
-  .catch((err) => {
-    // handle error
+  if (req.user.plus !== true) {
+    return res.json({msg: 'not a plus member'});
+  }
+
+  //console.log('loading new transactions...');
+  // await PlaidTransaction.deleteMany();
+  // console.log('transactions deleted');
+
+
+  const items = await PlaidItem.find({user_id: req.user._id, _id: { $ne: '604e41e6518abb3498943f5e'}});
+
+  var year = moment().year();
+  var month = moment().format("MM");
+  const start_date = year + "-" + month + "-01";
+
+  if (month == 12) {
+    ++year;
+    month = "01";
+  } else {
+    month = moment().add(1, 'M').format('MM');
+  }
+
+  const end_date = year + "-" + month + "-01";
+
+  let offset = 0;
+  let transactionsToFetch = true;
+  let resultData = {transactions: []};
+  let separateAccountVar = [];
+  const batchSize = 100;
+  let accountsToSync = [];
+  let accountIdsToSync = [];
+  var token;
+
+  items.forEach((item) => {
+    item.accounts.forEach((account) => {
+      if (account.sync == true) {
+        accountsToSync.push({account_id: account.account_id, name: account.name});
+      }
+    });
   });
-const transactions = response.transactions;
-console.log('transaction response ', transactions);
 
-res.json({transactions: transactions});
+  //console.log('accountstosync ', accountsToSync);
+  const start = async () => {
+
+
+
+  await asyncForEach(items, async (item) => {
+
+    //console.log('item ', item);
+
+    let accountIdsToSync = [];
+    offset = 0;
+    token = item.access_token;
+    //console.log('token ',token);
+
+    item.accounts.forEach((account) => {
+      if (account.sync == true) {
+        accountIdsToSync.push(account.account_id);
+      }
+    });
+
+    //console.log('accountIdsToSync ', accountIdsToSync);
+
+     while (transactionsToFetch) {
+
+       //console.log('inside while ');
+
+      const options = {
+        count: batchSize,
+        offset
+      };
+      //console.log(start_date);
+      //console.log(end_date);
+
+      const { transactions } = await client.getTransactions(token, start_date, end_date, options).catch((e) => {
+        return res.json({error: e});
+      });
+
+      //console.log('transactions ', transactions);
+
+      // separateAccountVar = accounts;
+      // console.log('accounts ', separateAccountVar);
+
+      resultData = {
+        transactions: [...resultData.transactions, ...transactions]
+      };
+
+      if (transactions.length === batchSize) {
+        offset += batchSize;
+      } else {
+        transactionsToFetch = false;
+      }
+
+    }
+
+  });
+
+  // items.forEach( async (item) => {
+  //
+  //   console.log('item ', item);
+  //
+  //   let accountIdsToSync = [];
+  //   offset = 0;
+  //   token = item.access_token;
+  //   console.log('token ',token);
+  //
+  //   item.accounts.forEach((account) => {
+  //     if (account.sync == true) {
+  //       accountIdsToSync.push(account.account_id);
+  //     }
+  //   });
+  //
+  //   //console.log('accountIdsToSync ', accountIdsToSync);
+  //
+  //    while (transactionsToFetch) {
+  //
+  //      console.log('inside while ');
+  //
+  //     const options = {
+  //       count: batchSize,
+  //       offset
+  //     };
+  //     console.log(start_date);
+  //     console.log(end_date);
+  //
+  //     const { transactions } = await client.getTransactions(token, start_date, end_date, options).catch((e) => {
+  //       return res.json({error: e});
+  //     });
+  //
+  //     console.log('transactions ', transactions);
+  //
+  //     // separateAccountVar = accounts;
+  //     // console.log('accounts ', separateAccountVar);
+  //
+  //     resultData = {
+  //       transactions: [...resultData.transactions, ...transactions]
+  //     };
+  //
+  //     if (transactions.length === batchSize) {
+  //       offset += batchSize;
+  //     } else {
+  //       transactionsToFetch = false;
+  //     }
+  //
+  //   }
+  //
+  //   //console.log('resultdata ', resultData);
+  //
+  // });
+
+  //console.log('resultdata ', resultData.transactions.length);
+
+  const existingTransactions = await PlaidTransaction.find({user_id: req.user._id, date: { $gte: start_date, $lte: end_date}});
+
+  //console.log('existing transactions ', existingTransactions);
+
+  const existingTransactionsIds = existingTransactions.reduce(
+    (idMap, {transaction_id: transactionId}) => ({
+      ...idMap,
+      [transactionId]: transactionId,
+    }),
+    {}
+  );
+
+  //console.log('exisiting transaction ids ', existingTransactionsIds);
+
+  const transactionsToStore = resultData.transactions.filter(({transaction_id: transactionId}) => {
+    const isExisting = existingTransactionsIds[transactionId];
+    return !isExisting;
+  });
+
+  //console.log('transactions to store ', transactionsToStore);
+
+  if (transactionsToStore.length > 0) {
+
+    transactionsToStore.forEach((transaction, index, theArray) => {
+      theArray[index].user_id = req.user._id;
+
+      accountsToSync.forEach((account) => {
+        if (transaction.account_id === account.account_id) {
+          theArray[index].account_name = account.name;
+        }
+      });
+
+    });
+
+    await PlaidTransaction.insertMany(transactionsToStore).catch((e) => {
+      console.log(e);
+    });
+
+
+
+  }
+
+const untrackedTransactions = await PlaidTransaction.find({user_id: req.user._id, tracked: false});
+
+
+
+  res.json({msg: 'success', countNewTransactions: untrackedTransactions.length});
+
+  };
+
+  start();
+
 });
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+app.get('/api/getTransactions', async (req, res, next) => {
+//   const account_ids = ['yEz61B4E9PT61rq1xXvzh17o6LKgVZhrpq1Zl'];
+//   const item = await PlaidItem.findOne({user_id: req.user._id, item_id: 'aJDdZX3LZ4i7486e8mM3fKEYvXbVdgujb6vKo'});
+//   var token = ACCESS_TOKEN;
+//   token = item.access_token;
+//
+//   //await PlaidTransaction.deleteMany();
+//
+//   var year = moment().year();
+//   var month = moment().month();
+//   month = moment().format("MM");
+//   const start_date = year + "-" + month + "-01";
+//   //console.log(start_date);
+//
+//   if (month == 12) {
+//     ++year;
+//     month = "01";
+//   } else {
+//     month = moment().add(1, 'M').format('MM');
+//   }
+//
+//   const end_date = year + "-" + month + "-01";
+//   //console.log(end_date);
+//
+//
+//   //get array of account ids that you want to sync with account name. pass account name to res
+//   //'2020-01-01', '2020-02-01'
+//
+//   var offset = 0;
+//   let transactionsToFetch = true;
+//   let resultData = {transactions: []};
+//   let separateAccountVar = [];
+//   const batchSize = 100;
+//
+//   while (transactionsToFetch) {
+//     const options = {
+//       count: batchSize,
+//       offset,
+//     };
+//
+//     const { transactions, accounts } = await client.getTransactions(token, start_date, end_date, options).catch((e) => {
+//       return res.json({error: e});
+//     });
+//
+//
+//     separateAccountVar = accounts;
+//     console.log('accounts ', separateAccountVar);
+//
+//
+//     resultData = {
+//       transactions: [...resultData.transactions, ...transactions]
+//     };
+//
+//     if (transactions.length === batchSize) {
+//       offset += batchSize;
+//     } else {
+//       transactionsToFetch = false;
+//     }
+//     //console.log("LOOOOOOPPPPP");
+//   }
+//
+//
+//   // const response = await client
+//   // .getTransactions(token, start_date, end_date, {
+//   //   count: 500,
+//   //   offset: 0
+//   //   //account_ids: account_ids
+//   // })
+//   // .catch((err) => {
+//   //   console.log(err);
+//   //   // handle error
+//   // });
+// // const transactions = response.transactions;
+// // console.log('transaction response ', response);
+//
+// //console.log('result data', resultData);
+//
+// // resultData.transactions.forEach((transaction, index, theArray) => {
+// //   theArray[index].user_id = req.user._id;
+// // });
+//
+// const existingTransactions = await PlaidTransaction.find({user_id: req.user._id, date: { $gte: start_date, $lte: end_date}});
+//
+// const existingTransactionsIds = existingTransactions.reduce(
+//   (idMap, {transaction_id: transactionId}) => ({
+//     ...idMap,
+//     [transactionId]: transactionId,
+//   }),
+//   {}
+// );
+//
+// const transactionsToStore = resultData.transactions.filter(({transaction_id: transactionId}) => {
+//   const isExisting = existingTransactionsIds[transactionId];
+//   return !isExisting;
+//   });
+//
+//   console.log('count of transactionsToStore ', transactionsToStore.length);
+//
+//
+//   if (transactionsToStore.length > 0) {
+//
+//     transactionsToStore.forEach((transaction, index, theArray) => {
+//       theArray[index].user_id = req.user._id;
+//
+//       separateAccountVar.forEach((account) => {
+//         if (transaction.account_id === account.account_id) {
+//           theArray[index].account_name = account.name;
+//         }
+//       });
+//
+//     });
+//
+//     await PlaidTransaction.insertMany(transactionsToStore).catch((e) => {
+//       console.log(e);
+//     });
+//
+//   }
+
+if (req.user.plus !== true) {
+  return res.json({error: 'not a plus member'});
+}
+
+const untrackedTransactions = await PlaidTransaction.find({user_id: req.user._id, tracked: false});
+
+
+
+res.json({result: untrackedTransactions});
+});
+
+app.post('/trackPlaidTransaction', async (req, res) => {
+
+  const transaction = await PlaidTransaction.findById(req.body.id);
+
+  transaction.tracked = true;
+  await transaction.save();
+
+  res.json({msg: 'success'});
+
+});
+
+function countofPlaidTransactions() {
+  var count = 7;
+  //get array of accounts that are synced from Plaid Item account array.
+  // run plaid getTransactions for those accounts
+  // loop through plaid transactions comparing to plaid transaction document, looking for new transactions (not tracked)
+  // count these up and return the count;
+
+  return count;
+
+}
 
 
 

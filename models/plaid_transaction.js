@@ -10,6 +10,9 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  account_name: {
+    type: String
+  },
   amount: {
     type: Number,
     required: true
@@ -30,12 +33,10 @@ const transactionSchema = new mongoose.Schema({
     required: true
   },
   merchant_name: {
-    type: String,
-    required: true
+    type: String
   },
   name: {
-    type: String,
-    required: true
+    type: String
   },
   payment_channel: {
     type: String,

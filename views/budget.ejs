@@ -14,6 +14,7 @@
   <script src="https://unpkg.com/@mongodb-js/charts-embed-dom"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script> -->
   <script type="text/javascript" src="/data.js"></script>
 
   <!-- <script type="text/javascript" src="/js/jquery.formatCurrency-1.4.0.js"></script> -->
@@ -89,14 +90,14 @@
 
             <!-- loop through and create buttons for each month for two years -->
             <% months.forEach(function(month, index) { %>
-            <form action="/switchmonth" method="post">
+            <form class="switchmonth" action="/switchmonth" method="post">
               <p>
                 <% if(month.monthString == budget.month ){ %>
-                <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>" data-index="<%= index %>" data-length="<%= months.length %>"> <%= month.monthString.substring(0,3) + " " + month.year %></button>
+                <button class="btn btn--current" type="submit" name="button" value="<%= month.month %>" data-index="<%= index %>" data-length="<%= months.length %>" data-name="<%= month.monthString %>" data-year="<%= month.year %>"> <%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else if(month.active == true){ %>
-                <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
+                <button class="btn btn--exists" type="submit" name="button" value="<%= month.month %>" data-name="<%= month.monthString %>" data-year="<%= month.year %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } else { %>
-                <button class="btn btn--month" type="submit" name="button" value="<%= month.month %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
+                <button class="btn btn--month" type="submit" name="button" value="<%= month.month %>" data-name="<%= month.monthString %>" data-year="<%= month.year %>"><%= month.monthString.substring(0,3) + " " + month.year %></button>
                 <% } %>
                 <!-- <button class="btn btn-primary" type="submit" name="button" value="<%= month.month %>"><%= month.monthString %></button> -->
                 <input type="hidden" name="year" value="<%= month.year %>">
@@ -200,6 +201,13 @@
           <button class="addCat" type="button" name="button" value="">Add Category</button>
         </div>
 
+        <!-- <div class="container Copy-Month-Container">
+          <span>You need a budget for May</span>
+          <span>We'll copy your budget from April to get you started!</span>
+          <p></p>
+          <button id="switchMonthButton" class="btn btn-primary" type="button">Start Planning for May</button>
+        </div> -->
+
       </div>
     </div> <!-- end of middle column -->
 
@@ -250,7 +258,7 @@
 
               <form id="transactionForm" class="row">
                 <div class="transactionModalInput col-12 my-2">
-                  <input type="text" name="modalAmt" placeholder="$0.00" id="transactionModalAmt" data-value="" class="form-control" required>
+                  <input type="text" name="modalAmt" placeholder="$0.00" id="transactionModalAmt" data-value="" class="form-control" autofocus required >
                 </div>
                 <div class="col-4 my-2">
                   <input type="date" name="modalDate" value="" id="transactionModalDate" class="transactionModalInput form-control">
@@ -326,6 +334,7 @@
               <div class="modalFooterContent">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="submit" id="transactionModalEdit" class="btn btn-primary">Save transaction</button>
+                <button type="button" id="transactionModalDelete" class="btn btn-danger">Delete transaction</button>
               </div>
             </div>
             </form>
@@ -355,6 +364,7 @@
             </div> -->
               <!-- </div> -->
               <!-- <div class="col-12 my-2"> -->
+              <hr style="color: #0091d9; width: 100%; height: 2px"></hr>
               <div class="PlaidAccountRow">
                 <button id="addPlaidAccount">Add Plaid Account</button>
               </div>
@@ -374,7 +384,15 @@
 
       <div class='RightHeader'>
         <button id='Accounts' data-bs-toggle="modal" data-bs-target="#PlaidAccountModal"><i class="fas fa-piggy-bank" style="font-size: 3rem; color: green"></i></button>
-        <button id='PlaidTransactions'><i class="fas fa-credit-card" style="font-size: 3rem; color: green"></i></button>
+        <div class="PlaidTransactionBox">
+          <div class="PlaidTransactionIcon">
+            <button id='PlaidTransactions'><i class="fas fa-credit-card" style="font-size: 3rem; color: green"></i></button>
+
+            <span class="countTransactions"></span>
+
+          </div>
+        </div>
+
       </div>
 
       <div class="chart-container">
@@ -421,6 +439,20 @@
           <div class="Budget-List-Item-Row dueDate">
             <span id="dueDate">Set Due Date</span><i class="fas fa-angle-down"></i>
           </div>
+          <div class="Budget-List-Item-Row fund" data-bs-toggle="collapse" data-bs-target="#fund" aria-expanded="false" aria-controls="fund">
+
+            <button id="makeFund">
+              <i class="fas fa-piggy-bank" style="font-size: 1.4rem; color: #0091d9; margin-right: 5px"></i><span style="color: #0091d9">Make this a fund</span>
+            </button>
+            <i class="fas fa-angle-down"></i>
+
+          </div>
+
+          <div class="collapse fundCollapse" id="fund">
+            <span>Funds carry balances month to month, letting you save toward a goal over time.</span>
+            <button id="makeThisAFund" class="btn btn-primary" style="margin-top: 10px; margin-left: 26%">Make this a Fund</button>
+          </div>
+
           <div class="Budget-List-Item-Row">
             <button id="setPlannedOnBudget" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Be On Budget</button>
           </div>
@@ -486,8 +518,8 @@
             <div class="tab-pane fade" id="pills-deleted" role="tabpanel" aria-labelledby="pills-deleted-tab">
               <div class="Plaid-Transaction-Row">
                 <span>Mar 20</span>
-                <span>Pornhub</span>
-                <span>-$69.69</span>
+                <span>Walmart</span>
+                <span>-$45.81</span>
               </div>
             </div>
           </div>

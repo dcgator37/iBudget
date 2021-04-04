@@ -11,7 +11,8 @@ $(document).ready(function() {
 //   console.log('chart loaded');
 // });
 
-
+  // add function to get new Plaid transactions. On Success update the count notification
+  getNewPlaidTransactions();
 
   //initialize global chart variable
   var myChart;
@@ -25,6 +26,12 @@ $(document).ready(function() {
   //format all the values on the site as currency
   $('.Input-Planned').toNumber().formatCurrency();
   $('.Budget-Row-Remaining').toNumber().formatCurrency();
+
+
+
+
+
+
 
 
   //listener when clicking off an item to hide item sidebar and re-display the chart
@@ -55,7 +62,7 @@ $(document).ready(function() {
   //*****************************************************Main Budget****************************************************************************
 
   $(document).on('click', '#monthPicker', function() {
-    console.log('postion ', $('.card-body').scrollLeft());
+    //console.log('postion ', $('.card-body').scrollLeft());
 
     indexOfCurrent = $('.btn--current').attr('data-index');
     //indexOfCurrent = 23;
@@ -86,6 +93,116 @@ $(document).ready(function() {
     //20px padding in between
     //564ish
     //$('.card-body').scrollLeft(300);
+  });
+
+  $('.switchmonth').on('submit', function(e) {
+    e.preventDefault();
+    const el = $(this).find("button");
+    var currentString = $(el).attr('data-name');
+    var monthString = '';
+    var monthNum = $(el).val()-1;
+    var lastName = '';
+    var year = $(el).attr('data-year');
+    console.log(currentString);
+
+    //console.log(e);
+    if ($(el).hasClass("btn--month")) {
+      $('.collapse').collapse('toggle');
+      $('.Budget-Main').empty();
+
+      const currentName = moment().month(monthNum).format("MMMM");
+
+      //monthNum = 0;
+
+      if (monthNum == 0) {
+        lastName = moment().month(11).format("MMMM");
+        monthString = lastName + " " + (year - 1);
+      } else {
+        lastName = moment().month(monthNum - 1).format("MMMM");
+        monthString = lastName + " " + year;
+      }
+
+
+      // if (monthNum == 12) {
+      //   --year;
+      //   --monthNum;
+      //   monthString = lastName + " " + year;
+      // } else {
+      //   monthString = lastName + " " + year;
+      // }
+
+      var html = "<div class='container Copy-Month-Container'>" +
+                  "<span>You need a budget for " + currentName + "</span>" +
+                  "<span>We'll copy your budget from " + lastName + " to get you started!</span>" +
+                  "<p></p>" +
+                  "<button id='switchMonthButton' class='btn btn-primary' type='button' value=" + (++monthNum) + " data-year=" + year + " data-current='" + currentString + "' data-last='" + monthString + "'>Start Planning for " + currentName + "</button>" +
+                  "</div>";
+
+      $('.Budget-Main').append(html);
+
+      //console.log(monthString);
+      //get last month's budget with ajax and monthstring
+
+
+    } else {
+      //switch to the budget with monthstring ajax switchmonth
+
+      $.ajax({
+        url: '/switchmonth',
+        method: 'post',
+        dataType: 'json',
+        data: {
+          'currentString': currentString,
+          'year': year,
+          'monthNum': monthNum + 1
+        },
+        success: function(res) {
+          if (res.msg == 'success') {
+            window.location.replace('/budget');
+
+          } else {
+            alert('data did not get retrieved');
+          }
+         },
+        error: function(res) {
+          alert('server error occurred');
+        }
+      });
+
+    }
+
+  });
+
+  $(document).on('click', '#switchMonthButton', function() {
+    console.log('click switch button');
+    const lastString = $(this).attr('data-last');
+    const currentString = $(this).attr('data-current');
+    const year = $(this).attr('data-year');
+    const monthNum = $(this).val();
+
+    $.ajax({
+      url: '/switchmonth',
+      method: 'post',
+      dataType: 'json',
+      data: {
+        'currentString': currentString,
+        'lastString': lastString,
+        'year': year,
+        'monthNum': monthNum
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          window.location.replace('/budget');
+
+        } else {
+          alert('data did not get retrieved');
+        }
+       },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+
   });
 
 
@@ -445,7 +562,7 @@ $(document).ready(function() {
 
 
           } else {
-          loadAccounts(res.accounts);
+          loadAccounts(res.item);
         }
         },
         error: function(res) {
@@ -455,18 +572,34 @@ $(document).ready(function() {
   });
 
   $(document).on('click', '#PlaidTransactions', () => {
+
     $.ajax({
       url: '/api/getTransactions',
       method: 'get',
       dataType: 'json',
       data: {},
       success: function(res) {
-        loadPlaidTransactions(res.transactions);
+
+        if (res.error) {
+
+        } else {
+          loadPlaidTransactions(res.result);
+
+          $('.Budget-List-Container').css("display", "none");
+          $('.Transactions-List').css("display", "none");
+          $('.Budget-List-Item').css("display", "none");
+
+          $('.Plaid-Transaction-Container').css("display", "block");
+          $('.Plaid-Transactions').css("display", "flex");
+          $('.chart-container').css("display", "none");
+        }
+
       },
       error: function(res) {
         alert('server error occurred');
       }
     });
+
   });
 
   $(document).on('click', '#addPlaidAccount', function() {
@@ -476,7 +609,12 @@ $(document).ready(function() {
       dataType: 'json',
       data: {},
       success: function(res) {
-        loadPlaidLink(res);
+        if (res.error) {
+          
+        } else {
+            loadPlaidLink(res);
+        }
+
       },
       error: function(res) {
         alert('server error occurred');
@@ -522,9 +660,11 @@ $(document).ready(function() {
     const updateLink = Plaid.create({
       token: token,
       onSuccess: (public_token, metadata) => {
-
+        console.log('successfully relinked cap 1');
+        console.log(public_token, metadata);
       },
       onExit: (err, metadata) => {
+        console.log('exiting plaid ', err);
 
       },
     });
@@ -532,88 +672,333 @@ $(document).ready(function() {
     updateLink.open();
   }
 
-  function loadAccounts(accounts) {
+  function loadAccounts(item) {
     el = $('#addPlaidAccount').parent();
+    el = $('#PlaidAccountModalBody').children('hr');
     var html = '';
-    if ($('#PlaidAccountModalBody').children().length == 1) {
-      accounts.accounts.forEach((account, index) => {
-        var name = account.name;
-        var balance = account.balances.current;
-        html += '<div class="PlaidAccountRow">' +
-                //'<div class="col-12 my-2">' +
-                '<button type="button" data-bs-toggle="collapse" data-bs-target="#PlaidAccountCollapse' + index + '" aria-expanded="false" aria-controls="PlaidAccountCollapse"><span class="PlaidAccountName">' + name + '<i class="fas fa-angle-down"></i></span></button>' +
-                //'<span class="PlaidAccountName">' + name +'</span>' +
-                '<span class="PlaidAccountBalance">' + balance + '</span>' +
-                '</div>' +
-                '<div class="collapse PlaidAccountCollapse" id="PlaidAccountCollapse' + index + '">' +
-                  '<div>' +
-                  '<input type="checkbox" id="sync' + index + '" name="sync" checked>' +
-                  '<label for="sync">Sync transactions</label>' +
-                  '</div>' +
-                  '<button type="button">Delete this account</button>' +
-                '</div>';
-      });
+    if ($('#PlaidAccountModalBody').children('.PlaidAccountRow').length == 1) {
 
+      const itemName = item.institution_name;
+      console.log(itemName);
+
+      html += '<div class="PlaidAccountRow">' +
+              '<span class="PlaidBankName">' + itemName + '<i class="fas fa-angle-down"></i></span>' +
+              '</div>';
+
+      item.accounts.forEach((account, index) => {
+        var name = account.name;
+        var balance = account.balances.available;
+
+        if (account.sync == true) {
+          html += '<div class="PlaidAccountRow">' +
+                  //'<div class="col-12 my-2">' +
+                  '<button type="button" data-bs-toggle="collapse" data-bs-target="#PlaidAccountCollapse' + index + '" aria-expanded="false" aria-controls="PlaidAccountCollapse"><span class="PlaidAccountName">' + name + '<i class="fas fa-angle-down"></i></span></button>' +
+                  //'<span class="PlaidAccountName">' + name +'</span>' +
+                  '<span class="PlaidAccountBalance">' + balance + '</span>' +
+                  '</div>' +
+                  '<div class="collapse PlaidAccountCollapse" id="PlaidAccountCollapse' + index + '">' +
+                    '<div>' +
+                    '<input type="checkbox" id="sync' + index + '" name="sync" checked>' +
+                    '<label for="sync">Sync transactions</label>' +
+                    '</div>' +
+                    '<button type="button">Delete this account</button>' +
+                  '</div>';
+        } else {
+          html += '<div class="PlaidAccountRow">' +
+                  //'<div class="col-12 my-2">' +
+                  '<button type="button" data-bs-toggle="collapse" data-bs-target="#PlaidAccountCollapse' + index + '" aria-expanded="false" aria-controls="PlaidAccountCollapse"><span class="PlaidAccountName">' + name + '<i class="fas fa-angle-down"></i></span></button>' +
+                  //'<span class="PlaidAccountName">' + name +'</span>' +
+                  '<span class="PlaidAccountBalance">' + balance + '</span>' +
+                  '</div>' +
+                  '<div class="collapse PlaidAccountCollapse" id="PlaidAccountCollapse' + index + '">' +
+                    '<div>' +
+                    '<input type="checkbox" id="sync' + index + '" name="sync">' +
+                    '<label for="sync">Sync transactions</label>' +
+                    '</div>' +
+                    '<button type="button">Delete this account</button>' +
+                  '</div>';
+        }
+
+      });
     el.before(html);
     }
 
     $('.PlaidAccountBalance').formatCurrency();
   }
 
-  $(document).on('click', '#PlaidTransactions', function() {
+
+
+
+//  $(document).on('click', '#PlaidTransactions', function() {
+
+    // $('.Plaid-Transaction-Row').draggable({
+    //   helper: 'clone',
+    //   zIndex: 10000,
+    // });
+    // //$( ".Plaid-Transaction-Row" ).draggable( "option", "stack", ".Budget-Main" );
+    //
+    // $('.Budget-Row').droppable({
+    //   accept: '.Plaid-Transaction-Row',
+    //   drop: function (event, ui) {
+    //     var droppedItem = $(ui.draggable).clone();
+    //     console.log(droppedItem);
+    //   }
+    // });
+
+
 
     //$('.Budget-List-Container').css("display", "block");
 
-    $('.Budget-List-Container').css("display", "none");
-    $('.Transactions-List').css("display", "none");
-    $('.Budget-List-Item').css("display", "none");
 
-    $('.Plaid-Transaction-Container').css("display", "block");
-    $('.Plaid-Transactions').css("display", "flex");
-    $('.chart-container').css("display", "none");
     //$('#myChart').css("display", "none");
 
+  //});
 
-  });
+  function getNewPlaidTransactions() {
 
-  function loadPlaidTransactions(transactions) {
+    // ajax call to query for plaid transactions. return just a count of new transactions to update notification
+
+
+    $.ajax({
+      url: '/api/getNewTransactions',
+      method: 'get',
+      dataType: 'json',
+      data: {},
+      success: function(res) {
+        if (res.msg == 'success') {
+          updateTransactionNotification(res.countNewTransactions);
+
+        } else {
+          //alert('data did not get retrieved');
+        }
+      },
+      error: function(res) {
+        alert('server error occurred');
+      }
+    });
+
+
+  }
+
+  function updateTransactionNotification(count) {
+    console.log('updating notification ', count);
+    if (count > 0) {
+      $('.countTransactions').text(count);
+      $('.countTransactions').css('display', 'flex');
+    }
+  }
+
+  function loadPlaidTransactions(result) {
     const el = $('#pills-new');
     var html = '';
 
-    transactions.forEach((transaction) => {
+    if ($(el).children().length == 0) {
+
+    result.forEach((transaction) => {
       var theDate = new Date(transaction.date);
-      console.log('date from Plaid ', transaction.date);
+      //console.log('date from Plaid ', transaction.date);
       // var month = theDate.toLocaleDateString("en-US", {month: "short"});
       // var day = theDate.toLocaleDateString("en-US", {day: "numeric"});
       var month = moment(transaction.date).format('MMM');
       var day = moment(transaction.date).date();
       var amt = transaction.amount;
       var merchant = transaction.name;
+      var accountName = transaction.account_name;
+
+      if (merchant.substring(0,3) === 'ACH') {
+        merchant = merchant.slice(4);
+        if (merchant.substring(0,7) === 'Deposit') {
+          merchant = merchant.slice(8);
+        } else if (merchant.substring(0,10) === 'Withdrawal') {
+          merchant = merchant.slice(11);
+        }
+      }
+
+      var origMerchant = merchant;
+
       if (merchant.length > 18) {
         merchant = merchant.substring(0,18) + "...";
       }
       var category = transaction.category[1];
       var type = transaction.category[0];
-      console.log(month);
-      console.log(day);
-      console.log(merchant);
-      console.log(type);
-      console.log(category);
-      console.log(amt);
+      // console.log(month);
+      // console.log(day);
+      // console.log(merchant);
+      // console.log(type);
+      // console.log(category);
+      // console.log(amt);
 
-      html += '<div class="Plaid-Transaction-Row">' +
-                '<div class="monthDay-container" style="margin-left: 5px">' +
+      html += '<div draggable="true" class="Plaid-Transaction-Row" data-id="' + transaction._id + '">' +
+                '<div class="monthDay-container" data-date=' + transaction.date + ' style="margin-left: 5px">' +
                   '<span class="transaction-month">' + month + '</span><span class="transaction-day">' + day + '</span>' +
                 '</div>' +
-                '<span>' + merchant + '</span>' +
-                '<span class="PlaidTransactionAmt">'+ amt + '</span>' +
+                '<div class="Plaid-Merchant-Box">' +
+                '<span class="Plaid-Merchant-Span" data-value="' + origMerchant + '">' + merchant + '</span>' +
+                '<span class="Plaid-Account-Span">' + accountName + '</span>' +
+                '</div>' +
+                '<span class="PlaidTransactionAmt" data-value='+ amt + '>'+ amt + '</span>' +
               '</div>';
 
-      el.append(html);
+
     });
+
+    el.append(html);
+
+  }
 
     $('.PlaidTransactionAmt').formatCurrency();
 
+    let dragSources = document.querySelectorAll('[draggable="true"]');
+      dragSources.forEach(dragSource => {
+      dragSource.addEventListener("dragstart", dragStart);
+      dragSource.addEventListener("dragend", dragEnd);
+    });
+
+    let dragDropRows = $('.Budget-Row');
+
+    //$('.Budget-Row').on('dragenter', dragEnter);
+    $('.Budget-Row').on('dragleave', dragLeave);
+    $('.Budget-Row').on('dragover', dragOver);
+    $('.Budget-Row').on('drop', dragDrop);
+
+    $('.Input-Planned').on('drop', dragDrop);
+    $('.Input-Name').on('drop', dragDrop);
+    $('.Budget-Row-Remaining').on('drop', dragDrop);
+
+  //  $('.Input-Planned').on('dragenter', dragEnter);
+    // $('.Input-Planned').on('dragleave', dragLeave);
+    // $('.Input-Planned').on('dragover', dragOver);
+    // $('.Input-Planned').on('drop', dragDrop);
+
+    // $('.Budget-Row').on('dragenter', dragEnter);
+    // $('.Budget-Row').on('dragleave', dragLeave);
+    // //$('.Budget-Row').on('dragover', dragOver);
+    // $('.Budget-Row').on('drop', dragDrop);
+    //
+    // $('.Budget-Row').on('dragenter', dragEnter);
+    // $('.Budget-Row').on('dragleave', dragLeave);
+    // //$('.Budget-Row').on('dragover', dragOver);
+    // $('.Budget-Row').on('drop', dragDrop);
+
+    function dragStart(e) {
+      //this.style.opacity = '0.4';
+         this.classList.add("dragging");
+        //  e.dataTransfer.setData("text/plain", e.target.id);
+        //  sourceContainerId = this.parentElement.id;
+    }
+
+    function dragEnd(e) {
+        this.classList.remove("dragging");
+    }
+
+    // function dragEnter() {
+    //
+    //   console.log($(this));
+    //   $(this).addClass('hover');
+    //
+    // }
+
+    function dragOver(e) {
+      e.preventDefault();
+      $(this).addClass('hover');
+      $(this).children('.Input-Planned').addClass('hover');
+      $(this).children('.Input-Name').addClass('hover');
+
+    }
+
+    function dragLeave() {
+      $(this).removeClass('hover');
+      $(this).children('.Input-Planned').removeClass('hover');
+      $(this).children('.Input-Name').removeClass('hover');
+    }
+
+    function dragDrop() {
+      if ($(this).attr('class') === 'Budget-Row hover') {
+        //console.log($(this).attr('class'));
+
+        const el = $(this);
+        const draggedEl = $('.dragging');
+        console.log(el);
+        console.log(draggedEl);
+
+        const index = $(this).parent().attr('data-cat');
+        const itemIndex = $(this).attr('data-item');
+        const date = $('.dragging').children('.monthDay-container').attr('data-date');
+        const amtDB = $('.dragging').children('.PlaidTransactionAmt').attr('data-value');
+        const merchant = $('.dragging').children('.Plaid-Merchant-Box').children('.Plaid-Merchant-Span').attr('data-value');
+        const plaidTransactionId = $('.dragging').attr('data-id');
+        console.log(index);
+        console.log(itemIndex);
+        console.log(date);
+        console.log(amtDB);
+        console.log(merchant);
+        console.log(plaidTransactionId);
+
+        $.ajax({
+          url: '/addTransaction',
+          method: 'post',
+          dataType: 'json',
+          data: {
+            'type': 'Expense',
+            'amt': amtDB,
+            'date': date,
+            'merchant': merchant,
+            'index': index,
+            'itemIndex': itemIndex
+          },
+          success: function(res) {
+            if (res.msg == 'success') {
+              console.log('Success');
+              updateRemaining(el, res.sum);
+              updateProgressBar(el);
+
+              //update the Plaid transaction as tracked
+              trackPlaidTransaction(plaidTransactionId);
+              //remove the Plaid transaction element
+              draggedEl.remove();
+
+            } else {
+              alert('data did not get added');
+            }
+          },
+          error: function(res) {
+            alert('server error occurred');
+          }
+        });
+
+
+
+      }
+
+      $(this).removeClass('hover');
+      $(this).children('.Input-Planned').removeClass('hover');
+      $(this).children('.Input-Name').removeClass('hover');
+    }
+
+  }
+
+  function trackPlaidTransaction(id) {
+    $.ajax({
+      url: '/trackPlaidTransaction',
+      method: 'post',
+      dataType: 'json',
+      data: {
+        id
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          console.log('plaid transaction to tracked');
+          //update transaction notification
+          var count = $('.countTransactions').text();
+          $('.countTransactions').text(--count);
+        } else {
+          alert('data did not get added');
+        }
+      },
+      error: function(res) {
+
+      }
+    });
   }
 
   ////*****************************************************Budget Item Sidebar****************************************************************************
@@ -721,6 +1106,7 @@ $(document).ready(function() {
     //reset amt
     $('#transactionModalAmt').val('');
     $('#transactionModalAmt').attr('data-value', '');
+    $('#transactionModalAmt').focus();
 
     //set date picker to today
     $('#transactionModalDate').val(today);
@@ -736,6 +1122,8 @@ $(document).ready(function() {
 
 
 
+
+
   });
 
   $('#transactionForm').on('submit', function(e) {
@@ -747,7 +1135,7 @@ $(document).ready(function() {
     var itemIndex;
     var budgetItem;
     var budgetContainer;
-    const amtDB = $('#transactionModalAmt').data('value');
+    const amtDB = $('#transactionModalAmt').attr('data-value');
     const merchant = $('#transactionModalMerchant').val();
     const notes = $('#transactionModalNote').val();
     const date = $('#transactionModalDate').val();
@@ -760,8 +1148,8 @@ $(document).ready(function() {
 
     } else {
       // console.log('dropdown is visible');
-      index = dropdown.find('option:selected').data('cat');
-      itemIndex = dropdown.find('option:selected').data('item');
+      index = dropdown.find('option:selected').attr('data-cat');
+      itemIndex = dropdown.find('option:selected').attr('data-item');
       budgetItem = dropdown.find('option:selected').val();
 
       budgetContainer = $(document).find("div.Budget-Container[data-cat='" + index + "']");
@@ -864,7 +1252,7 @@ $(document).ready(function() {
     var itemIndex;
     var budgetItem;
     var budgetContainer;
-    const amtDB = $('#transactionEditModalAmt').data('value');
+    const amtDB = $('#transactionEditModalAmt').attr('data-value');
     const merchant = $('#transactionEditModalMerchant').val();
     const notes = $('#transactionEditModalNote').val();
     const date = $('#transactionEditModalDate').val();
@@ -879,8 +1267,8 @@ $(document).ready(function() {
 
     } else {
       // console.log('dropdown is visible');
-      index = dropdown.find('option:selected').data('cat');
-      itemIndex = dropdown.find('option:selected').data('item');
+      index = dropdown.find('option:selected').attr('data-cat');
+      itemIndex = dropdown.find('option:selected').attr('data-item');
       budgetItem = dropdown.find('option:selected').val();
 
       budgetContainer = $(document).find("div.Budget-Container[data-cat='" + index + "']");
@@ -919,6 +1307,45 @@ $(document).ready(function() {
       },
       error: function(res) {
         alert('server error occurred');
+      }
+    });
+  });
+
+  $(document).on('click', '#transactionModalDelete', () => {
+
+    var el = $('.item--selected');
+    const index = $('.item--selected').parent().attr('data-cat');
+    const itemIndex = $('.item--selected').attr('data-item');
+    const transactionIndex = $('#transactionEditModal').attr('data-index');
+    const amtDB = $('#transactionEditModalAmt').attr('data-value');
+
+    $.ajax({
+      url: '/deleteTransaction',
+      method: 'delete',
+      dataType: 'json',
+      data: {
+        index,
+        itemIndex,
+        transactionIndex,
+        amtDB
+      },
+      success: function(res) {
+        if (res.msg == 'success') {
+          updateRemaining(el, res.sum);
+          updateProgressBar(el);
+          updateBudgetListItem(el);
+
+          $('#Transaction-Container').children('.Transactions-List-Row').eq(transactionIndex).remove();
+          var numOfTransactions = $('#numTransactions').text();
+          $('#numTransactions').text(--numOfTransactions);
+          $('#transactionEditModal').modal('hide');
+
+        } else {
+
+        }
+      },
+      error: function(res) {
+
       }
     });
   });
@@ -1324,8 +1751,11 @@ $(document).ready(function() {
     //const income = data[0];
     var sumofPlannedAmt = 0;
     if (income == undefined) {
-      income = $('#leftToBudget').attr('data-income');
+      income = $('#leftToBudget').attr('data-income') || $('#leftToBudgetText').attr('data-income');
     }
+
+    //console.log('income in budgetremaining ', income);
+    //console.log('data in budgetremaining ', data);
 
     data.forEach(function(plannedAmt, index){
       //if(index>0){
@@ -1333,10 +1763,13 @@ $(document).ready(function() {
       //}
     });
 
+    //console.log(sumofPlannedAmt);
+
     if(sumofPlannedAmt ==  income){
       //if on budget, remove the span with the value
       $('#leftToBudget').remove();
       $('#leftToBudgetText').text("You are on budget!");
+      $('#leftToBudgetText').attr('data-income', income);
       //remove prior css class before adding new one
       $('#leftToBudgetText').removeClass();
       $('#leftToBudgetText').addClass("on-buget");
