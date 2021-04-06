@@ -27,8 +27,12 @@ $(document).ready(function() {
   $('.Input-Planned').toNumber().formatCurrency();
   $('.Budget-Row-Remaining').toNumber().formatCurrency();
 
-
-
+  const el = $('.Budget-Row-Remaining');
+  $(el).each(function(){
+    if ($(this).attr("data-value")<0 ){
+      $(this).addClass("remainingnegative");
+    }
+  });
 
 
 
@@ -610,7 +614,7 @@ $(document).ready(function() {
       data: {},
       success: function(res) {
         if (res.error) {
-          
+
         } else {
             loadPlaidLink(res);
         }
