@@ -229,9 +229,13 @@ input:last-child {
 }
 
 .item--selected {
-  border: 2px solid green;
-  /* top: -.8rem;
-  bottom: -.8rem; */
+  /* border: 2px solid green; */
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0.25rem 0.5rem grey;
+  width: 42rem;
+  left: -1.5rem;
+  background-color: white;
   border-radius: .4rem;
 }
 

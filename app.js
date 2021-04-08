@@ -1744,3 +1744,5 @@ function createChart(id) {
   const url = src + '&filter={"_id":' + id + '}';
   return url;
 }
+
+//Styling
