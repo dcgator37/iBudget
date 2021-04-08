@@ -28,12 +28,6 @@ $(document).ready(function() {
   $('.Budget-Row-Remaining').toNumber().formatCurrency();
 
 
-
-
-
-
-
-
   //listener when clicking off an item to hide item sidebar and re-display the chart
   $(document).click(function(event) {
     var $target = $(event.target);
@@ -208,13 +202,21 @@ $(document).ready(function() {
 
   $(document).on('click', '.Budget-Row', function(e) {
 
+    if ($('.fund').attr('aria-expanded') == 'true') {
+
+      $('.fundCollapse').collapse('toggle');
+    }
+
     const index = $(this).parent().attr('data-cat');
     const itemIndex = $(this).attr('data-item');
 
     const categoryName = $(this).parent().attr('data-cat-name');
     const itemName = $(this).children('.Input-Name').val();
     const remaining = $(this).children('.Budget-Row-Remaining').text();
+    const planned = $(this).children('.Input-Planned').attr('data-value');
     const spent = $(this).children('.Input-Planned').attr('data-value') - $(this).children('.Budget-Row-Remaining').attr('data-value');
+    var html = '';
+
     var progressAmt = (spent / $(this).children('.Input-Planned').attr('data-value') * 100).toFixed(1);
 
     if (isNaN(progressAmt)) {
@@ -235,6 +237,53 @@ $(document).ready(function() {
     $('#spent').toNumber().formatCurrency();
     $('#budgetSideBarProgress').css('width', progressAmt + '%');
     $('#budgetSideBarProgress').attr('aria-valuenow', progressAmt);
+
+    if ($(this).attr('data-fund') == 'true') {
+      const startingBalance = $('.item--selected').attr('data-balance');
+      const balance = startingBalance + planned - spent;
+      $('#makeFund span').text('Fund Details');
+      $('.fundCollapse span').css('display', 'none');
+      $('.fundCollapse button').css('display', 'none');
+
+      $('.fundCollapse').children().remove();
+
+      html = '<div class="Budget-List-Item-Row">' +
+          '<span id="startBalSpan">Starting Balance</span>' +
+          '<input type="text" placeholder="$0.00" value="' + startingBalance + '" data-value="' + startingBalance + '" id="startBalInput" onclick="this.select()">' +
+        '</div>' +
+        '<div class="Budget-List-Item-Row">' +
+          '<span id="fundPlanned">Planned This Month</span>' +
+          '<span id="fundPlannedAmt" data-value="' + planned + '">' + planned + '</span>' +
+        '</div>' +
+        '<div class="Budget-List-Item-Row">' +
+          '<span id="fundSpent">Spent This Month</span>' +
+          '<span id="fundSpentAmt" data-value="' + spent + '">' + spent + '</span>' +
+        '</div>' +
+        '<hr>' +
+        '<div class="Budget-List-Item-Row" style="justify-content: flex-end;">' +
+          '<span id="fundBalance" data-value="' + balance + '">' + balance + '</span>' +
+        '</div>' +
+        '<hr>' +
+        '<div class="Budget-List-Item-Row">' +
+          '<span id="fundGoal">Savings Goal</span>' +
+          '<input type="text" placeholder="$0.00" data-value="" id="fundGoalInput" onclick="this.select()">' +
+        '</div>';
+
+        $('.fundCollapse').append(html);
+
+        $('#startBalInput').formatCurrency();
+        $('#fundPlannedAmt').formatCurrency();
+        $('#fundSpentAmt').formatCurrency();
+        $('#fundBalance').formatCurrency();
+
+
+    } else {
+      $('#makeFund span').text('Make this a fund');
+      $('.fundCollapse').children().remove();
+      html = '<span>Funds carry balances month to month, letting you save toward a goal over time.</span>' +
+              '<button id="makeThisAFund" class="btn btn-primary" style="margin-top: 10px">Make this a Fund</button>';
+      $('.fundCollapse').append(html);
+    }
 
     //remove all elements of the transaction container except the first one
     $('#Transaction-Container').children('.Transactions-List-Row').remove();
@@ -285,6 +334,40 @@ $(document).ready(function() {
   }).on('click', 'button.btndel', function(e) {
     e.stopPropagation();
   });
+
+
+  $(document).on('click', '.dropdown-item', function() {
+
+    if ($(this).hasClass('active')) {
+
+      return false;
+    } else {
+
+      const dropdowntext = $(this).text();
+
+      $('.dropdown-item').each(function() {
+
+        if ($(this).text() == dropdowntext) {
+          $(this).addClass('active');
+        } else {
+          $(this).removeClass('active');
+        }
+      });
+
+      if ($(this).text() == 'Spent') {
+          $('.Category-Header div:nth-child(4)').children('span').text('Spent ');
+
+      } else {
+
+        $('.Category-Header div:nth-child(4)').children('span').text('Remaining ');
+      }
+
+    }
+
+  });
+
+
+
 
   $(document).on('click', '.Header-Left', function() {
     const el = $(this);
@@ -349,6 +432,19 @@ $(document).ready(function() {
       },
       error: function(res) {
         alert('server error occurred');
+      }
+    });
+  });
+
+  $(document).on('click', '#deleteBudget', function() {
+    $.ajax({
+      url: '/deleteBudget',
+      method: 'delete',
+      success: function(res) {
+        window.location.replace('/budget');
+      },
+      error: function(res) {
+
       }
     });
   });
@@ -610,7 +706,7 @@ $(document).ready(function() {
       data: {},
       success: function(res) {
         if (res.error) {
-          
+
         } else {
             loadPlaidLink(res);
         }
@@ -1012,6 +1108,129 @@ $(document).ready(function() {
 
     //$('#myChart').css("display", "block");
     $('.chart-container').css("display", "block");
+  });
+
+  $(document).on('click', '#makeThisAFund', function() {
+    const el = $('.item--selected');
+    const index = $(el).parent().attr('data-cat');
+    const itemIndex = $(el).attr('data-item');
+    const inputName = $('.item--selected').children('.Input-Name');
+    const planned = $('.item--selected').children('.Input-Planned').attr('data-value');
+    const spent = $('.item--selected').children('.Input-Planned').attr('data-value') - $('.item--selected').children('.Budget-Row-Remaining').attr('data-value');
+    const balance = planned - spent;
+    var html = '<i class="fas fa-piggy-bank" style="font-size: 1.4rem; color: #0091d9; width: 5%; align-self: center;" aria-hidden="true"></i>';
+    inputName.css('width', '45%');
+
+    inputName.before(html);
+
+    $('#makeFund').children('span').text('Fund Details');
+
+    $(this).siblings('span').remove();
+    $(this).css("display", "none");
+
+    html = '<div class="Budget-List-Item-Row">' +
+        '<span id="startBalSpan">Starting Balance</span>' +
+        '<input type="text" placeholder="$0.00" value="" data-value="" id="startBalInput" onclick="this.select()">' +
+      '</div>' +
+      '<div class="Budget-List-Item-Row">' +
+        '<span id="fundPlanned">Planned This Month</span>' +
+        '<span id="fundPlannedAmt" data-value="' + planned + '">' + planned + '</span>' +
+      '</div>' +
+      '<div class="Budget-List-Item-Row">' +
+        '<span id="fundSpent">Spent This Month</span>' +
+        '<span id="fundSpentAmt" data-value="' + spent + '">' + spent + '</span>' +
+      '</div>' +
+      '<hr>' +
+      '<div class="Budget-List-Item-Row" style="justify-content: flex-end;">' +
+        '<span id="fundBalance" data-value="' + balance + '">' + balance + '</span>' +
+      '</div>' +
+      '<hr>' +
+      '<div class="Budget-List-Item-Row">' +
+        '<span id="fundGoal">Savings Goal</span>' +
+        '<input type="text" placeholder="$0.00" data-value="" id="fundGoalInput" onclick="this.select()">' +
+      '</div>';
+
+      $('#fund').append(html);
+
+      $('#fundPlannedAmt').formatCurrency();
+      $('#fundSpentAmt').formatCurrency();
+      $('#fundBalance').formatCurrency();
+    // add the fund details html
+
+    // ajax call to add fund=true to item
+    // add starting balance field
+    // add ending balance; starting balance + planned - spent
+
+    $.ajax({
+      url: '/createFund',
+      method: 'post',
+      dataType: 'json',
+      data: {
+        index,
+        itemIndex
+      },
+      success: function(res) {
+
+      },
+      error: function(res) {
+
+      }
+    });
+
+
+  });
+
+  $(document).on('change', '#startBalInput', function() {
+    var el = $('item--selected');
+    var index = $(el).parent().attr('data-cat');
+    var itemIndex = $(el).attr('data-item');
+    const amtDB = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
+    const plannedAmt = parseFloat($('#fundPlannedAmt').attr('data-value')).toFixed(2);
+    const spent = parseFloat($('#fundSpentAmt').attr('data-value')).toFixed(2);
+
+
+    $(this).toNumber().formatCurrency();    //format it as currency with dollar sign and commas, and not accept non-numbers
+
+    var amt = $(this).val();
+
+    //if it's blank, end the function
+    if (amt == '') {
+      console.log('not a number');
+      return false;
+    }
+
+    $(this).attr('data-value', amtDB);
+    const balance = parseFloat(amtDB) + parseFloat(plannedAmt) - parseFloat(spent);
+
+    $('#fundBalance').text(balance);
+
+    $('#fundBalance').attr('data-value', balance);
+    $('#fundBalance').formatCurrency();
+
+
+
+    //ajax to save the change
+  });
+
+  $(document).on('change', '#fundGoalInput', function() {
+    var el = $('item--selected');
+    var index = $(el).parent().attr('data-cat');
+    var itemIndex = $(el).attr('data-item');
+    var amtDB = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
+
+    $(this).toNumber().formatCurrency();    //format it as currency with dollar sign and commas, and not accept non-numbers
+
+    var amt = $(this).val();
+
+    //if it's blank, end the function
+    if (amt == '') {
+      console.log('not a number');
+      return false;
+    }
+
+    $(this).attr('data-value', amtDB);
+
+    //ajax to save the change
   });
 
   $(document).on('click', '#setPlannedOnBudget', function() {

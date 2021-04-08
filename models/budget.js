@@ -15,6 +15,10 @@ const budgetSchema = new mongoose.Schema ({
         {
           name: String,
           planned: Number,
+          fund: Boolean,
+          startingBalance: Number,
+          endingBalance: Number,
+          savingsGoal: Number,
           sumOfTransactions: Number,
           transactions: [
             {

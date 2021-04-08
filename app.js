@@ -617,6 +617,42 @@ app.delete("/deleteCategory", function(req, res) {
   res.json({msg: 'success'});
 });
 
+app.delete('/deleteBudget', async (req, res) => {
+  var year = activeBudget.year;
+  var monthNum = activeBudget.monthNum;
+  const id = activeBudget._id;
+  var budget;
+
+  while (!budget) {
+    if (monthNum == 1) {
+      monthNum = 12;
+      --year;
+    } else {
+      --monthNum;
+    }
+
+    budget = await Budget.findOne({user_id: req.user._id, year: year, monthNum: monthNum}).catch((e) =>{
+      console.log(e);
+    });
+
+   }
+
+   req.user.monthsArray.find((month, index) => {
+     if (month.monthString === activeBudget.month) {
+       req.user.monthsArray[index].active = false;
+     }
+   });
+
+   await req.user.save();
+
+   activeBudget = budget;
+
+   await Budget.findByIdAndDelete(id);
+
+   res.json({msg: 'success'});
+
+});
+
 app.post("/addCat", function(req, res) {
 
   activeBudget.category.push({});
@@ -741,6 +777,21 @@ app.delete('/deleteTransaction', (req, res) => {
 
   res.json({msg: 'success', sum: sum});
 
+});
+
+app.post('/createFund', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+
+  console.log(index);
+  console.log(itemIndex);
+
+  activeBudget.category[index].items[itemIndex].fund = true;
+  activeBudget.category[index].items[itemIndex].startingBalance = 0;
+  activeBudget.category[index].items[itemIndex].endingBalance = 0;
+  activeBudget.save();
+
+  res.json({msg: 'success'});
 });
 
 app.post('/testmodalpost', (req, res) => {

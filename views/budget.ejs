@@ -154,12 +154,12 @@
             <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
             <span class="Header-Left"><%= category.name %></span>
             <span class="Header-Right">Planned</span>
-            <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
+            <div class="Header-Right"><span>Remaining </span><button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <li><a class="dropdown-item active">Remaining</a></li>
                 <li><a class="dropdown-item">Spent</a></li>
               </ul>
-            </span>
+            </div>
           </header>
 
           <!-- </div> -->
@@ -168,15 +168,15 @@
           <!-- Loop through each budget item in the category -->
           <% category.items.forEach(function(item, itemIndex) { %>
 
-          <div class="Budget-Row" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>">
+          <div class="Budget-Row" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>" data-fund="<%= item.fund %>" data-balance="<%= item.startingBalance %>">
 
             <button type="button" class="btndel" name="button"><i class="far fa-trash-alt"></i></button>
-
-            <!-- input-label
-          planned-label
-          span-rem -->
-
-            <input class="Input-Name" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
+            <% if (item.fund == true) { %>
+              <i class="fas fa-piggy-bank" style="font-size: 1.4rem; color: #0091d9; width: 5%; align-self: center;" aria-hidden="true"></i>
+              <input class="Input-Name" style="width: 45%" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
+            <% } else { %>
+              <input class="Input-Name" type="text" name="itemName" value="<%= item.name %>" placeholder="Enter a name"></input>
+            <% } %>
             <input class="Input-Planned" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
             <span class="Budget-Row-Remaining" data-value="<%= (item.planned - item.sumOfTransactions).toFixed(2) %>"><%= (item.planned - item.sumOfTransactions).toFixed(2) %></span>
 
@@ -199,6 +199,10 @@
         <!-- add category button -->
         <div class="container Category-Button">
           <button class="addCat" type="button" name="button" value="">Add Category</button>
+        </div>
+
+        <div class="container Delete-Budget">
+          <button id="deleteBudget" class="" style="color: red" type="button"><i class="fas fa-minus-circle"></i> Delete Budget</button>
         </div>
 
         <!-- <div class="container Copy-Month-Container">
@@ -450,7 +454,31 @@
 
           <div class="collapse fundCollapse" id="fund">
             <span>Funds carry balances month to month, letting you save toward a goal over time.</span>
-            <button id="makeThisAFund" class="btn btn-primary" style="margin-top: 10px; margin-left: 26%">Make this a Fund</button>
+            <button id="makeThisAFund" class="btn btn-primary" style="margin-top: 10px">Make this a Fund</button>
+            <!-- <div class="Budget-List-Item-Row">
+              <span id='startBalSpan'>Starting Balance</span>
+
+              <input type="text" placeholder="$0.00" value="" data-value="" id="startBalInput" onclick="this.select()">
+
+            </div>
+            <div class="Budget-List-Item-Row">
+              <span id='fundPlanned'>Planned This Month</span>
+              <span id='fundPlannedAmt' data-value="1000.55">$1,000.00</span>
+            </div>
+            <div class="Budget-List-Item-Row">
+              <span id='fundSpent'>Spent This Month</span>
+              <span id='fundSpentAmt' data-value="500.00">$0.00</span>
+            </div>
+            <hr>
+            <div class="Budget-List-Item-Row" style="justify-content: flex-end;">
+              <span id='fundBalance' data-value=''>$1,000.00</span>
+            </div>
+            <hr>
+            <div class="Budget-List-Item-Row">
+              <span id='fundGoal'>Savings Goal</span>
+              <input type="text" placeholder="$0.00" data-value="" id="fundGoalInput" onclick="this.select()">
+            </div> -->
+
           </div>
 
           <div class="Budget-List-Item-Row">
