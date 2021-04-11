@@ -375,6 +375,9 @@ app.post('/switchmonth', async (req, res) => {
 
         category.forEach((cat) => {
           cat.items.forEach((item, index, theArray) => {
+            if (item.fund == true) {
+              theArray[index].startingBalance = item.endingBalance;
+            }
             theArray[index].sumOfTransactions = 0;
             if (theArray[index].transactions.length > 0) {
               theArray[index].transactions.splice(0);
@@ -549,6 +552,11 @@ app.put("/editItemAmt", (req, res) => {
   const index = req.body.index;
   const itemIndex = req.body.itemIndex;
   const amt = parseFloat(req.body.amt);
+  const fund = req.body.fund;
+
+  if (fund == 'true') {
+    activeBudget.category[index].items[itemIndex].endingBalance = activeBudget.category[index].items[itemIndex].startingBalance + amt - activeBudget.category[index].items[itemIndex].sumOfTransactions;
+  }
 
   activeBudget.category[index].items[itemIndex].planned = amt;
   activeBudget.save();
@@ -794,6 +802,34 @@ app.post('/createFund', (req, res) => {
   res.json({msg: 'success'});
 });
 
+app.patch('/editFundStartBalance', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const startBal = req.body.startBal;
+  const endBal = req.body.endBal;
+
+  console.log(index);
+
+  activeBudget.category[index].items[itemIndex].startingBalance = startBal;
+  activeBudget.category[index].items[itemIndex].endingBalance = endBal;
+  activeBudget.save();
+
+  res.json({msg: 'success'});
+
+});
+
+app.patch('/editFundGoal', (req, res) => {
+  const index = req.body.index;
+  const itemIndex = req.body.itemIndex;
+  const fundGoal = req.body.fundGoal;
+
+  activeBudget.category[index].items[itemIndex].fundGoal = fundGoal;
+  activeBudget.save();
+
+  res.json({msg: 'success'});
+
+});
+
 app.post('/testmodalpost', (req, res) => {
 
 });
@@ -804,6 +840,11 @@ app.post('/getTransactions', async (req, res) => {
   const categoryName = activeBudget.category[index].name;
   const itemName = activeBudget.category[index].items[itemIndex].name;
   const currentMonth = activeBudget.monthNum;
+  const fund = req.body.fund;
+  if (fund == 'true') {
+    console.log('fund ',fund);
+  }
+
   var currentYear = activeBudget.year;
   var priorMonth = currentMonth - 1;
   var priorMonthYear = currentYear;
@@ -825,7 +866,11 @@ app.post('/getTransactions', async (req, res) => {
         if (el.name == categoryName) {
           el.items.find( function (item, index, array) {
             if (item.name == itemName) {
-              sum = item.sumOfTransactions;
+              if (fund == 'true') {
+                sum = item.planned;
+              } else {
+                sum = item.sumOfTransactions;
+              }
             } else {
 
             }
@@ -843,7 +888,11 @@ app.post('/getTransactions', async (req, res) => {
         if (el.name == categoryName) {
           el.items.find( function (item, index, array) {
             if (item.name == itemName) {
-              sumLastYear = item.sumOfTransactions;
+              if (fund == 'true') {
+                sumLastYear = item.planned;
+              } else {
+                sumLastYear = item.sumOfTransactions;
+              }
             } else {
 
             }
@@ -1795,3 +1844,5 @@ function createChart(id) {
   const url = src + '&filter={"_id":' + id + '}';
   return url;
 }
+
+//Styling

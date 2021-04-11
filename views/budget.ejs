@@ -154,12 +154,12 @@
             <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
             <span class="Header-Left"><%= category.name %></span>
             <span class="Header-Right">Planned</span>
-            <div class="Header-Right"><span>Remaining </span><button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
+            <span class="Header-Right">Remaining <button class="fas fa-angle-down" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"></button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 <li><a class="dropdown-item active">Remaining</a></li>
                 <li><a class="dropdown-item">Spent</a></li>
               </ul>
-            </div>
+            </span>
           </header>
 
           <!-- </div> -->
@@ -168,7 +168,7 @@
           <!-- Loop through each budget item in the category -->
           <% category.items.forEach(function(item, itemIndex) { %>
 
-          <div class="Budget-Row" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>" data-fund="<%= item.fund %>" data-balance="<%= item.startingBalance %>">
+          <div class="Budget-Row" onmouseover="dosomething(this)" onmouseout="dothat(this)" onclick="clickItem(this)" data-item="<%= itemIndex %>" data-fund="<%= item.fund %>" data-balance="<%= item.startingBalance %>" data-goal="<%= item.fundGoal %>">
 
             <button type="button" class="btndel" name="button"><i class="far fa-trash-alt"></i></button>
             <% if (item.fund == true) { %>
@@ -283,10 +283,6 @@
                   <textarea name="modalNotes" placeholder="Note" id="transactionModalNote" class="transactionModalInput form-control"></textarea>
                 </div>
 
-
-                <!--vaidation?-->
-                <!--calendar default to "today"-->
-                <!--option for the transactionModalItem is depending on the item in the main screen (backend)-->
             </div>
             <div class="modal-footer">
               <div class="modalFooterContent">

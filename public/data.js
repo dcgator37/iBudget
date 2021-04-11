@@ -27,11 +27,21 @@ $(document).ready(function() {
   $('.Input-Planned').toNumber().formatCurrency();
   $('.Budget-Row-Remaining').toNumber().formatCurrency();
 
+  const el = $('.Budget-Row-Remaining');
+  $(el).each(function(){
+    if ($(this).attr("data-value")<0 ){
+      $(this).addClass("remainingnegative");
+    }
+  });
+
+
+
+
 
   //listener when clicking off an item to hide item sidebar and re-display the chart
   $(document).click(function(event) {
     var $target = $(event.target);
-    if(!$target.closest('.Budget-Row').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length  && !$target.closest('.modal').length && !$target.closest('#PlaidTransactions').length && !$target.closest('#Accounts').length && !$target.closest('.Plaid-Transaction-Row').length && !$target.closest('#pills-tab').length) {
+    if(!$target.closest('.Budget-Row').length && !$target.closest('.dropdown-item').length && !$target.closest('#monthPicker').length && !$target.closest('.Budget-List-Item').length  && !$target.closest('.Transactions-List').length  && !$target.closest('.modal').length && !$target.closest('#PlaidTransactions').length && !$target.closest('#Accounts').length && !$target.closest('.Plaid-Transaction-Row').length && !$target.closest('#pills-tab').length) {
       $('.item--selected').removeClass('item--selected');
       $('.chart-container').css("display", "block");
       $('.Budget-List-Container').css("display", "none");
@@ -90,6 +100,8 @@ $(document).ready(function() {
   });
 
   $('.switchmonth').on('submit', function(e) {
+    // when a month in the dropdown is clicked, cancel the normal submit
+    // get the monthstring, monthnum, and year from the month button clicked
     e.preventDefault();
     const el = $(this).find("button");
     var currentString = $(el).attr('data-name');
@@ -97,17 +109,17 @@ $(document).ready(function() {
     var monthNum = $(el).val()-1;
     var lastName = '';
     var year = $(el).attr('data-year');
-    console.log(currentString);
 
-    //console.log(e);
+    // if the month has not been created yet, collapse dropdwon and clear out the main budget container
+
     if ($(el).hasClass("btn--month")) {
       $('.collapse').collapse('toggle');
       $('.Budget-Main').empty();
 
+      // name of the month selected
       const currentName = moment().month(monthNum).format("MMMM");
 
-      //monthNum = 0;
-
+      // make the monthstring for the prior month to copy from. If January, then decrement the year
       if (monthNum == 0) {
         lastName = moment().month(11).format("MMMM");
         monthString = lastName + " " + (year - 1);
@@ -149,6 +161,7 @@ $(document).ready(function() {
           'currentString': currentString,
           'year': year,
           'monthNum': monthNum + 1
+          // +1 because moment starts at 0, whereas we start at 1 for months
         },
         success: function(res) {
           if (res.msg == 'success') {
@@ -168,7 +181,9 @@ $(document).ready(function() {
   });
 
   $(document).on('click', '#switchMonthButton', function() {
-    console.log('click switch button');
+
+    // when you click on the copy from last month's budget
+
     const lastString = $(this).attr('data-last');
     const currentString = $(this).attr('data-current');
     const year = $(this).attr('data-year');
@@ -202,7 +217,9 @@ $(document).ready(function() {
 
   $(document).on('click', '.Budget-Row', function(e) {
 
-    if ($('.fund').attr('aria-expanded') == 'true') {
+    var $target = $(e.target);
+
+    if ($('.fund').attr('aria-expanded') == 'true' && !$target.closest('.Input-Planned').length) {
 
       $('.fundCollapse').collapse('toggle');
     }
@@ -215,6 +232,8 @@ $(document).ready(function() {
     const remaining = $(this).children('.Budget-Row-Remaining').text();
     const planned = $(this).children('.Input-Planned').attr('data-value');
     const spent = $(this).children('.Input-Planned').attr('data-value') - $(this).children('.Budget-Row-Remaining').attr('data-value');
+    var fund;
+
     var html = '';
 
     var progressAmt = (spent / $(this).children('.Input-Planned').attr('data-value') * 100).toFixed(1);
@@ -240,7 +259,10 @@ $(document).ready(function() {
 
     if ($(this).attr('data-fund') == 'true') {
       const startingBalance = $('.item--selected').attr('data-balance');
-      const balance = startingBalance + planned - spent;
+      const fundGoal = $('.item--selected').attr('data-goal');
+      const balance = parseFloat(startingBalance) + parseFloat(planned) - parseFloat(spent);
+      fund = $(this).attr('data-fund');
+
       $('#makeFund span').text('Fund Details');
       $('.fundCollapse span').css('display', 'none');
       $('.fundCollapse button').css('display', 'none');
@@ -266,12 +288,13 @@ $(document).ready(function() {
         '<hr>' +
         '<div class="Budget-List-Item-Row">' +
           '<span id="fundGoal">Savings Goal</span>' +
-          '<input type="text" placeholder="$0.00" data-value="" id="fundGoalInput" onclick="this.select()">' +
+          '<input type="text" placeholder="$0.00" value="' + fundGoal + '" data-value="' + fundGoal + '" id="fundGoalInput" onclick="this.select()">' +
         '</div>';
 
         $('.fundCollapse').append(html);
 
         $('#startBalInput').formatCurrency();
+        $('#fundGoalInput').formatCurrency();
         $('#fundPlannedAmt').formatCurrency();
         $('#fundSpentAmt').formatCurrency();
         $('#fundBalance').formatCurrency();
@@ -295,7 +318,8 @@ $(document).ready(function() {
       dataType: 'json',
       data: {
         'index': index,
-        'itemIndex': itemIndex
+        'itemIndex': itemIndex,
+        'fund': fund
       },
       success: function(res) {
         if (res.msg == 'success') {
@@ -330,43 +354,11 @@ $(document).ready(function() {
     $('.Transactions-List').css("display", "flex");
     $('.Budget-List-Item').css("display", "flex");
 
+    $('.Plaid-Transaction-Container').css("display", "none");
     $('.chart-container').css("display", "none");
   }).on('click', 'button.btndel', function(e) {
     e.stopPropagation();
   });
-
-
-  $(document).on('click', '.dropdown-item', function() {
-
-    if ($(this).hasClass('active')) {
-
-      return false;
-    } else {
-
-      const dropdowntext = $(this).text();
-
-      $('.dropdown-item').each(function() {
-
-        if ($(this).text() == dropdowntext) {
-          $(this).addClass('active');
-        } else {
-          $(this).removeClass('active');
-        }
-      });
-
-      if ($(this).text() == 'Spent') {
-          $('.Category-Header div:nth-child(4)').children('span').text('Spent ');
-
-      } else {
-
-        $('.Category-Header div:nth-child(4)').children('span').text('Remaining ');
-      }
-
-    }
-
-  });
-
-
 
 
   $(document).on('click', '.Header-Left', function() {
@@ -544,6 +536,7 @@ $(document).ready(function() {
     var index = $(this).parent().parent().attr('data-cat');
     var itemIndex = $(this).parent().attr('data-item');
     var amtDB = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
+    var fund = $(this).parent().attr('data-fund');
     //console.log(amtDB);
     $(this).toNumber().formatCurrency();    //format it as currency with dollar sign and commas, and not accept non-numbers
     var amt = $(this).val();
@@ -569,7 +562,8 @@ $(document).ready(function() {
       data: {
         'index': index,
         'itemIndex': itemIndex,
-        'amt': amtDB
+        'amt': amtDB,
+        'fund': fund
       },
       success: function(res) {
         if (res.msg == 'success') {
@@ -769,8 +763,8 @@ $(document).ready(function() {
   }
 
   function loadAccounts(item) {
-    el = $('#addPlaidAccount').parent();
-    el = $('#PlaidAccountModalBody').children('hr');
+    //el = $('#addPlaidAccount').parent();
+    var el = $('#PlaidAccountModalBody').children('hr');
     var html = '';
     if ($('#PlaidAccountModalBody').children('.PlaidAccountRow').length == 1) {
 
@@ -1181,14 +1175,13 @@ $(document).ready(function() {
   });
 
   $(document).on('change', '#startBalInput', function() {
-    var el = $('item--selected');
+    var el = $('.item--selected');
     var index = $(el).parent().attr('data-cat');
     var itemIndex = $(el).attr('data-item');
-    const amtDB = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
+    const startBal = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
     const plannedAmt = parseFloat($('#fundPlannedAmt').attr('data-value')).toFixed(2);
     const spent = parseFloat($('#fundSpentAmt').attr('data-value')).toFixed(2);
 
-
     $(this).toNumber().formatCurrency();    //format it as currency with dollar sign and commas, and not accept non-numbers
 
     var amt = $(this).val();
@@ -1199,24 +1192,40 @@ $(document).ready(function() {
       return false;
     }
 
-    $(this).attr('data-value', amtDB);
-    const balance = parseFloat(amtDB) + parseFloat(plannedAmt) - parseFloat(spent);
+    $(this).attr('data-value', startBal);
+    const endBal = parseFloat(startBal) + parseFloat(plannedAmt) - parseFloat(spent);
 
-    $('#fundBalance').text(balance);
+    $('#fundBalance').text(endBal);
 
-    $('#fundBalance').attr('data-value', balance);
+    $('#fundBalance').attr('data-value', endBal);
     $('#fundBalance').formatCurrency();
 
+    $.ajax({
+      url: '/editFundStartBalance',
+      method: 'patch',
+      dataType: 'json',
+      data: {
+        index,
+        itemIndex,
+        startBal,
+        endBal
+      },
+      success: function(res) {
+        $('.item--selected').attr('data-balance', startBal);
 
+      },
+      error: function(res) {
 
-    //ajax to save the change
+      }
+    });
+
   });
 
   $(document).on('change', '#fundGoalInput', function() {
-    var el = $('item--selected');
+    var el = $('.item--selected');
     var index = $(el).parent().attr('data-cat');
     var itemIndex = $(el).attr('data-item');
-    var amtDB = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
+    var fundGoal = parseFloat($(this).val()).toFixed(2);   //change the value entered to two decimal places
 
     $(this).toNumber().formatCurrency();    //format it as currency with dollar sign and commas, and not accept non-numbers
 
@@ -1228,7 +1237,26 @@ $(document).ready(function() {
       return false;
     }
 
-    $(this).attr('data-value', amtDB);
+
+
+    $.ajax({
+      url: '/editFundGoal',
+      method: 'patch',
+      dataType: 'json',
+      data: {
+        index,
+        itemIndex,
+        fundGoal
+      },
+      success: function(res) {
+        $(this).attr('data-value', fundGoal);
+        $('.item--selected').attr('data-goal', fundGoal);
+
+      },
+      error: function(res) {
+
+      }
+    });
 
     //ajax to save the change
   });
@@ -1774,6 +1802,7 @@ $(document).ready(function() {
 
   //after clicking on an item row, add in all the data to the budget sidebar
   function updateBudgetListItem(el) {
+    const planned = $(el).children('.Input-Planned').attr('data-value');
     const remaining = $(el).children('.Budget-Row-Remaining').text();
     const spent = $(el).children('.Input-Planned').attr('data-value') - $(el).children('.Budget-Row-Remaining').attr('data-value');
     const progressAmt = (spent / $(el).children('.Input-Planned').attr('data-value') * 100).toFixed(1);
@@ -1785,6 +1814,17 @@ $(document).ready(function() {
     $('#remaining').text(remaining);
     $('#spent').text(spent);
     $('#spent').attr('data-value', spent);
+
+    if ($(el).attr('data-fund') == 'true') {
+      const startingBal = $('#startBalInput').attr('data-value');
+      const balance = parseFloat(startingBal) + parseFloat(planned) - parseFloat(spent);
+      $('#fundPlannedAmt').attr('data-value', planned);
+      $('#fundPlannedAmt').text(planned);
+      $('#fundBalance').attr('data-value', balance);
+      $('#fundBalance').text(balance);
+      $('#fundPlannedAmt').formatCurrency();
+      $('#fundBalance').formatCurrency();
+    }
 
     $('#spent').toNumber().formatCurrency();
     $('#budgetSideBarProgress').css('width', progressAmt + '%');
@@ -1860,6 +1900,8 @@ $(document).ready(function() {
     $(el).children('.transactionAmt').text(amt);
     $(el).children('.transaction-month').text(month);
     $(el).children('.transaction-day').text(day);
+
+    $(el).children('.transactionAmt').formatCurrency();
 
   }
 

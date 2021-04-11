@@ -18,7 +18,7 @@ const budgetSchema = new mongoose.Schema ({
           fund: Boolean,
           startingBalance: Number,
           endingBalance: Number,
-          savingsGoal: Number,
+          fundGoal: Number,
           sumOfTransactions: Number,
           transactions: [
             {
