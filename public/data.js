@@ -1386,6 +1386,7 @@ $(document).ready(function() {
     const merchant = $('#transactionModalMerchant').val();
     const notes = $('#transactionModalNote').val();
     const date = $('#transactionModalDate').val();
+    const fund = $('.item--selected').attr('data-fund');
 
     if ($('#modalRemoveItem').is(":visible")) {
       // console.log('modal remove is visible');
@@ -1415,7 +1416,8 @@ $(document).ready(function() {
         'merchant': merchant,
         'notes': notes,
         'index': index,
-        'itemIndex': itemIndex
+        'itemIndex': itemIndex,
+        'fund': fund
       },
       success: function(res) {
         if (res.msg == 'success') {
@@ -1504,6 +1506,7 @@ $(document).ready(function() {
     const notes = $('#transactionEditModalNote').val();
     const date = $('#transactionEditModalDate').val();
     const transactionIndex = $('#transactionEditModal').attr('data-index');
+    const fund = $(el).attr('data-fund');
     console.log('date when editing trans ',date);
 
     if ($('#modalEditRemoveItem').is(":visible")) {
@@ -1535,7 +1538,8 @@ $(document).ready(function() {
         'notes': notes,
         'index': index,
         'itemIndex': itemIndex,
-        'transactionIndex': transactionIndex
+        'transactionIndex': transactionIndex,
+        'fund': fund
       },
       success: function(res) {
         if (res.msg == 'success') {
@@ -1565,6 +1569,7 @@ $(document).ready(function() {
     const itemIndex = $('.item--selected').attr('data-item');
     const transactionIndex = $('#transactionEditModal').attr('data-index');
     const amtDB = $('#transactionEditModalAmt').attr('data-value');
+    const fund = $(el).attr('data-fund');
 
     $.ajax({
       url: '/deleteTransaction',
@@ -1574,7 +1579,8 @@ $(document).ready(function() {
         index,
         itemIndex,
         transactionIndex,
-        amtDB
+        amtDB,
+        fund
       },
       success: function(res) {
         if (res.msg == 'success') {
@@ -1820,10 +1826,13 @@ $(document).ready(function() {
       const balance = parseFloat(startingBal) + parseFloat(planned) - parseFloat(spent);
       $('#fundPlannedAmt').attr('data-value', planned);
       $('#fundPlannedAmt').text(planned);
+      $('#fundSpentAmt').text(spent);
+      $('#fundSpentAmt').attr('data-value', spent);
       $('#fundBalance').attr('data-value', balance);
       $('#fundBalance').text(balance);
       $('#fundPlannedAmt').formatCurrency();
       $('#fundBalance').formatCurrency();
+      $('#fundSpentAmt').formatCurrency();
     }
 
     $('#spent').toNumber().formatCurrency();

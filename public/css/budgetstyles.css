@@ -250,6 +250,7 @@ input:last-child {
  color: #fff;
  background-color: green;
  border-color: black;
+
 }
 
 .btn--exists {
@@ -263,7 +264,12 @@ input:last-child {
  color: black;
  background-color: transparent;
  border-color: black;
- border-style:dashed;
+ border-style: dashed;
+
+}
+
+#monthPicker {
+  font-size: 1.4rem;
 }
 
 .btndel {

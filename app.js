@@ -699,6 +699,9 @@ app.post('/addTransaction', (req, res) => {
   const date = req.body.date;
   const merchant = req.body.merchant;
   const notes = req.body.notes;
+  const fund = req.body.fund;
+
+
 
   //create transaction object
   let obj = {
@@ -724,6 +727,10 @@ app.post('/addTransaction', (req, res) => {
 
   //increment the sum with the new transaction
   activeBudget.category[index].items[itemIndex].sumOfTransactions += amt;
+
+  if (fund == 'true') {
+    activeBudget.category[index].items[itemIndex].endingBalance -= amt;
+  }
 
   //save the budget to the database
   activeBudget.save();
@@ -751,6 +758,7 @@ app.post('/editTransaction', (req, res) => {
   const date = req.body.date;
   const merchant = req.body.merchant;
   const notes = req.body.notes;
+  const fund = req.body.fund;
 
   var priorAmt = activeBudget.category[index].items[itemIndex].transactions[transactionIndex].amt;
   var difference = amt - priorAmt;
@@ -763,6 +771,10 @@ app.post('/editTransaction', (req, res) => {
 
   //increment the sum with the new transaction
   activeBudget.category[index].items[itemIndex].sumOfTransactions += difference;
+
+  if (fund == 'true') {
+    activeBudget.category[index].items[itemIndex].endingBalance -= difference;
+  }
 
   //set sum to the sum from the db
   sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
@@ -777,10 +789,16 @@ app.delete('/deleteTransaction', (req, res) => {
   const itemIndex = req.body.itemIndex;
   const transactionIndex = req.body.transactionIndex;
   const amt = parseFloat(req.body.amtDB);
+  const fund = req.body.fund;
 
   activeBudget.category[index].items[itemIndex].sumOfTransactions -= amt;
   const sum = activeBudget.category[index].items[itemIndex].sumOfTransactions;
   activeBudget.category[index].items[itemIndex].transactions.splice(transactionIndex,1);
+
+  if (fund == 'true') {
+    activeBudget.category[index].items[itemIndex].endingBalance += amt;
+  }
+
   activeBudget.save();
 
   res.json({msg: 'success', sum: sum});
