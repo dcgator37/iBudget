@@ -1,0 +1,163 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+body {
+  font-size: 1.4rem;
+  background-color: #f5f7f8;
+}
+
+.Insights-Header {
+  height: 7rem;
+  background-color: #0091d9;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.Insights-Header h1 {
+  color: white;
+  padding-left: 2rem;
+  font-size: 2.25rem;
+  font-weight: 600;
+}
+
+/* --------------------------Main Content -----------------------------*/
+
+.Insights-Content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+
+
+}
+
+.timeframe-btn {
+  font-size: 1.5rem;
+  font-weight: 600;
+  border: 1px solid #0091d9;
+}
+
+.chart-wrapper {
+
+  width:40%;
+  display:block;
+  overflow:hidden;
+  margin: 10px;
+  /* 0 10px */
+  /* padding: 10px 10px; */
+  background:#fff;
+  border-radius:4px;
+
+}
+
+.chart-row {
+  width: 100%;
+  display: flex;
+}
+
+canvas {
+  background:#fff;
+  height: 400px;
+}
+
+h1 {
+  text-align: center;
+}
+
+
+
+/* --------------------------Left side nav menu -----------------------------*/
+
+.leftnav {
+  height: 100%;
+  display: flex;
+  width: 0;
+  position: fixed;
+  z-index: 99;
+  top: 0;
+  left: -25px;
+  background-color: rgb(0, 145, 217);
+  overflow-x: hidden;
+  padding-top: 60px;
+  transition: 0.5s;
+}
+.leftnav ul{
+  padding-left: 10px;
+  text-align: center;
+}
+
+/* Left nav links */
+.leftnav ul li a {
+  padding: 8px 8px 8px 10px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #ffffff;
+  display: block;
+  transition: 0.3s;
+}
+
+
+.leftnav ul li{
+  padding-left: 0px;
+  text-align: center;
+  list-style: none;
+  /* width: 280px; */
+  width: 14.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-top: 1px solid rgba(225, 225, 225, 0.05);
+}
+
+
+/* Change font size and color on hover */
+.leftnav ul li:hover a{
+  background: rgb(3, 166, 247);
+  font-size: 120%;
+  transition: 0.2s;
+}
+
+/* Close button */
+.leftnav .closebtn {
+  display: block;
+  padding: -15px -15px;
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  font-size: 30px;
+  color: #ffffff;
+}
+
+
+.closebtn:hover {
+  color: #beb6b6;
+}
+
+/* Open button */
+.openbtn {
+  color:rgb(0, 145, 217);
+  position: fixed;
+  width: 55px;
+  height: 55px;
+  top: 0;
+  font-size: 36px;
+  margin-left: 25px;
+  cursor: pointer;
+}
+
+.openbtn:hover{
+  color: rgb(4, 115, 170);
+  font-size: 34px;
+  transition: 0.2s;
+}

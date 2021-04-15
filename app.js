@@ -18,6 +18,7 @@ const datejs = require('datejs');
 const plaid = require('plaid');
 const flash = require('connect-flash');
 const moment = require('moment');
+const _ = require('lodash');
 
 
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
@@ -162,7 +163,7 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 //doesn't work yet. deletes unverified users once a day 24 is hours
-setInterval(deleteNotVerified, 1000 * 60 * 60 * 24);
+//setInterval(deleteNotVerified, 1000 * 60 * 60 * 24);
 
 
 app.get("/", function(req, res) {
@@ -1006,7 +1007,7 @@ app.get('/getBudgetData', async (req, res) => {
   const twelveMonthsAgo = new Date().add(-12).months();
   console.log(twelveMonthsAgo);
   try {
-    const budgets = await Budget.find({'user_id': id, date: { $gte: twelveMonthsAgo, $lte: today}});
+    const budgets = await Budget.find({'user_id': id, date: { $gte: twelveMonthsAgo, $lte: today}}, null, {sort: {date: 1}});
     res.json({msg: 'success', data: budgets});
   } catch(e) {
     res.status(500).send();
@@ -1735,9 +1736,9 @@ async function fixBudgets() {
 
 async function createPastBudgets(req) {
   var id = req.user._id;
-  id = '602eafb82982f1000477ec5a';
+  id = '603a91e14e8c130a5c874600';
   // console.log(id);
-  if (id == '602eafb82982f1000477ec5a') {
+  if (id == '603a91e14e8c130a5c874600') {
     // var startMonth = req.user.monthsArray[0].date;
     // console.log(startMonth);
     // startMonth.add(-11).months();
@@ -1751,8 +1752,8 @@ async function createPastBudgets(req) {
     //
     // });
 
-var transactionDate;
-    const connor = await User.findOne({_id: '602eafb82982f1000477ec5a'});
+    //var transactionDate;
+    const connor = await User.findOne({_id: id});
 
     for (i = 0; i < 12; i++) {
 
@@ -1767,7 +1768,7 @@ var transactionDate;
           newBudget.monthNum = connor.monthsArray[i].month;
           newBudget.date = connor.monthsArray[i].date;
 
-          transactionDate = newBudget.date;
+          var transactionDate = _.cloneDeep(newBudget.date);
           //console.log(transactionDate);
           transactionDate.add(5).days();
           //console.log(transactionDate);
@@ -1803,17 +1804,18 @@ var transactionDate;
   }
 }
 
- function createBudgetArray(req) {
+ async function createBudgetArray(req) {
 
   let monthArray = [];
   var i;
   let myDate = new Date();
-  myDate.add(-12).months();
+  //myDate.add(-12).months();
   var newDate;
+  var id = req.user._id;
 
   console.log(myDate);
 
-  for (i = 0; i < 36; i++) {
+  for (i = 0; i < 24; i++) {
     monthArray.push({active: false, date: new Date(utils.getYear(myDate) + "-" + utils.getMonthNum(myDate) + "-" + "1"), month: utils.getMonthNum(myDate), year: utils.getYear(myDate), monthString: utils.getMonth(myDate)});
     // console.log(new Date(utils.getYear(myDate) + "-" + utils.getMonthNum(myDate) + "-" + "1"));
     myDate = myDate.add(1).month();
@@ -1821,8 +1823,9 @@ var transactionDate;
   }
 
   //user: req.user.username
+  //user_id: req.user._id
 
-  Budget.find({user: req.user.username}, "month", (err, budgets) => {
+  Budget.find({user_id: id}, "month", (err, budgets) => {
     // console.log(budgets);
     monthArray.forEach((month, index, theArray) => {
       budgets.forEach((budget) => {
@@ -1841,13 +1844,20 @@ var transactionDate;
     // console.log('month array');
     // console.log(monthArray);
 
-    //const connor = await User.findOne({_id: '602eafb82982f1000477ec5a'});
+
+//********************************************************************
      req.user.monthsArray = monthArray;
      req.user.save();
+
+
     // console.log(connor);
-    // connor.monthsArray = monthArray;
-    // connor.save();
+
+
   });
+
+  // const ram = await User.findOne({_id: id});
+  // ram.monthsArray = monthArray;
+  // ram.save();
 
 }
 

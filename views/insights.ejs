@@ -8,10 +8,74 @@
     <script src="https://kit.fontawesome.com/0edefc6157.js" crossorigin="anonymous"></script>
     <script src="/jquery/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+
     <script type="text/javascript" src="/insights.js"></script>
+    <script src="/sidenav.js"></script>
     <link rel="stylesheet" href="css/insights.css">
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <div class="row">
+      <div class="col-lg-1" style="background-color: #f5f7f8">
+
+        <div id="leftNav" class="leftnav" style="width: 0px;">
+          <ul>
+            <li><a href="/budget"><i class="fas fa-chart-pie"></i> Budget</a></li>
+            <li><a href="/insights"><i class="fas fa-chart-pie"></i> Insights</a></li>
+            <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
+          </ul>
+          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="far fa-window-close"></i></a>
+        </div>
+
+        <!-- Use any element to open the sidenav -->
+        <span class="openbtn" onclick="openNav()"><i class="fas fa-bars"></i></span>
+
+      </div>
+      <div class="col-lg-11">
+        <header class="Insights-Header">
+          <h1>Insights</h1>
+        </header>
+        <div class="Insights-Content">
+
+          <div class="dropdown">
+            <button class="btn dropdown-toggle timeframe-btn" type="button" id="dropdownTimeframe" data-bs-toggle="dropdown" aria-expanded="false">Past 12 Months</button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownTimeframe">
+              <li><a class="dropdown-item timeframe" href="#">Year To Date</a></li>
+              <li><a class="dropdown-item timeframe" href="#">Past 3 Months</a></li>
+              <li><a class="dropdown-item timeframe" href="#">Past 6 Months</a></li>
+              <li><a class="dropdown-item timeframe" href="#">Past 9 Months</a></li>
+              <li><a class="dropdown-item timeframe active" href="#">Past 12 Months</a></li>
+
+            </ul>
+          </div>
+          <div class="chart-row">
+            <div class="chart-wrapper">
+              <h1>Monthly Income</h1>
+              <canvas id="stackedIncome"></canvas>
+            </div>
+
+            <div class="chart-wrapper">
+              <h1>Income vs Spent</h1>
+              <canvas id="lineGraph"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="chart-wrapper">
+              <h1>Spending Breakdown</h1>
+              <canvas id="stackedSpending"></canvas>
+            </div>
+
+            <div class="chart-wrapper">
+              <h1>Spending Totals</h1>
+              <canvas id="donutSpending"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
   </body>
 </html>
