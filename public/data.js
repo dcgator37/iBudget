@@ -359,7 +359,25 @@ $(document).ready(function() {
   }).on('click', 'button.btndel', function(e) {
     e.stopPropagation();
   });
+  $(document).on('click', '.dropdown-item', function() {
+    if ($(this).hasClass('active')) {return false;
+  } else {
+    const dropdowntext = $(this).text();$('.dropdown-item').each(function() {
 
+      if ($(this).text() == dropdowntext) {
+        $(this).addClass('active');
+      }
+      else {
+        $(this).removeClass('active');
+      }
+      });
+      if ($(this).text() == 'Spent') {
+        $('.Category-Header div:nth-child(4)').children('span').text('Spent ');
+      } else {
+        $('.Category-Header div:nth-child(4)').children('span').text('Remaining ');
+      }
+    }
+  });
 
   $(document).on('click', '.Header-Left', function() {
     const el = $(this);
@@ -569,6 +587,7 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           //function to update remaining value
           updateRemaining(el, res.sum);
+          updateSpent(el, res.sum);
           updateProgressBar(el);
           updateChart(index, res.newCatSum);
           updateBudgetListItem(el);
@@ -1040,6 +1059,7 @@ $(document).ready(function() {
             if (res.msg == 'success') {
               console.log('Success');
               updateRemaining(el, res.sum);
+              updateSpent(el, res.sum);
               updateProgressBar(el);
 
               //update the Plaid transaction as tracked
@@ -1423,6 +1443,7 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           console.log('Success');
           updateRemaining(el, res.sum);
+          updateSpent(el, res.sum);
           updateProgressBar(el);
           if ($('#modalRemoveItem').is(":visible")) {
             updateBudgetListItem(el);
@@ -1545,6 +1566,7 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           console.log('Success');
           updateRemaining(el, res.sum);
+          updateSpent(el, res.sum);
           updateProgressBar(el);
           if ($('#modalEditRemoveItem').is(":visible")) {
             updateBudgetListItem(el);
@@ -1585,6 +1607,7 @@ $(document).ready(function() {
       success: function(res) {
         if (res.msg == 'success') {
           updateRemaining(el, res.sum);
+          updateSpent(el, res.sum);
           updateProgressBar(el);
           updateBudgetListItem(el);
 
@@ -1762,7 +1785,31 @@ $(document).ready(function() {
     //format the span remaining as currency
     $(el).children('span').formatCurrency();
   }
+  //update the Remaining to spend span next to planned
+  function updateSpent(el, sum) {
+    // console.log('data-value from label: ' + $(el).children('.Input-Planned').attr('data-value'));
+    // console.log('value from label before edit: ' + $(el).children('.Input-Planned').val());
 
+    // get the planned amt from the html data element
+    plannedAmt = $(el).children('.Input-Planned').attr('data-value');
+    remaining = $(el).children('.Budget-Row-Remaining').attr('data-value');
+    // console.log('value from label: ' + plannedAmt);
+    // console.log(sum);
+    const value = plannedAmt - remaining;
+    if (value < 0) {
+        $(el).children('span').addClass('remainingnegative');
+    } else {
+      $(el).children('span').removeClass('remainingnegative');
+    }
+    //eset the text of the remaining span; planned amount - all the transactions for the item
+    $(el).children('span').text((plannedAmt - remaining).toFixed(2));
+
+    //set the data-value for remaining
+    $(el).children('span').attr('data-value', (plannedAmt - remaining).toFixed(2) );
+
+    //format the span remaining as currency
+    $(el).children('span').formatCurrency();
+  }
   function loadProgressBar() {
     const el = $('.Budget-Row');
     var planned;
@@ -1993,13 +2040,8 @@ $(document).ready(function() {
       donutInner(income);
     }
 
-
-
-
     const data = myChart.config.data.datasets[0].data;
     budgetRemaining(data, income);
-
-
 
   }
 
