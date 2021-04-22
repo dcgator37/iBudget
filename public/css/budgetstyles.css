@@ -162,6 +162,14 @@ input:last-child {
   text-align: right;
 }
 
+.Spent-Row {
+  width: 25%;
+  margin-left: 5px;
+  text-align: right;
+  color: green;
+  display: none;
+}
+
 .Budget-Row-Progress {
   height: 2px;
 }

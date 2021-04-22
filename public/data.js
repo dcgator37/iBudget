@@ -23,17 +23,22 @@ $(document).ready(function() {
   //update budget progressbar
   loadProgressBar();
 
+  // turn off remaining, turn on spent (received), for Income category
+  const incomeContainer = $('.Budget-Container')[0];
+  $(incomeContainer).children('.Budget-Row').children('.Budget-Row-Remaining').css("display", "none");
+  $(incomeContainer).children('.Budget-Row').children('.Spent-Row').css("display", "block");
+
   //format all the values on the site as currency
   $('.Input-Planned').toNumber().formatCurrency();
   $('.Budget-Row-Remaining').toNumber().formatCurrency();
+  $('.Spent-Row').toNumber().formatCurrency();
 
-  const el = $('.Budget-Row-Remaining');
+  var el = $('.Budget-Row-Remaining');
   $(el).each(function(){
     if ($(this).attr("data-value")<0 ){
       $(this).addClass("remainingnegative");
     }
   });
-
 
 
 
@@ -217,6 +222,9 @@ $(document).ready(function() {
 
   $(document).on('click', '.Budget-Row', function(e) {
 
+    // $('#fund').css('display', 'flex');
+    // $('.fund').css('display', 'flex');
+
     var $target = $(e.target);
 
     if ($('.fund').attr('aria-expanded') == 'true' && !$target.closest('.Input-Planned').length) {
@@ -257,7 +265,16 @@ $(document).ready(function() {
     $('#budgetSideBarProgress').css('width', progressAmt + '%');
     $('#budgetSideBarProgress').attr('aria-valuenow', progressAmt);
 
+    if (spent > planned) {
+      $('#budgetSideBarProgress').removeClass('bg-success');
+      $('#budgetSideBarProgress').addClass('bg-danger');
+    } else {
+      $('#budgetSideBarProgress').addClass('bg-success');
+      $('#budgetSideBarProgress').removeClass('bg-danger');
+    }
+
     if ($(this).attr('data-fund') == 'true') {
+
       const startingBalance = $('.item--selected').attr('data-balance');
       const fundGoal = $('.item--selected').attr('data-goal');
       const balance = parseFloat(startingBalance) + parseFloat(planned) - parseFloat(spent);
@@ -300,7 +317,10 @@ $(document).ready(function() {
         $('#fundBalance').formatCurrency();
 
 
-    } else {
+    // } else if (categoryName == "Income") {
+    //   $('#fund').css('display', 'none');
+    //   $('.fund').css('display', 'none');
+   } else {
       $('#makeFund span').text('Make this a fund');
       $('.fundCollapse').children().remove();
       html = '<span>Funds carry balances month to month, letting you save toward a goal over time.</span>' +
@@ -359,10 +379,15 @@ $(document).ready(function() {
   }).on('click', 'button.btndel', function(e) {
     e.stopPropagation();
   });
+
+
   $(document).on('click', '.dropdown-item', function() {
-    if ($(this).hasClass('active')) {return false;
-  } else {
-    const dropdowntext = $(this).text();$('.dropdown-item').each(function() {
+    if ($(this).hasClass('active')) {
+      return false;
+    } else {
+    const dropdowntext = $(this).text();
+
+    $('.dropdown-item').each(function() {
 
       if ($(this).text() == dropdowntext) {
         $(this).addClass('active');
@@ -370,14 +395,52 @@ $(document).ready(function() {
       else {
         $(this).removeClass('active');
       }
+    });
+
+    if ($(this).text() == 'Spent') {
+      $('.Category-Header div:nth-child(4)').children('span').text('Spent ');
+
+      $('.Budget-Row').each(function(index, el) {
+
+        if ($(el).parent().attr('data-cat-name') !== 'Income') {
+
+          const plannedAmt = $(el).children('.Input-Planned').attr('data-value');
+          const spent = plannedAmt - remaining;
+
+          if (spent > plannedAmt) {
+            $(el).children('.Spent-Row').css("color", "red");
+          } else {
+            $(el).children('.Spent-Row').css("color", "green");
+          }
+
+          $(el).children('.Budget-Row-Remaining').css("display", "none");
+          $(el).children('.Spent-Row').css("display", "block");
+          $(el).children('.Spent-Row').formatCurrency();
+        }
+
       });
-      if ($(this).text() == 'Spent') {
-        $('.Category-Header div:nth-child(4)').children('span').text('Spent ');
-      } else {
-        $('.Category-Header div:nth-child(4)').children('span').text('Remaining ');
-      }
+
+
+    } else {
+      $('.Category-Header div:nth-child(4)').children('span').text('Remaining ');
+
+      $('.Budget-Row').each(function(index, el) {
+        if ($(el).parent().attr('data-cat-name') !== 'Income') {
+
+          const plannedAmt = $(el).children('.Input-Planned').attr('data-value');
+          const spent = plannedAmt - remaining;
+
+          $(el).children('.Budget-Row-Remaining').css("display", "block");
+          $(el).children('.Spent-Row').css("display", "none");
+          $(el).children('.Budget-Row-Remaining').formatCurrency();
+        }
+
+      });
+
     }
-  });
+  }
+
+});
 
   $(document).on('click', '.Header-Left', function() {
     const el = $(this);
@@ -1125,6 +1188,10 @@ $(document).ready(function() {
   });
 
   $(document).on('click', '#makeThisAFund', function() {
+
+    if ($('.item--selected').parent().attr('data-cat-name') == 'Income') {
+      return false;
+    }
     const el = $('.item--selected');
     const index = $(el).parent().attr('data-cat');
     const itemIndex = $(el).attr('data-item');
@@ -1785,31 +1852,33 @@ $(document).ready(function() {
     //format the span remaining as currency
     $(el).children('span').formatCurrency();
   }
-  //update the Remaining to spend span next to planned
+
+  //update the Spent span
   function updateSpent(el, sum) {
-    // console.log('data-value from label: ' + $(el).children('.Input-Planned').attr('data-value'));
-    // console.log('value from label before edit: ' + $(el).children('.Input-Planned').val());
 
     // get the planned amt from the html data element
     plannedAmt = $(el).children('.Input-Planned').attr('data-value');
-    remaining = $(el).children('.Budget-Row-Remaining').attr('data-value');
-    // console.log('value from label: ' + plannedAmt);
-    // console.log(sum);
-    const value = plannedAmt - remaining;
-    if (value < 0) {
-        $(el).children('span').addClass('remainingnegative');
+
+    const spent = sum;
+
+    // if spent more than planned, make it red, otherwise green
+    if (spent > plannedAmt) {
+        $(el).children('.Spent-Row').css('color', 'red');
     } else {
-      $(el).children('span').removeClass('remainingnegative');
+      $(el).children('.Spent-Row').css('color', 'green');
     }
-    //eset the text of the remaining span; planned amount - all the transactions for the item
-    $(el).children('span').text((plannedAmt - remaining).toFixed(2));
 
-    //set the data-value for remaining
-    $(el).children('span').attr('data-value', (plannedAmt - remaining).toFixed(2) );
+    // set the text to sum of all transactions; spent amt
+    $(el).children('.Spent-Row').text(spent.toFixed(2));
 
-    //format the span remaining as currency
-    $(el).children('span').formatCurrency();
+    //set the data-value to sum of all transactions; spent amt
+    $(el).children('.Spent-Row').attr('data-value', spent.toFixed(2) );
+
+    //format the spent span as currency
+    $(el).children('.Spent-Row').formatCurrency();
   }
+
+
   function loadProgressBar() {
     const el = $('.Budget-Row');
     var planned;
@@ -1885,6 +1954,15 @@ $(document).ready(function() {
     $('#spent').toNumber().formatCurrency();
     $('#budgetSideBarProgress').css('width', progressAmt + '%');
     $('#budgetSideBarProgress').attr('aria-valuenow', progressAmt);
+
+    if (spent > planned) {
+      $('#budgetSideBarProgress').removeClass('bg-success');
+      $('#budgetSideBarProgress').addClass('bg-danger');
+    } else {
+      $('#budgetSideBarProgress').addClass('bg-success');
+      $('#budgetSideBarProgress').removeClass('bg-danger');
+    }
+
   }
 
   //load transactions for the item clicked

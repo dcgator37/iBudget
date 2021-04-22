@@ -143,7 +143,8 @@
             <button type="button" class="btndelHidden" name="button"><i class="far fa-trash-alt"></i></button>
             <span class="Header-Left"><%= category.name %></span>
             <span class="Header-Right">Planned</span>
-            <span class="Header-Right">Received <i class="fas fa-angle-down"></i></span>
+            <span class="Header-Right">Received</span>
+            <!-- <i class="fas fa-angle-down"></i> -->
 
           </header>
           <!-- </div> -->
@@ -179,6 +180,7 @@
             <% } %>
             <input class="Input-Planned" type="text" name="planned" data-value="<%= item.planned %>" value="$<%= item.planned %>" onclick="this.select()"></input>
             <span class="Budget-Row-Remaining" data-value="<%= (item.planned - item.sumOfTransactions).toFixed(2) %>"><%= (item.planned - item.sumOfTransactions).toFixed(2) %></span>
+            <span class="Spent-Row" data-value="<%= item.sumOfTransactions %>"><%= item.sumOfTransactions %></span>
 
           </div>
           <div class="progress Budget-Row-Progress">
