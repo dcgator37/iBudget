@@ -18,7 +18,6 @@ $(document).ready(function() {
     $('#sum-Spent').text(sumSpent);
     $('#sum-Spent').addClass("sum-of-Spent");
     $('#sum-Spent').formatCurrency();
-    console.log('sum-Spent');
   });
 
 
@@ -281,6 +280,12 @@ $(document).ready(function() {
     $('#spent').toNumber().formatCurrency();
     $('#budgetSideBarProgress').css('width', progressAmt + '%');
     $('#budgetSideBarProgress').attr('aria-valuenow', progressAmt);
+
+    if ($('.item--selected').parent().attr('data-cat-name') == 'Income') {
+      $('#sidebarSpentText').text(' received');
+    } else {
+      $('#sidebarSpentText').text(' spent');
+    }
 
     if (spent > planned) {
       $('#budgetSideBarProgress').removeClass('bg-success');
@@ -1529,6 +1534,11 @@ $(document).ready(function() {
           updateRemaining(el, res.sum);
           updateSpent(el, res.sum);
           updateProgressBar(el);
+
+          if ($(el).parent().attr('data-cat-name') == 'Income') {
+            sumOfIncomeSpent();
+          }
+
           if ($('#modalRemoveItem').is(":visible")) {
             updateBudgetListItem(el);
             addTransactionList(merchant, amtDB, date, res.transactionIndex);
@@ -1652,6 +1662,11 @@ $(document).ready(function() {
           updateRemaining(el, res.sum);
           updateSpent(el, res.sum);
           updateProgressBar(el);
+
+          if ($(el).parent().attr('data-cat-name') == 'Income') {
+            sumOfIncomeSpent();
+          }
+
           if ($('#modalEditRemoveItem').is(":visible")) {
             updateBudgetListItem(el);
             //addTransactionList(merchant, amtDB, date, res.transactionIndex);
@@ -1694,6 +1709,10 @@ $(document).ready(function() {
           updateSpent(el, res.sum);
           updateProgressBar(el);
           updateBudgetListItem(el);
+
+          if ($(el).parent().attr('data-cat-name') == 'Income') {
+            sumOfIncomeSpent();
+          }
 
           $('#Transaction-Container').children('.Transactions-List-Row').eq(transactionIndex).remove();
           var numOfTransactions = $('#numTransactions').text();
@@ -2164,12 +2183,17 @@ $(document).ready(function() {
     $('#totalIncome').addClass("sum-of-income");
     $('#totalIncome').formatCurrency();
 
+  }
 
-
-
-
-
-
+  function sumOfIncomeSpent() {
+    const budgetcontainer= $('.Budget-Container')[0];
+    var sumSpent = 0;
+    $(budgetcontainer).children('.Budget-Row').each(function(){
+      sumSpent += parseFloat($(this).children('.Spent-Row').attr('data-value'));
+      $('#sum-Spent').text(sumSpent);
+      $('#sum-Spent').addClass("sum-of-Spent");
+      $('#sum-Spent').formatCurrency();
+    });
   }
 
 

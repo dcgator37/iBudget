@@ -585,10 +585,37 @@ margin-top: 0;
 }
 
 .Budget-List-Item-Row span {
-    color: #69757a;
+    color: #566573;
 
 
     /* font-weight: 600; */
+}
+
+#catName {
+  color: #566573;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+#sidebarRemaining {
+  color: #566573;
+  font-size: 1.2rem;
+}
+
+#itemName {
+  color: black;
+  font-weight: 700;
+}
+
+#remaining {
+  color: black;
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+
+#spent {
+  color: green;
+  font-weight: 600
 }
 
 .fund {
@@ -627,9 +654,10 @@ margin-top: 0;
 
 
 
-/* #fundBalance {
-  justify-self: start;
-} */
+#fundBalance {
+  color: green;
+  font-weight: 600;
+}
 
 .Budget-List-Item-Progress {
   height: 10px;
@@ -677,6 +705,8 @@ margin-top: 0;
   justify-content: space-between;
   align-items: center;
   padding: 5px;
+  color: #566573;
+  font-weight: 600;
 }
 
 .Transactions-List-Header {
@@ -685,6 +715,8 @@ margin-top: 0;
   justify-content: space-between;
   align-items: center;
   padding: 5px;
+  color: #566573;
+  font-weight: 600;
 }
 
 .monthDay-container {
