@@ -286,6 +286,26 @@ input:last-child {
   visibility: hidden;
 
 }
+.sum-of-income{
+  color:black;
+  font-size: 1em;
+  /* text-align: right; */
+   /* width: 175rem; */
+   position: absolute;
+  right: 1005px;
+
+  font-weight: bold;
+}
+
+.sum-of-Spent{
+  color:black;
+  font-size: 1em;
+  /* text-align: right; */
+  /* width: 43.3rem;  */
+  position: absolute;
+  right: 855px;
+  font-weight: bold;
+}
 
 .on-buget{
   color:green;
@@ -300,18 +320,6 @@ input:last-child {
   color:red;
   font-size: 1em;
 }
-
-.sum-of-income{
-  color:black;
-  font-size: 1em;
-  font-weight: bold;
-  /* margin-left: 15px; */
-  width: 60%;
-  text-align: right;
-
-}
-
-
 
 .input-label {
   width: 300px;
@@ -567,6 +575,12 @@ margin-top: 0;
 }
 
 .fundCollapse {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.dueDateCollapse {
   display: flex;
   flex-direction: column;
   align-items: center;

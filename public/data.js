@@ -11,6 +11,23 @@ $(document).ready(function() {
 //   console.log('chart loaded');
 // });
 
+  const budgetcontainer= $('.Budget-Container')[0];
+  var sumSpent = 0;
+  $(budgetcontainer).children('.Budget-Row').each(function(){
+    sumSpent += parseFloat($(this).children('.Spent-Row').attr('data-value'));
+    $('#sum-Spent').text(sumSpent);
+    $('#sum-Spent').addClass("sum-of-Spent");
+    $('#sum-Spent').formatCurrency();
+    console.log('sum-Spent');
+  });
+
+
+  // $("#datepicker").datepicker();
+  //   {
+  //   format: "dd-mm-yyyy",
+  //   viewMode: "days",
+  //   minViewMode: "days"
+  // });
   // add function to get new Plaid transactions. On Success update the count notification
   getNewPlaidTransactions();
 
@@ -2102,6 +2119,7 @@ $(document).ready(function() {
     });
 
     donutInner(income);
+    sumOfIncome(income);
   }
 
   //update the chart when the planned amt changes for an item
@@ -2116,6 +2134,7 @@ $(document).ready(function() {
     } else {
       income = newCatSum;
       donutInner(income);
+      sumOfIncome(income);
     }
 
     const data = myChart.config.data.datasets[0].data;
@@ -2135,6 +2154,24 @@ $(document).ready(function() {
     $('.donut-inner h5').text(income);
     $('.donut-inner h5').formatCurrency();
   }
+
+  function sumOfIncome(income){
+    $('#totalIncome').text(income);
+    $('#totalIncome').addClass("sum-of-income");
+    $('#totalIncome').formatCurrency();
+
+
+
+
+
+
+
+  }
+
+
+  // $('.datepicker').datepicker({
+  // inline: true
+  // });
 
   // function to determine if the user is over budget, under budget or on budget
   function budgetRemaining(data, income){
