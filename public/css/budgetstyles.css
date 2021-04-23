@@ -225,11 +225,51 @@ input:last-child {
   width: 100%;
 }
 
+/* display: flex;
+padding: 0.4rem 0;
+border-bottom: 1px solid #f1f1f1; */
+
 .itemButton {
   border-bottom: 1px solid #F1F1F1;
   display: flex;
   /* font-size: 2em; */
   width: 100%;
+}
+
+.addItem {
+  width: 50%;
+  margin-left: 25px;
+  text-align: left;
+}
+
+.sum-of-income{
+  color:black;
+  font-size: 1em;
+  /* text-align: right; */
+   /* width: 175rem; */
+   /* position: absolute;
+  right: 1005px; */
+
+  width: 25%;
+  margin-left: 5px;
+  text-align: right;
+
+  font-weight: bold;
+}
+
+.sum-of-Spent{
+  color:black;
+  font-size: 1em;
+  /* text-align: right; */
+  /* width: 43.3rem;  */
+  /* position: absolute;
+  right: 855px; */
+
+  width: 25%;
+  margin-left: 5px;
+  text-align: right;
+
+  font-weight: bold;
 }
 
 .addCat {
@@ -286,26 +326,7 @@ input:last-child {
   visibility: hidden;
 
 }
-.sum-of-income{
-  color:black;
-  font-size: 1em;
-  /* text-align: right; */
-   /* width: 175rem; */
-   position: absolute;
-  right: 1005px;
 
-  font-weight: bold;
-}
-
-.sum-of-Spent{
-  color:black;
-  font-size: 1em;
-  /* text-align: right; */
-  /* width: 43.3rem;  */
-  position: absolute;
-  right: 855px;
-  font-weight: bold;
-}
 
 .on-buget{
   color:green;
