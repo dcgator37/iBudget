@@ -11,6 +11,7 @@
 
   <script src="https://kit.fontawesome.com/0edefc6157.js" crossorigin="anonymous"></script>
   <script src="/jquery/jquery.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js" integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@mongodb-js/charts-embed-dom"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
@@ -45,6 +46,7 @@
       // $('#myChart').css("display", "none");
       // document.getElementById("myChart").style.display = "none";
     };
+
   </script>
 
   <link rel="stylesheet" href="css/budgetstyles.css">
@@ -191,7 +193,9 @@
           <!-- add item button -->
           <div class="itemButton" data-cat="<%= index %>">
             <button class="addItem" type="button" name="button">Add Item</button>
-            <span id="sumOfIncome" data-value=""></span>
+            <span id="totalIncome" data-value=""></span>
+            <span id="sum-Spent" data-value=""></span>
+
           </div>
 
         </div>
@@ -439,8 +443,19 @@
             <span id="lastYear">Last <%=budget.month.split(" ",1)%></span><span id="last-Year-Val"></span>
           </div>
           <div class="Budget-List-Item-Row dueDate">
+
             <span id="dueDate">Set Due Date</span><i class="fas fa-angle-down"></i>
+
           </div>
+          <!-- <div class="collapse dueDateCollapse" id="dueDate">
+
+
+            <div class="input-append date" id="datepicker" data-date="02-2012" data-date-format="mm-dd-yyyy">
+                <input type="text" name="date" >
+                <span class="add-on"></span>
+            </div>
+          </div> -->
+
           <div class="Budget-List-Item-Row fund" data-bs-toggle="collapse" data-bs-target="#fund" aria-expanded="false" aria-controls="fund">
 
             <button id="makeFund">
@@ -449,6 +464,7 @@
             <i class="fas fa-angle-down"></i>
 
           </div>
+
 
           <div class="collapse fundCollapse" id="fund">
             <span>Funds carry balances month to month, letting you save toward a goal over time.</span>
@@ -478,6 +494,7 @@
             </div> -->
 
           </div>
+
 
           <div class="Budget-List-Item-Row">
             <button id="setPlannedOnBudget" style="padding: 0"><i class="fas fa-plus"></i> Set Planned To Be On Budget</button>
