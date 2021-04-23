@@ -1784,6 +1784,10 @@ $(document).ready(function() {
   //   });
   // });
 
+
+
+
+
   //function to add item html
   function addItem(el, data) {
     const item = "<div class='Budget-Row' onmouseover='dosomething(this)' onmouseout='dothat(this)' onclick='clickItem(this)' data-item='" + data.itemIndex + "'>" +
