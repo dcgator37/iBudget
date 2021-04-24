@@ -1,12 +1,14 @@
 //jshint esversion: 8
 
+var mainData = [];
 var stackedIncome;
 var stackedSpending;
 var donutSpending;
 var labels = [];
+var categories = [];
 var datasets = [];
 var datasetsStackedSpending = [];
-var datasetsDonutSpending = [];
+var datasetDonutSpending = [];
 
 $(document).ready(function() {
 
@@ -45,6 +47,7 @@ function getChartData() {
     method: 'get',
     success: function(res) {
       if (res.msg == 'success') {
+        mainData = res.data;
         createCharts(res.data);
 
       } else {
@@ -64,7 +67,7 @@ function createCharts(data) {
 
   var incomeItems = [];
   var budgetItems = [];
-  var categories = [];
+  //var categories = [];
 
   var colors = [
     "#caf270",
@@ -318,64 +321,89 @@ var colors3 = [
   "#827717",
 ];
 
-labels.forEach((label, index) => {
-var dataForDataset = [];
-  //console.log(categories);
-  //console.log(budgetItems);
-  // loop through categories
 
-    //console.log(category);
+categories.forEach((category) => {
+  var sum = 0;
+  data.forEach((budget) => {
 
-    // loop through every budget month, getting the amount earned for the item for that month. Add it to a dataset
-    // Ex: 12 items in array for each month. If no income for that month add zero
-    // [500,500,500,1000,500,0,0,1000,0,500,500,500]
-    data.forEach((budget) => {
-      var sum = 0;
+    budget.category.forEach((cat) => {
 
-      budget.category.forEach((cat) => {
-
-          cat.items.forEach((item) => {
-            sum += item.sumOfTransactions;
-          });
-
-
-        //console.log(budget.month, " ", cat.name, " ", sum);
-      });
-
-      if (sum == undefined) {
-        dataForDataset.push(0);
-      } else {
-        dataForDataset.push(sum);
+      if (category == cat.name) {
+        cat.items.forEach((item) => {
+          sum += item.sumOfTransactions;
+        });
       }
-
-    });
-
-    // create the main dataset for the chart for each item. The income name, color, and the amt earned for each month
-    // Ex: [{label: 'Paycheck 1', backgroundColor: '#caf270', data: [500,500,500,1000,500,0,0,1000,0,500,500,500]},{...},{...}]
-    datasetsDonutSpending.push({
-      label: labels,
-      backgroundColor: colors3[index],
-      data: dataForDataset
     });
 
   });
 
+  datasetDonutSpending.push(sum);
+});
+
+
+// labels.forEach((label, index) => {
+// var dataForDataset = [];
+//   //console.log(categories);
+//   //console.log(budgetItems);
+//   // loop through categories
+//
+//     //console.log(category);
+//
+//     // loop through every budget month, getting the amount earned for the item for that month. Add it to a dataset
+//     // Ex: 12 items in array for each month. If no income for that month add zero
+//     // [500,500,500,1000,500,0,0,1000,0,500,500,500]
+//     data.forEach((budget) => {
+//       var sum = 0;
+//
+//       budget.category.forEach((cat) => {
+//
+//           cat.items.forEach((item) => {
+//             sum += item.sumOfTransactions;
+//           });
+//
+//
+//         //console.log(budget.month, " ", cat.name, " ", sum);
+//       });
+//
+//       if (sum == undefined) {
+//         dataForDataset.push(0);
+//       } else {
+//         dataForDataset.push(sum);
+//       }
+//
+//     });
+//
+//     // create the main dataset for the chart for each item. The income name, color, and the amt earned for each month
+//     // Ex: [{label: 'Paycheck 1', backgroundColor: '#caf270', data: [500,500,500,1000,500,0,0,1000,0,500,500,500]},{...},{...}]
+//     datasetsDonutSpending.push({
+//       label: labels,
+//       backgroundColor: colors3[index],
+//       data: dataForDataset
+//     });
+//
+//   });
+
 
 
 //make a clone of the main dataset
-var tempdatasets3 = _.cloneDeep(datasetsDonutSpending);
+var tempdatasets3 = _.cloneDeep(datasetDonutSpending);
 
 var ctx3 = $('#donutSpending');
 donutSpending = new Chart(ctx3, {
   type: 'doughnut',
   data: {
-    labels: labels,
-    datasets: tempdatasets3
+    labels: categories,
+    datasets: [{
+      data: tempdatasets3,
+      backgroundColor: colors2,
+      borderColor: colors2
+    }]
   },
   options: {
     scales: {
     },
-    legend: { position: 'bottom' }
+    legend: { position: 'bottom' },
+    cutoutPercentage: 0
   }
 });
 
@@ -389,7 +417,9 @@ function updateTimeframe(timeframe) {
   // update all the charts with the new selected timeframe
   var tempDatasets = [];
   var tempDatasets2 = [];
-  var tempDatasets3 =[];
+  var tempDataDonut = [];
+  var tempCategories = [];
+  var datasetForDonut = [];
 
   switch (timeframe) {
     case 'Year To Date':
@@ -425,19 +455,52 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.datasets = tempDatasets2;
       stackedSpending.update();
 
+      //********************Donut Spending***************************
 
+      tempCategories = [];
+      datasetForDonut = [];
+      tempDataDonut = _.cloneDeep(mainData).slice(start);
 
-        
-      //make a clone of the main dataset
-        tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+      //console.log(tempDataDonut);
 
-      //loop through
-      tempDatasets3.forEach((data, index, theArray) => {
-        theArray[index].data = data.data.slice(start);
+      tempDataDonut.forEach((budget) => {
+
+        budget.category.forEach((category, index) => {
+          if (index > 0) {
+          category.items.forEach((item) => {
+            if (item.sumOfTransactions > 0) {
+              if (tempCategories.indexOf(category.name) === -1) {
+                tempCategories.push(category.name);
+              }
+
+            }
+          });
+          }
+
         });
-  
-      donutSpending.data.labels = labels.slice(start);
-      donutSpending.data.datasets = tempDatasets3;
+
+      });
+
+      tempCategories.forEach((category) => {
+        var sum = 0;
+        tempDataDonut.forEach((budget) => {
+
+          budget.category.forEach((cat) => {
+
+            if (category == cat.name) {
+              cat.items.forEach((item) => {
+                sum += item.sumOfTransactions;
+              });
+            }
+          });
+
+        });
+
+        datasetForDonut.push(sum);
+      });
+
+      donutSpending.data.labels = tempCategories;
+      donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
 
       break;
@@ -451,8 +514,8 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.datasets = _.cloneDeep(datasetsStackedSpending);
       stackedSpending.update();
 
-      donutSpending.data.labels = labels;
-      donutSpending.data.datasets = _.cloneDeep(datasetsDonutSpending);
+      donutSpending.data.labels = categories;
+      donutSpending.data.datasets[0].data = _.cloneDeep(datasetDonutSpending);
       donutSpending.update();
       break;
     case 'Past 9 Months':
@@ -481,18 +544,54 @@ function updateTimeframe(timeframe) {
 
       stackedSpending.update();
 
+      //********************Donut Spending***************************
 
+      tempCategories = [];
+      datasetForDonut = [];
+      tempDataDonut = _.cloneDeep(mainData).slice(3);
 
-      tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+      //console.log(tempDataDonut);
 
-      tempDatasets3.forEach((data, index, theArray) => {
-        theArray[index].data = theArray[index].data.slice(3);
+      tempDataDonut.forEach((budget) => {
+
+        budget.category.forEach((category, index) => {
+          if (index > 0) {
+          category.items.forEach((item) => {
+            if (item.sumOfTransactions > 0) {
+              if (tempCategories.indexOf(category.name) === -1) {
+                tempCategories.push(category.name);
+              }
+
+            }
+          });
+          }
+
+        });
+
       });
 
-      donutSpending.data.labels = labels.slice(3);
-      donutSpending.data.datasets = tempDatasets3;
+      tempCategories.forEach((category) => {
+        var sum = 0;
+        tempDataDonut.forEach((budget) => {
 
+          budget.category.forEach((cat) => {
+
+            if (category == cat.name) {
+              cat.items.forEach((item) => {
+                sum += item.sumOfTransactions;
+              });
+            }
+          });
+
+        });
+
+        datasetForDonut.push(sum);
+      });
+
+      donutSpending.data.labels = tempCategories;
+      donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
+
       break;
     case 'Past 6 Months':
 
@@ -518,17 +617,54 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.datasets = tempDatasets2;
       stackedSpending.update();
 
+      //********************Donut Spending***************************
 
+      tempCategories = [];
+      datasetForDonut = [];
+      tempDataDonut = _.cloneDeep(mainData).slice(6);
 
-      tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+      //console.log(tempDataDonut);
 
-      tempDatasets3.forEach((data, index, theArray) => {
-        theArray[index].data = data.data.slice(6);
+      tempDataDonut.forEach((budget) => {
+
+        budget.category.forEach((category, index) => {
+          if (index > 0) {
+          category.items.forEach((item) => {
+            if (item.sumOfTransactions > 0) {
+              if (tempCategories.indexOf(category.name) === -1) {
+                tempCategories.push(category.name);
+              }
+
+            }
+          });
+          }
+
+        });
+
       });
 
-      donutSpending.data.labels = labels.slice(6);
-      donutSpending.data.datasets = tempDatasets3;
+      tempCategories.forEach((category) => {
+        var sum = 0;
+        tempDataDonut.forEach((budget) => {
+
+          budget.category.forEach((cat) => {
+
+            if (category == cat.name) {
+              cat.items.forEach((item) => {
+                sum += item.sumOfTransactions;
+              });
+            }
+          });
+
+        });
+
+        datasetForDonut.push(sum);
+      });
+
+      donutSpending.data.labels = tempCategories;
+      donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
+
       break;
     case 'Past 3 Months':
 
@@ -554,16 +690,52 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.datasets = tempDatasets2;
       stackedSpending.update();
 
+      //********************Donut Spending***************************
 
+      tempCategories = [];
+      datasetForDonut = [];
+      tempDataDonut = _.cloneDeep(mainData).slice(9);
 
-      tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+      //console.log(tempDataDonut);
 
-      tempDatasets3.forEach((data, index, theArray) => {
-        theArray[index].data = data.data.slice(9);
+      tempDataDonut.forEach((budget) => {
+
+        budget.category.forEach((category, index) => {
+          if (index > 0) {
+          category.items.forEach((item) => {
+            if (item.sumOfTransactions > 0) {
+              if (tempCategories.indexOf(category.name) === -1) {
+                tempCategories.push(category.name);
+              }
+
+            }
+          });
+          }
+
+        });
+
       });
 
-      donutSpending.data.labels = labels.slice(9);
-      donutSpending.data.datasets = tempDatasets3;
+      tempCategories.forEach((category) => {
+        var sum = 0;
+        tempDataDonut.forEach((budget) => {
+
+          budget.category.forEach((cat) => {
+
+            if (category == cat.name) {
+              cat.items.forEach((item) => {
+                sum += item.sumOfTransactions;
+              });
+            }
+          });
+
+        });
+
+        datasetForDonut.push(sum);
+      });
+
+      donutSpending.data.labels = tempCategories;
+      donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
 
       break;
