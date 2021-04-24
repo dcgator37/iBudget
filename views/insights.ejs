@@ -21,8 +21,7 @@
 
         <div id="leftNav" class="leftnav" style="width: 0px;">
           <ul>
-            <li><a href="/budget"><i class="fas fa-chart-pie"></i> Budget</a></li>
-            <li><a href="/insights"><i class="fas fa-chart-pie"></i> Insights</a></li>
+            <li><a href="/budget"><i class="fas fa-money-check-alt"></i> Budget</a></li>
             <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a></li>
           </ul>
           <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i class="far fa-window-close"></i></a>
@@ -32,13 +31,13 @@
         <span class="openbtn" onclick="openNav()"><i class="fas fa-bars"></i></span>
 
       </div>
-      <div class="col-lg-11">
+      <div class="col-lg-11" onclick="closeNav()">
         <header class="Insights-Header">
           <h1>Insights</h1>
         </header>
-        <div class="Insights-Content">
+        <div class="Insights-Content" onclick="closeNav()">
 
-          <div class="dropdown">
+          <div class="dropdown" onclick="closeNav()" onmousedown="closeNav()">
             <button class="btn dropdown-toggle timeframe-btn" type="button" id="dropdownTimeframe" data-bs-toggle="dropdown" aria-expanded="false">Past 12 Months</button>
             <ul class="dropdown-menu" aria-labelledby="dropdownTimeframe">
               <li><a class="dropdown-item timeframe" href="#">Year To Date</a></li>

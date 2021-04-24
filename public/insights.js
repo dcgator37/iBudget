@@ -2,9 +2,11 @@
 
 var stackedIncome;
 var stackedSpending;
+var donutSpending;
 var labels = [];
 var datasets = [];
 var datasetsStackedSpending = [];
+var datasetsDonutSpending = [];
 
 $(document).ready(function() {
 
@@ -299,11 +301,83 @@ function createCharts(data) {
 
 
 
+//********************************************Donut Chart*********************************************************
+
+var colors3 = [
+  "#EC407A",
+  "#CE93D8",
+  "#8E24AA",
+  "#311B92",
+  "#5C6BC0",
+  "#42A5F5",
+  "#00ACC1",
+  "#009688",
+  "#81C784",
+  "#1B5E20",
+  "#C5E1A5",
+  "#827717",
+];
+
+labels.forEach((label, index) => {
+var dataForDataset = [];
+  //console.log(categories);
+  //console.log(budgetItems);
+  // loop through categories
+
+    //console.log(category);
+
+    // loop through every budget month, getting the amount earned for the item for that month. Add it to a dataset
+    // Ex: 12 items in array for each month. If no income for that month add zero
+    // [500,500,500,1000,500,0,0,1000,0,500,500,500]
+    data.forEach((budget) => {
+      var sum = 0;
+
+      budget.category.forEach((cat) => {
+
+          cat.items.forEach((item) => {
+            sum += item.sumOfTransactions;
+          });
 
 
-    // loop through the items in the income category. If you had income for that item, and it doesn't already exist in incomeItems array, add it
-    // Ex: ['Paycheck 1', 'Paycheck 2', 'Uber']
+        //console.log(budget.month, " ", cat.name, " ", sum);
+      });
 
+      if (sum == undefined) {
+        dataForDataset.push(0);
+      } else {
+        dataForDataset.push(sum);
+      }
+
+    });
+
+    // create the main dataset for the chart for each item. The income name, color, and the amt earned for each month
+    // Ex: [{label: 'Paycheck 1', backgroundColor: '#caf270', data: [500,500,500,1000,500,0,0,1000,0,500,500,500]},{...},{...}]
+    datasetsDonutSpending.push({
+      label: labels,
+      backgroundColor: colors3[index],
+      data: dataForDataset
+    });
+
+  });
+
+
+
+//make a clone of the main dataset
+var tempdatasets3 = _.cloneDeep(datasetsDonutSpending);
+
+var ctx3 = $('#donutSpending');
+donutSpending = new Chart(ctx3, {
+  type: 'doughnut',
+  data: {
+    labels: labels,
+    datasets: tempdatasets3
+  },
+  options: {
+    scales: {
+    },
+    legend: { position: 'bottom' }
+  }
+});
 
 
 
@@ -315,6 +389,7 @@ function updateTimeframe(timeframe) {
   // update all the charts with the new selected timeframe
   var tempDatasets = [];
   var tempDatasets2 = [];
+  var tempDatasets3 =[];
 
   switch (timeframe) {
     case 'Year To Date':
@@ -349,6 +424,22 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.labels = labels.slice(start);
       stackedSpending.data.datasets = tempDatasets2;
       stackedSpending.update();
+
+
+
+        
+      //make a clone of the main dataset
+        tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+
+      //loop through
+      tempDatasets3.forEach((data, index, theArray) => {
+        theArray[index].data = data.data.slice(start);
+        });
+  
+      donutSpending.data.labels = labels.slice(start);
+      donutSpending.data.datasets = tempDatasets3;
+      donutSpending.update();
+
       break;
     case 'Past 12 Months':
 
@@ -359,6 +450,10 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.labels = labels;
       stackedSpending.data.datasets = _.cloneDeep(datasetsStackedSpending);
       stackedSpending.update();
+
+      donutSpending.data.labels = labels;
+      donutSpending.data.datasets = _.cloneDeep(datasetsDonutSpending);
+      donutSpending.update();
       break;
     case 'Past 9 Months':
 
@@ -386,6 +481,18 @@ function updateTimeframe(timeframe) {
 
       stackedSpending.update();
 
+
+
+      tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+
+      tempDatasets3.forEach((data, index, theArray) => {
+        theArray[index].data = theArray[index].data.slice(3);
+      });
+
+      donutSpending.data.labels = labels.slice(3);
+      donutSpending.data.datasets = tempDatasets3;
+
+      donutSpending.update();
       break;
     case 'Past 6 Months':
 
@@ -411,6 +518,17 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.datasets = tempDatasets2;
       stackedSpending.update();
 
+
+
+      tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+
+      tempDatasets3.forEach((data, index, theArray) => {
+        theArray[index].data = data.data.slice(6);
+      });
+
+      donutSpending.data.labels = labels.slice(6);
+      donutSpending.data.datasets = tempDatasets3;
+      donutSpending.update();
       break;
     case 'Past 3 Months':
 
@@ -435,6 +553,18 @@ function updateTimeframe(timeframe) {
       stackedSpending.data.labels = labels.slice(9);
       stackedSpending.data.datasets = tempDatasets2;
       stackedSpending.update();
+
+
+
+      tempDatasets3 = _.cloneDeep(datasetsDonutSpending);
+
+      tempDatasets3.forEach((data, index, theArray) => {
+        theArray[index].data = data.data.slice(9);
+      });
+
+      donutSpending.data.labels = labels.slice(9);
+      donutSpending.data.datasets = tempDatasets3;
+      donutSpending.update();
 
       break;
   }
