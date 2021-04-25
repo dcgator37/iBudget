@@ -1030,9 +1030,12 @@ app.post('/getTransactions', async (req, res) => {
 
 app.get('/testData', (req, res) => {
   const labels = [];
+  const labelsSpent = [];
   const data = [];
+  const dataSpent = [];
   var income;
   var plannedSum;
+  var spentSum;
 
 
   activeBudget.category.forEach((category, index) => {
@@ -1041,6 +1044,7 @@ app.get('/testData', (req, res) => {
     }
 
     plannedSum = 0;
+    spentSum = 0;
 
     category.items.forEach((item, index) => {
 
@@ -1050,16 +1054,23 @@ app.get('/testData', (req, res) => {
           plannedSum += 0;
         }
 
+        spentSum += item.sumOfTransactions;
+
     });
 
     if (index > 0) {
       data.push(plannedSum);
+      if (spentSum > 0) {
+        dataSpent.push(spentSum);
+        labelsSpent.push(category.name);
+      }
+
     } else {
       income = plannedSum;
     }
   });
 
-  res.json({msg: 'success', labels: labels, data: data, income: income});
+  res.json({msg: 'success', labels: labels, labelsSpent: labelsSpent, data: data, dataSpent: dataSpent, income: income});
 });
 
 //***********************************Insights***********************************************

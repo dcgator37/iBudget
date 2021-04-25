@@ -743,6 +743,10 @@ margin-top: 0;
   /* position: fixed; */
 }
 
+#myChartSpent {
+  display: none;
+}
+
 .PlaidAccountCollapse {
   display: flex;
   flex-direction:  column;

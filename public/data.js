@@ -32,6 +32,7 @@ $(document).ready(function() {
 
   //initialize global chart variable
   var myChart;
+  var myChartSpent;
 
   //load budget data from db and create the chart with it
   getChartData();
@@ -1741,6 +1742,33 @@ $(document).ready(function() {
     $('#transactionEditModalMerchant').val(item);
   });
 
+  $(document).on('click', '#btnSpent', function() {
+    $('#myChart').css('display', 'none');
+    $('#myChartSpent').css('display', 'block');
+
+    $('#donut-inner-name').text('Spent');
+
+
+    const spent = $('#myChartSpent').attr('data-value');
+
+    $('#donut-inner-amt').text(spent);
+    $('#donut-inner-amt').formatCurrency();
+
+  });
+
+  $(document).on('click', '#btnPlanned', function() {
+    $('#myChart').css('display', 'block');
+    $('#myChartSpent').css('display', 'none');
+
+    $('#donut-inner-name').text('Income');
+
+    const planned = $('#myChart').attr('data-value');
+
+    $('#donut-inner-amt').text(planned);
+    $('#donut-inner-amt').formatCurrency();
+
+  });
+
   // Add transaction button click event. Sends post request to server, sending the transaction data.
   //
   // $(document).on('click', 'button.addTransaction', function() {
@@ -2090,7 +2118,7 @@ $(document).ready(function() {
         if (res.msg == 'success') {
           console.log(res.labels);
           console.log(res.data);
-          createChart(res.labels, res.data, res.income);
+          createChart(res.labels, res.labelsSpent, res.data, res.dataSpent, res.income);
           budgetRemaining(res.data, res.income);
         } else {
           alert('data did not get added');
@@ -2103,7 +2131,7 @@ $(document).ready(function() {
   }
 
   //create the chart
-  function createChart(labels, data, income) {
+  function createChart(labels, labelsSpent, data, dataSpent, income) {
     //const income = data[0];
     //data = data.slice(1);
     //labels = labels.slice(1);
@@ -2141,6 +2169,64 @@ $(document).ready(function() {
       data: chartData,
       options: options
     });
+
+    $('#myChart').attr('data-value', income);
+
+    //*****************************Spent Chart**********************************
+
+    const chartData2 = {
+      datasets: [{
+          data: dataSpent,
+          backgroundColor: [
+                'rgba(255, 99, 132)',
+                'rgba(54, 162, 235)',
+                'rgba(255, 206, 86)',
+                'rgba(75, 192, 192)',
+                'rgba(153, 102, 255)',
+                'rgba(255, 159, 64)',
+                'rgba(244, 67, 54)',
+                'rgba(159, 39, 176)',
+                'rgba(63, 81, 81)',
+                'rgba(33, 150, 243)',
+                'rgba(0, 150, 136)',
+                'rgba(76, 175, 80)',
+                'rgba(255, 235, 59)',
+                'rgba(255, 152, 0)',
+                'rgba(255, 87, 34)'
+            ]
+      }],
+      labels : labelsSpent
+    };
+
+    const options2 = {
+      cutoutPercentage: 60
+    };
+
+    var ctx2 = document.getElementById('myChartSpent').getContext('2d');
+    myChartSpent = new Chart(ctx2, {
+      type: 'doughnut',
+      data: chartData2,
+      options: options2
+    });
+
+    $('#myChartSpent').css('display', 'none');
+
+    var sumSpent = 0;
+    var sumFunds = 0;
+
+    myChartSpent.config.data.datasets[0].data.forEach((spent) => {
+      sumSpent += spent;
+    });
+
+    $('.Budget-Row').each(function () {
+      if ($(this).attr('data-fund') == 'true') {
+        sumFunds += parseFloat($(this).children('.Input-Planned').attr('data-value'));
+      }
+    });
+
+
+    $('#myChartSpent').attr('data-value', sumSpent + sumFunds);
+
 
     donutInner(income);
     sumOfIncome(income);
