@@ -85,6 +85,11 @@ h1 {
   color: green;
 }
 
+#avgSaved {
+  color: blue;
+  font-weight: 700;
+}
+
 
 
 /* --------------------------Left side nav menu -----------------------------*/

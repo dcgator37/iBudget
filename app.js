@@ -251,6 +251,8 @@ app.post("/failure", function(req, res) {
 app.get("/budget", async function(req, res) {
   if (req.isAuthenticated()) {
 
+
+
     var count;
 
     if (req.user.monthsArray.length === 0) {
@@ -272,46 +274,113 @@ app.get("/budget", async function(req, res) {
 
       let today = new Date();
 
-      Budget.findOne({user: req.user.username, month: utils.getMonth(today)}, function (err, budget) {
+      Budget.findOne({user: req.user.username, month: utils.getMonth(today)}, async function (err, budget) {
         if (err) {
           console.log('mongo is down!');
         } else if(!budget) {
-          console.log("no budget in db for this month. generating default budget");
-          // next idea is to display website or popup that asks user if they want to load from the past month
 
-          var newBudget = new Budget();
+          var tempToday = new Date();
+          var monthNumber = utils.getMonthNum(tempToday);
+          var year = utils.getYear(tempToday);
 
-          newBudget.user = req.user.username;
-          newBudget.user_id = req.user._id;
-          newBudget.month = utils.getMonth(today);
-          newBudget.year = utils.getYear(today);
-          newBudget.monthNum = utils.getMonthNum(today);
-          const date = new Date(utils.getYear(today) + "-" + utils.getMonthNum(today) + "-" + "1");
-          newBudget.date = date;
+          console.log(monthNumber);
+          console.log(year);
+          if (monthNumber == 1) {
+            monthNumber = 12;
+            console.log(monthNumber);
+            --year;
+            console.log(year);
+          } else {
+            --monthNumber;
+            console.log(monthNumber);
 
-          newBudget.category = defaultBudget.category;
+          }
 
-          // defaultBudget.user = req.user.username;
-          // defaultBudget.month = utils.getMonth(today);
-          // defaultBudget.year = utils.getYear(today);
-          // defaultBudget.monthNum = utils.getMonthNum(today);
-
-          // defaultBudget.save();
-
-          newBudget.save();
-
-          activeBudget = newBudget;
-
-          //save the monthsArray for new month
-          req.user.monthsArray.find((month, index) => {
-            if (month.monthString === newBudget.month) {
-              req.user.monthsArray[index].active = true;
-            }
+          const lastMonth = await Budget.findOne({user_id: req.user._id, monthNum: monthNumber, year: year}).catch((err) => {
+            console.log(err);
           });
 
-          req.user.save();
+          if (lastMonth == undefined) {
+            console.log('no last month');
 
-          // const url = createChart(activeBudget._id);
+            var newBudget = new Budget();
+
+            newBudget.user = req.user.username;
+            newBudget.user_id = req.user._id;
+            newBudget.month = utils.getMonth(today);
+            newBudget.year = utils.getYear(today);
+            newBudget.monthNum = utils.getMonthNum(today);
+            const date = new Date(utils.getYear(today) + "-" + utils.getMonthNum(today) + "-" + "1");
+            newBudget.date = date;
+
+            newBudget.category = defaultBudget.category;
+
+            newBudget.save();
+
+            activeBudget = newBudget;
+
+            //save the monthsArray for new month
+            req.user.monthsArray.find((month, index) => {
+              if (month.monthString === newBudget.month) {
+                req.user.monthsArray[index].active = true;
+              }
+            });
+
+            req.user.save();
+
+
+          } else {
+
+            console.log('last month budget found');
+
+            var newBudget2 = new Budget();
+            const date2 = new Date(year + "-" + monthNumber + "-" + "1");
+
+            newBudget2.user = req.user.username;
+            newBudget2.user_id = req.user._id;
+            newBudget2.month = lastMonth.month;
+            newBudget2.year = parseInt(year);
+            newBudget2.monthNum = monthNumber;
+            newBudget2.date = date2;
+
+            const category2 = lastMonth.category;
+
+            category2.forEach((cat) => {
+              cat.items.forEach((item, index, theArray) => {
+                if (item.fund == true) {
+                  theArray[index].startingBalance = item.endingBalance;
+                }
+                theArray[index].sumOfTransactions = 0;
+                if (theArray[index].transactions.length > 0) {
+                  theArray[index].transactions.splice(0);
+                }
+
+              });
+            });
+
+            newBudget2.category = category2;
+
+            await newBudget2.save();
+            activeBudget = newBudget2;
+
+
+            //save the monthsArray for new month
+               req.user.monthsArray.find((month, index) => {
+                 if (month.monthString === newBudget2.month) {
+                   req.user.monthsArray[index].active = true;
+                 }
+               });
+
+               await req.user.save();
+
+          }
+
+
+          //console.log("no budget in db for this month. generating default budget");
+          // next idea is to display website or popup that asks user if they want to load from the past month
+
+
+
 
           res.render("budget", {budget: activeBudget, months: req.user.monthsArray});
 

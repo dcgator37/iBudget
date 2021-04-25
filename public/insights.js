@@ -452,9 +452,11 @@ spentdatasetLine.forEach((spent) => {
 
 $('#avgIncome').text((totalIncome / 12).toFixed(2));
 $('#avgSpent').text((totalSpent / 12).toFixed(2));
+$('#avgSaved').text((totalIncome / 12).toFixed(2) - (totalSpent / 12).toFixed(2));
 
 $('#avgIncome').formatCurrency();
 $('#avgSpent').formatCurrency();
+$('#avgSaved').formatCurrency();
 
 
 datasetsLine.push({
@@ -605,9 +607,12 @@ function updateTimeframe(timeframe) {
 
       $('#avgIncome').text((totalIncome / month).toFixed(2));
       $('#avgSpent').text((totalSpent / month).toFixed(2));
+      $('#avgSaved').text((totalIncome / month).toFixed(2) - (totalSpent / month).toFixed(2));
 
       $('#avgIncome').formatCurrency();
       $('#avgSpent').formatCurrency();
+      $('#avgSaved').formatCurrency();
+
 
       break;
     case 'Past 12 Months':
@@ -641,6 +646,10 @@ function updateTimeframe(timeframe) {
 
       $('#avgIncome').text((totalIncome / 12).toFixed(2));
       $('#avgSpent').text((totalSpent / 12).toFixed(2));
+      $('#avgSaved').text((totalIncome / 12).toFixed(2) - (totalSpent / 12).toFixed(2));
+
+
+      $('#avgSaved').formatCurrency();
 
       $('#avgIncome').formatCurrency();
       $('#avgSpent').formatCurrency();
@@ -742,6 +751,10 @@ function updateTimeframe(timeframe) {
 
       $('#avgIncome').text((totalIncome / 9).toFixed(2));
       $('#avgSpent').text((totalSpent / 9).toFixed(2));
+      $('#avgSaved').text((totalIncome / 9).toFixed(2) - (totalSpent / 9).toFixed(2));
+
+
+      $('#avgSaved').formatCurrency();
 
       $('#avgIncome').formatCurrency();
       $('#avgSpent').formatCurrency();
@@ -842,6 +855,9 @@ function updateTimeframe(timeframe) {
 
       $('#avgIncome').text((totalIncome / 6).toFixed(2));
       $('#avgSpent').text((totalSpent / 6).toFixed(2));
+      $('#avgSaved').text((totalIncome / 6).toFixed(2) - (totalSpent / 6).toFixed(2));
+
+      $('#avgSaved').formatCurrency();
 
       $('#avgIncome').formatCurrency();
       $('#avgSpent').formatCurrency();
@@ -941,6 +957,9 @@ function updateTimeframe(timeframe) {
 
       $('#avgIncome').text((totalIncome / 3).toFixed(2));
       $('#avgSpent').text((totalSpent / 3).toFixed(2));
+      $('#avgSaved').text((totalIncome / 3).toFixed(2) - (totalSpent / 3).toFixed(2));
+
+      $('#avgSaved').formatCurrency();
 
       $('#avgIncome').formatCurrency();
       $('#avgSpent').formatCurrency();
