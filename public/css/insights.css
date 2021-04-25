@@ -52,7 +52,7 @@ body {
 
 .chart-wrapper {
 
-  width:40%;
+  width: 39%;
   display:block;
   overflow:hidden;
   margin: 10px;
@@ -75,6 +75,14 @@ canvas {
 
 h1 {
   text-align: center;
+}
+
+#avgSpent {
+  color: red;
+}
+
+#avgIncome {
+  color: green;
 }
 
 

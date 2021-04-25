@@ -4,15 +4,20 @@ var mainData = [];
 var stackedIncome;
 var stackedSpending;
 var donutSpending;
+var incomespentLine;
 var labels = [];
 var categories = [];
 var datasets = [];
 var datasetsStackedSpending = [];
 var datasetDonutSpending = [];
+var datasetsLine = [];
 
 $(document).ready(function() {
 
   // once the document loads and is ready
+
+  $.getScript("jquery.formatCurrency-1.4.0.js", function() {
+});
 
   //ajax call to pull over 12 months of budget data for the user
   //when successful with data back from database, call function to load and create the charts
@@ -408,6 +413,77 @@ donutSpending = new Chart(ctx3, {
 });
 
 
+//*********************************Line Graph**************************************
+var incomedatasetLine = [];
+var spentdatasetLine = [];
+var totalIncome = 0;
+var totalSpent = 0;
+
+data.forEach((budget) => {
+  var income = 0;
+  var spent = 0;
+  budget.category.forEach((cat, index) => {
+
+        cat.items.forEach((item) => {
+          if (index == 0) {
+            income += item.sumOfTransactions;
+          } else {
+            spent += item.sumOfTransactions;
+          }
+
+        });
+
+
+  });
+
+  incomedatasetLine.push(income);
+  spentdatasetLine.push(spent);
+
+
+});
+
+incomedatasetLine.forEach((income) => {
+  totalIncome += income;
+});
+
+spentdatasetLine.forEach((spent) => {
+  totalSpent += spent;
+});
+
+$('#avgIncome').text((totalIncome / 12).toFixed(2));
+$('#avgSpent').text((totalSpent / 12).toFixed(2));
+
+$('#avgIncome').formatCurrency();
+$('#avgSpent').formatCurrency();
+
+
+datasetsLine.push({
+  data: incomedatasetLine,
+  label: "Income",
+  borderColor: "#008000",
+  fill: false
+},{
+  data: spentdatasetLine,
+  label: "Spent",
+  borderColor: "#ff0000",
+  fill: false
+});
+
+var tempdatasetsLine = _.cloneDeep(datasetsLine);
+
+var ctx4 = $('#lineGraph');
+incomespentLine = new Chart(ctx4, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: tempdatasetsLine
+  },
+  options: {
+    legend: { position: 'bottom' }
+  }
+});
+
+
 
 
 
@@ -417,12 +493,19 @@ function updateTimeframe(timeframe) {
   // update all the charts with the new selected timeframe
   var tempDatasets = [];
   var tempDatasets2 = [];
+  var tempDatasets4 = [];
   var tempDataDonut = [];
   var tempCategories = [];
   var datasetForDonut = [];
 
+  var totalIncome = 0;
+  var totalSoent = 0;
+
   switch (timeframe) {
     case 'Year To Date':
+
+      totalIncome = 0;
+      totalSpent = 0;
 
       //current month number
       var month = moment().month() + 1;
@@ -503,8 +586,34 @@ function updateTimeframe(timeframe) {
       donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
 
+      //*************************Line Graph**************************
+
+      tempDatasets4 = _.cloneDeep(datasetsLine);
+
+      incomespentLine.data.labels = labels.slice(start);
+      incomespentLine.data.datasets[0].data = tempDatasets4[0].data.slice(start);
+      incomespentLine.data.datasets[1].data = tempDatasets4[1].data.slice(start);
+      incomespentLine.update();
+
+      incomespentLine.data.datasets[0].data.forEach((income) => {
+        totalIncome += income;
+      });
+
+      incomespentLine.data.datasets[1].data.forEach((spent) => {
+        totalSpent += spent;
+      });
+
+      $('#avgIncome').text((totalIncome / month).toFixed(2));
+      $('#avgSpent').text((totalSpent / month).toFixed(2));
+
+      $('#avgIncome').formatCurrency();
+      $('#avgSpent').formatCurrency();
+
       break;
     case 'Past 12 Months':
+
+      totalIncome = 0;
+      totalSpent = 0;
 
       stackedIncome.data.labels = labels;
       stackedIncome.data.datasets = _.cloneDeep(datasets);
@@ -517,8 +626,30 @@ function updateTimeframe(timeframe) {
       donutSpending.data.labels = categories;
       donutSpending.data.datasets[0].data = _.cloneDeep(datasetDonutSpending);
       donutSpending.update();
+
+      incomespentLine.data.labels = labels;
+      incomespentLine.data.datasets = _.cloneDeep(datasetsLine);
+      incomespentLine.update();
+
+      datasetsLine[0].data.forEach((income) => {
+        totalIncome += income;
+      });
+
+      datasetsLine[1].data.forEach((spent) => {
+        totalSpent += spent;
+      });
+
+      $('#avgIncome').text((totalIncome / 12).toFixed(2));
+      $('#avgSpent').text((totalSpent / 12).toFixed(2));
+
+      $('#avgIncome').formatCurrency();
+      $('#avgSpent').formatCurrency();
+
       break;
     case 'Past 9 Months':
+
+      totalIncome = 0;
+      totalSpent = 0;
 
       tempDatasets = _.cloneDeep(datasets);
 
@@ -592,8 +723,35 @@ function updateTimeframe(timeframe) {
       donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
 
+      //*************************Line Graph**************************
+
+      tempDatasets4 = _.cloneDeep(datasetsLine);
+
+      incomespentLine.data.labels = labels.slice(3);
+      incomespentLine.data.datasets[0].data = tempDatasets4[0].data.slice(3);
+      incomespentLine.data.datasets[1].data = tempDatasets4[1].data.slice(3);
+      incomespentLine.update();
+
+      incomespentLine.data.datasets[0].data.forEach((income) => {
+        totalIncome += income;
+      });
+
+      incomespentLine.data.datasets[1].data.forEach((spent) => {
+        totalSpent += spent;
+      });
+
+      $('#avgIncome').text((totalIncome / 9).toFixed(2));
+      $('#avgSpent').text((totalSpent / 9).toFixed(2));
+
+      $('#avgIncome').formatCurrency();
+      $('#avgSpent').formatCurrency();
+
+
       break;
     case 'Past 6 Months':
+
+      totalIncome = 0;
+      totalSpent = 0;
 
       tempDatasets = _.cloneDeep(datasets);
 
@@ -665,8 +823,34 @@ function updateTimeframe(timeframe) {
       donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
 
+      //*************************Line Graph**************************
+
+      tempDatasets4 = _.cloneDeep(datasetsLine);
+
+      incomespentLine.data.labels = labels.slice(6);
+      incomespentLine.data.datasets[0].data = tempDatasets4[0].data.slice(6);
+      incomespentLine.data.datasets[1].data = tempDatasets4[1].data.slice(6);
+      incomespentLine.update();
+
+      incomespentLine.data.datasets[0].data.forEach((income) => {
+        totalIncome += income;
+      });
+
+      incomespentLine.data.datasets[1].data.forEach((spent) => {
+        totalSpent += spent;
+      });
+
+      $('#avgIncome').text((totalIncome / 6).toFixed(2));
+      $('#avgSpent').text((totalSpent / 6).toFixed(2));
+
+      $('#avgIncome').formatCurrency();
+      $('#avgSpent').formatCurrency();
+
       break;
     case 'Past 3 Months':
+
+      totalIncome = 0;
+      totalSpent = 0;
 
       tempDatasets = _.cloneDeep(datasets);
 
@@ -737,6 +921,29 @@ function updateTimeframe(timeframe) {
       donutSpending.data.labels = tempCategories;
       donutSpending.data.datasets[0].data = datasetForDonut;
       donutSpending.update();
+
+      //*************************Line Graph**************************
+
+      tempDatasets4 = _.cloneDeep(datasetsLine);
+
+      incomespentLine.data.labels = labels.slice(9);
+      incomespentLine.data.datasets[0].data = tempDatasets4[0].data.slice(9);
+      incomespentLine.data.datasets[1].data = tempDatasets4[1].data.slice(9);
+      incomespentLine.update();
+
+      incomespentLine.data.datasets[0].data.forEach((income) => {
+        totalIncome += income;
+      });
+
+      incomespentLine.data.datasets[1].data.forEach((spent) => {
+        totalSpent += spent;
+      });
+
+      $('#avgIncome').text((totalIncome / 3).toFixed(2));
+      $('#avgSpent').text((totalSpent / 3).toFixed(2));
+
+      $('#avgIncome').formatCurrency();
+      $('#avgSpent').formatCurrency();
 
       break;
   }
